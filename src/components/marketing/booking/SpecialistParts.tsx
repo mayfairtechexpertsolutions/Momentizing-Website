@@ -154,7 +154,7 @@ export function SpecialistProfileSheet({
               Choose {firstNameOf(specialist.name)}
             </BookButton>
             <Link
-              href={`/associates/${specialist.id}`}
+              href={`/associates/view?id=${specialist.id}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex min-h-12 items-center justify-center rounded-full border border-momentizing-slate/30 px-6 py-3 text-sm font-semibold text-momentizing-slate hover:bg-momentizing-slate/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal sm:flex-1"

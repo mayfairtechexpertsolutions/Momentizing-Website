@@ -1,9 +1,9 @@
 "use client";
 
 import { initials } from "@/components/marketing/booking/SpecialistParts";
-import { useState, type ReactNode } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { MarketingFonts } from "@/components/marketing/MarketingFonts";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
@@ -33,9 +33,25 @@ function Chip({ children }: { children: ReactNode }) {
   );
 }
 
+/** The profile id comes from `?id=` (not a `[id]` segment) so the site can be statically exported for GitHub Pages;
+ * the Suspense boundary is required for `useSearchParams` under static prerendering. */
 export default function AssociateDetailPage() {
-  const params = useParams<{ id: string }>();
-  const psychId = Number(params.id);
+  return (
+    <Suspense
+      fallback={
+        <div role="status" className="flex min-h-dvh items-center justify-center bg-momentizing-cream font-marketing-serif text-lg text-momentizing-muted">
+          Loading profile…
+        </div>
+      }
+    >
+      <AssociateDetail />
+    </Suspense>
+  );
+}
+
+function AssociateDetail() {
+  const searchParams = useSearchParams();
+  const psychId = Number(searchParams.get("id"));
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("About");
 
   const { data: psych, error, isLoading, refetch } = useMarketingSpecialist(psychId);

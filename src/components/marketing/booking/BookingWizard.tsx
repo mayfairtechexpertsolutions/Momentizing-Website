@@ -44,6 +44,7 @@ import {
   type Draft,
   type StepId,
 } from "./wizard-state";
+import { withBase } from "@/lib/base-path";
 
 /**
  * The public "book a session" flow. No account is needed. It ends with the visitor proving they own the WhatsApp
@@ -512,7 +513,7 @@ function StepAbout({
             />
             <span>
               I agree to the{" "}
-              <a href="/legal" target="_blank" rel="noopener noreferrer" className="font-semibold underline">
+              <a href={withBase("/legal/")} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
                 Terms &amp; Privacy
               </a>{" "}
               and to being contacted on WhatsApp about this booking.

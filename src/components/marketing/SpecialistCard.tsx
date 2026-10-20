@@ -41,7 +41,7 @@ export function SpecialistCard({ specialist: p, size = "default" }: SpecialistCa
         <i aria-hidden="true" className={`${compact ? "text-xs" : ""} ${favorited ? "fas fa-heart text-momentizing-gold-deep" : "far fa-heart text-momentizing-muted"}`} />
       </button>
 
-      <Link href={`/associates/${p.id}`} className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-momentizing-teal">
+      <Link href={`/associates/view?id=${p.id}`} className="block focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-momentizing-teal">
 
       {/* Initials, not a photo: the public site deliberately doesn't show specialists' pictures. */}
       <div className={`relative mb-3 flex items-center overflow-hidden rounded-2xl bg-momentizing-mint ${compact ? "h-20 px-4" : "h-24 px-5"}`}>

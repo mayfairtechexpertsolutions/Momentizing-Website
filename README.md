@@ -2,7 +2,7 @@
 
 The public marketing site and no-account booking flow, split out of the CRMS frontend. It talks to the CRMS backend over its public API only.
 
-Pages: `/` (home), `/associates`, `/associates/[id]`, `/book`, `/legal`, `/help`.
+Pages: `/` (home), `/associates`, `/associates/view?id=<id>`, `/book`, `/legal`, `/help`.
 Login, registration, specialist sign-up and the app-install page stay in the CRMS app; the website links to them.
 
 ## Point it at a backend
@@ -27,6 +27,21 @@ npm run dev      # http://localhost:3001
 npm run build && npm start
 npm test
 ```
+
+## Deploy to GitHub Pages
+
+The site is a static export (`output: "export"`), deployed by [.github/workflows/deploy.yml](.github/workflows/deploy.yml) on every push to `main`.
+
+1. Push to `https://github.com/mayfairtechexpertsolutions/Momentizing-Website`.
+2. Repo **Settings → Pages → Source: GitHub Actions**.
+3. Repo **Settings → Secrets and variables → Actions → Variables**, add (all public, baked into the bundle):
+   `API_BASE_URL` (public **https** backend incl. `/api/v1`), `APP_URL`, `TURNSTILE_SITE_KEY` (optional).
+   Using a custom domain? Also add `CUSTOM_DOMAIN` = `true` (serves from `/` instead of `/<repo-name>`).
+4. The backend must list the Pages origin (`https://mayfairtechexpertsolutions.github.io`, or your custom domain) under `cors.allowed-origins`.
+
+Local check of the Pages build: `NEXT_PUBLIC_BASE_PATH=/Momentizing-Website npm run build && npx serve out` (served under that prefix).
+
+Because Pages is static, the associate profile is `/associates/view?id=<id>` rather than `/associates/<id>`.
 
 ## Notes
 - The guest-booking claim token is handed to the app's register page via `sessionStorage`, which only works when the website and the app share an origin (e.g. both behind one domain). On separate origins the booking still succeeds but won't auto-link to the new account.

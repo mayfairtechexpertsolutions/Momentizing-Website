@@ -5,6 +5,7 @@ import { useApiQuery } from "@/lib/use-api-query";
 import { Card } from "@/components/ui/Card";
 import { MarketingFonts } from "@/components/marketing/MarketingFonts";
 import { WhatsAppFloatingButton } from "@/components/marketing/WhatsAppFloatingButton";
+import { withBase } from "@/lib/base-path";
 
 interface CrisisResource {
   name: string;
@@ -28,7 +29,7 @@ export default function HelpPage() {
       <main className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-5 px-5 pt-8 pb-10">
         <div className="flex items-center justify-between">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/website/momentizing-logo.jpeg" alt="Momentizing" className="h-9" />
+          <img src={withBase("/website/momentizing-logo.jpeg")} alt="Momentizing" className="h-9" />
           <button
             onClick={() => (window.history.length > 1 ? router.back() : router.push("/"))}
             className="inline-flex min-h-11 items-center text-sm text-momentizing-muted hover:text-momentizing-slate"

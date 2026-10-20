@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { appLink } from "@config";
+import { withBase } from "@/lib/base-path";
 
 interface MarketingNavProps {
   variant?: "full" | "simple";
@@ -17,7 +18,7 @@ export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: Ma
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <Link href="/">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/website/momentizing-logo.jpeg" alt="Momentizing" className="h-12 mix-blend-multiply md:h-14" />
+          <img src={withBase("/website/momentizing-logo.jpeg")} alt="Momentizing" className="h-12 mix-blend-multiply md:h-14" />
         </Link>
 
         {variant === "simple" ? (

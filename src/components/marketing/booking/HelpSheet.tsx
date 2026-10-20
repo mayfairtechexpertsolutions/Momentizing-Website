@@ -6,6 +6,7 @@ import { requestBookingHelp } from "@/lib/guest-booking";
 import { BookButton, Field, InlineNotice, inputClass } from "./ui";
 import { Sheet } from "./Sheet";
 import { TurnstileWidget, TURNSTILE_ENABLED } from "./TurnstileWidget";
+import { withBase } from "@/lib/base-path";
 
 export interface HelpPrefill {
   fullName: string;
@@ -124,7 +125,7 @@ export function HelpSheet({
             <input type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 h-5 w-5 flex-shrink-0 accent-[var(--momentizing-teal)]" />
             <span>
               I agree to be contacted on WhatsApp about this request, and to the{" "}
-              <a href="/legal" target="_blank" rel="noopener noreferrer" className="font-semibold underline">
+              <a href={withBase("/legal/")} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
                 Terms &amp; Privacy
               </a>
               .
