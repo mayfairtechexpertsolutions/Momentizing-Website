@@ -1,0 +1,288 @@
+@import "tailwindcss";
+
+:root {
+  --crms-cream: #faf3e8;
+  /* sage/coral/muted darkened from their original values to clear WCAG AA 4.5:1
+     text contrast (white text on sage/coral buttons, and sage-dark/muted used as
+     text on the cream background) - see Momentizing_CRMS_QA_Checklist.md §0H */
+  --crms-sage: #607d47;
+  --crms-sage-dark: #54743a;
+  --crms-sage-light: #a8c47a;
+  --crms-sage-tint: #eef4e8;
+  --crms-coral: #c14218;
+  --crms-coral-tint: #fef0e8;
+  --crms-blush: #f2c4a0;
+  --crms-charcoal: #3a3a3a;
+  --crms-mist: #eee8dd;
+  --crms-muted: #6b6b6b;
+  --crms-bg: #f4efe6;
+  --crms-white: #ffffff;
+  --crms-purple: #7c5cbf;
+  --crms-purple-tint: #f0ebf8;
+  --crms-blue: #3b82f6;
+  --crms-blue-tint: #eff6ff;
+  --crms-amber: #f59e0b;
+  --crms-amber-tint: #fffbeb;
+  --crms-red: #c81e1e; /* darkened from #ef4444: used as error text, needs 4.5:1 on white and cream */
+  --crms-red-tint: #fef2f2;
+  --crms-green: #10b981;
+  --crms-green-tint: #ecfdf5;
+  --crms-radius: 20px;
+  --crms-radius-sm: 12px;
+  --crms-shadow-card: 0 2px 12px rgba(58, 58, 58, 0.1);
+
+  /* Momentizing marketing palette — sampled from the brand's Instagram artwork (mint wash, rust headlines,
+     peach tints, deep sage pills, cream paper). Token names are kept from the earlier gold/teal/slate theme so
+     every page picks the new look up at once; each pairing below was checked for WCAG AA (see README "Colour").
+       gold       decorative peach/terracotta: borders, rings, accents, and text on the dark green only
+       gold-deep  rust, the headline colour; 6.3:1 on cream, 5.6:1 on peach  -> text and buttons with white text
+       teal       sage green; 5.6:1 on cream, 6.1:1 with white text       -> eyebrows, icons, links
+       slate      deep forest ink; 11:1 on cream                          -> body text, primary buttons, dark bands
+       muted      secondary text; 6.5:1 on cream, 6.0:1 on mint           -> replaces every grey-400..700 */
+  --momentizing-gold: #e8a07e;
+  --momentizing-gold-deep: #9a3f1a;
+  --momentizing-teal: #3b6b58;
+  --momentizing-slate: #24382f;
+  --momentizing-muted: #4a5d54;
+  --momentizing-cream: #fbf5ec;
+  --momentizing-mint: #e6f0ea;
+  --momentizing-mint-deep: #cfe3d8;
+  --momentizing-peach: #fbe6d8;
+
+  --background: var(--crms-bg);
+  --foreground: var(--crms-charcoal);
+
+  /* Admin (admin panel) design tokens — distinct namespace from --crms-* on purpose,
+     so the client-facing PWA is never affected by changes here. */
+  --admin-bg: #f6f7fb;
+  --admin-surface: #ffffff;
+  --admin-border: #e7e9f0;
+  --admin-border-strong: #d7dae4;
+  --admin-ink: #1e2430;
+  --admin-ink-muted: #6b7280;
+  /* admin-ink-faint/success/danger darkened to clear WCAG AA 4.5:1 against their
+     own tint backgrounds and white - see Momentizing_CRMS_QA_Checklist.md §0H */
+  --admin-ink-faint: #727579;
+  --admin-primary: #3d5afe;
+  --admin-primary-dark: #2a3fd1;
+  --admin-primary-tint: #eef1ff;
+  --admin-success: #0d824b;
+  --admin-success-tint: #ecfdf3;
+  --admin-warning: #f79009;
+  --admin-warning-tint: #fffaeb;
+  --admin-danger: #d91e10;
+  --admin-danger-tint: #fef3f2;
+  --admin-info: #6366f1;
+  --admin-info-tint: #eef0ff;
+  --admin-neutral: #667085;
+  --admin-neutral-tint: #f2f4f7;
+  --admin-radius: 16px;
+  --admin-radius-sm: 10px;
+  --admin-radius-lg: 20px;
+  --admin-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --admin-shadow-md: 0 4px 8px rgba(16, 24, 40, 0.06), 0 2px 4px rgba(16, 24, 40, 0.04);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-cream: var(--crms-cream);
+  --color-sage: var(--crms-sage);
+  --color-sage-dark: var(--crms-sage-dark);
+  --color-sage-light: var(--crms-sage-light);
+  --color-sage-tint: var(--crms-sage-tint);
+  --color-coral: var(--crms-coral);
+  --color-coral-tint: var(--crms-coral-tint);
+  --color-blush: var(--crms-blush);
+  --color-charcoal: var(--crms-charcoal);
+  --color-mist: var(--crms-mist);
+  --color-muted: var(--crms-muted);
+  --color-crms-bg: var(--crms-bg);
+  --color-purple: var(--crms-purple);
+  --color-purple-tint: var(--crms-purple-tint);
+  --color-blue: var(--crms-blue);
+  --color-blue-tint: var(--crms-blue-tint);
+  --color-amber: var(--crms-amber);
+  --color-amber-tint: var(--crms-amber-tint);
+  --color-red: var(--crms-red);
+  --color-red-tint: var(--crms-red-tint);
+  --color-green: var(--crms-green);
+  --color-green-tint: var(--crms-green-tint);
+  --font-heading: var(--font-fraunces);
+  --font-sans: var(--font-nunito);
+  --radius-card: var(--crms-radius);
+  --radius-card-sm: var(--crms-radius-sm);
+
+  --color-momentizing-gold: var(--momentizing-gold);
+  --color-momentizing-gold-deep: var(--momentizing-gold-deep);
+  --color-momentizing-teal: var(--momentizing-teal);
+  --color-momentizing-slate: var(--momentizing-slate);
+  --color-momentizing-muted: var(--momentizing-muted);
+  --color-momentizing-cream: var(--momentizing-cream);
+  --color-momentizing-mint: var(--momentizing-mint);
+  --color-momentizing-mint-deep: var(--momentizing-mint-deep);
+  --color-momentizing-peach: var(--momentizing-peach);
+  --font-marketing-serif: var(--font-fraunces);
+  --font-marketing-sans: var(--font-nunito);
+
+  --color-admin-bg: var(--admin-bg);
+  --color-admin-surface: var(--admin-surface);
+  --color-admin-border: var(--admin-border);
+  --color-admin-border-strong: var(--admin-border-strong);
+  --color-admin-ink: var(--admin-ink);
+  --color-admin-ink-muted: var(--admin-ink-muted);
+  --color-admin-ink-faint: var(--admin-ink-faint);
+  --color-admin-primary: var(--admin-primary);
+  --color-admin-primary-dark: var(--admin-primary-dark);
+  --color-admin-primary-tint: var(--admin-primary-tint);
+  --color-admin-success: var(--admin-success);
+  --color-admin-success-tint: var(--admin-success-tint);
+  --color-admin-warning: var(--admin-warning);
+  --color-admin-warning-tint: var(--admin-warning-tint);
+  --color-admin-danger: var(--admin-danger);
+  --color-admin-danger-tint: var(--admin-danger-tint);
+  --color-admin-info: var(--admin-info);
+  --color-admin-info-tint: var(--admin-info-tint);
+  --color-admin-neutral: var(--admin-neutral);
+  --color-admin-neutral-tint: var(--admin-neutral-tint);
+  --radius-admin: var(--admin-radius);
+  --radius-admin-sm: var(--admin-radius-sm);
+  --radius-admin-lg: var(--admin-radius-lg);
+}
+
+.admin-scope {
+  color: var(--admin-ink);
+}
+.admin-scope h1,
+.admin-scope h2,
+.admin-scope h3 {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* The Admin shell (.admin-scope) renders inside the same root <body> as the client PWA,
+   which defaults to the warm client-app background. Without this, overscroll/bounce at
+   the top or bottom of any Admin page flashes the client app's cream color through. */
+body:has(.admin-scope) {
+  background: var(--admin-bg);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+h1, h2, h3, .font-heading {
+  font-family: var(--font-heading), Georgia, serif;
+}
+
+.marketing-input {
+  width: 100%;
+  padding: 1rem;
+  background: var(--momentizing-cream);
+  border-radius: 1.25rem;
+  outline: none;
+  border: 1.5px solid var(--momentizing-mint-deep);
+  transition: 0.3s;
+  font-size: 1rem; /* 16px: iOS Safari zooms into smaller inputs on focus */
+  appearance: none;
+}
+/* A border-color shift alone was barely visible against the light background - added a
+   proper ring so keyboard focus is actually trackable (WCAG 2.4.7) - see
+   Momentizing_CRMS_QA_Checklist.md §0H */
+.marketing-input:focus-visible {
+  border-color: var(--momentizing-teal);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 107, 88, 0.35);
+}
+
+.marketing-card:hover {
+  transform: scale(1.02);
+  transition: 0.4s;
+}
+
+/* Marketing site: one visible keyboard focus style everywhere (WCAG 2.4.7), a skip link, and calm motion. */
+.marketing-root a:focus-visible,
+.marketing-root button:focus-visible,
+.marketing-root summary:focus-visible {
+  outline: 3px solid var(--momentizing-teal);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.marketing-root .on-dark a:focus-visible,
+.marketing-root .on-dark button:focus-visible {
+  outline-color: var(--momentizing-gold);
+}
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: var(--momentizing-slate);
+  color: #fff;
+  font-weight: 700;
+  transform: translateY(-200%);
+  transition: transform 0.2s;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem; /* anchored sections clear the fixed 80px nav */
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ADHD-friendly mode (PRD §5.2 preferences): cuts non-essential motion and visual
+   noise across the client app rather than a per-screen redesign. */
+[data-adhd-mode="true"] {
+  --crms-shadow-card: none;
+}
+[data-adhd-mode="true"] *,
+[data-adhd-mode="true"] *::before,
+[data-adhd-mode="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Printing a calendar drops the app chrome and lets the scrolling grid run to
+   full length, so a whole week or month fits on the page. */
+@media print {
+  body:has([data-print-region]) * {
+    visibility: hidden;
+  }
+  [data-print-region],
+  [data-print-region] * {
+    visibility: visible;
+  }
+  [data-print-region] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: none !important;
+  }
+  [data-print-hide] {
+    display: none !important;
+  }
+  .crms-calendar-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
