@@ -60,7 +60,7 @@ Scale used on the home page: hero `text-5xl md:text-7xl` bold; section titles `t
 | Section rhythm | `px-6 py-24`; content `max-w-7xl mx-auto`; alternate cream / mint / peach / slate bands |
 | Decoration | Blurred mint and peach circles behind the hero (`aria-hidden`), leaf sprigs via `BrandIllustration` |
 | Hover | `.marketing-card:hover` scale 1.02 over 0.4s; buttons colour-shift, no jumps |
-| Motion | Calm; `scroll-behavior: smooth`; all animation collapses under `prefers-reduced-motion` |
+| Motion | Calm; `scroll-behavior: smooth`; all animation collapses under `prefers-reduced-motion`. Scroll effects are subtle and one-shot: add `data-reveal` to a below-the-fold block and render `<ScrollReveal />` on the page (fade + 18px rise, `globals.css`). Used on `/` and `/about` only; keep `/book`, `/my-bookings`, `/help`, `/legal` free of scroll effects. |
 
 ## 5. Components to reuse (don't re-invent)
 
@@ -72,7 +72,7 @@ Scale used on the home page: hero `text-5xl md:text-7xl` bold; section titles `t
 | Step indicator | `booking/Stepper.tsx` |
 | Yes/No question | `booking/YesNoField.tsx` |
 | Star rating, specialist card | `StarRating.tsx`, `SpecialistCard.tsx` |
-| Hero art | `BrandIllustration` (`care` / `team`) |
+| Hero art | `BrandIllustration` (`care` / `team`); About page art in `about/AboutArt.tsx` (SVG colours via `var(--momentizing-*)`, not hex) |
 | Nav, footer, WhatsApp button | `MarketingNav`, `MarketingFooter`, `WhatsAppFloatingButton` |
 
 New components follow the same ingredients: tokens only, `rounded-full` actions, `rounded-3xl` cards, visible focus ring, ≥ 44px targets.

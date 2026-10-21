@@ -8,6 +8,7 @@ import { MarketingFonts } from "@/components/marketing/MarketingFonts";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { BrandIllustration } from "@/components/marketing/BrandIllustration";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { ScrollReveal } from "@/components/marketing/ScrollReveal";
 import { BookingModal } from "@/components/marketing/BookingModal";
 import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp";
 import { WhatsAppFloatingButton } from "@/components/marketing/WhatsAppFloatingButton";
@@ -131,6 +132,7 @@ export default function MarketingHomePage() {
       </a>
       <MarketingFonts />
       <MarketingNav />
+      <ScrollReveal />
 
       <main id="main">
       <header className="relative mx-auto max-w-7xl px-6 pt-36 pb-20 md:pt-44 md:pb-24">
@@ -190,7 +192,7 @@ export default function MarketingHomePage() {
       </section>
 
       <section id="services" className="px-6 py-24">
-        <div className="mx-auto max-w-7xl">
+        <div data-reveal className="mx-auto max-w-7xl">
           <div className="mb-20 text-center">
             <h2 className="font-marketing-serif text-4xl text-momentizing-gold-deep">Clinical Excellence</h2>
             <p className="mt-2 text-xs font-bold tracking-[0.2em] text-momentizing-muted uppercase">
@@ -250,8 +252,28 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
+      <section aria-labelledby="our-story" className="bg-momentizing-mint px-6 py-20">
+        <div data-reveal className="mx-auto flex max-w-5xl flex-col items-start gap-8 md:flex-row md:items-center md:justify-between">
+          <div className="max-w-2xl">
+            <h2 id="our-story" className="font-marketing-serif text-3xl leading-snug font-semibold text-momentizing-gold-deep md:text-4xl">
+              Born between two cultures, built for many.
+            </h2>
+            <p className="mt-4 text-lg leading-relaxed text-momentizing-muted">
+              Momentizing grew from one person&apos;s life as an expat in Taiwan into a team supporting people who live between
+              cultures. Read how it began.
+            </p>
+          </div>
+          <Link
+            href="/about"
+            className="inline-flex min-h-12 flex-shrink-0 items-center rounded-full border-2 border-momentizing-gold-deep px-8 py-3 font-bold text-momentizing-gold-deep transition hover:bg-momentizing-gold-deep hover:text-white"
+          >
+            Our story
+          </Link>
+        </div>
+      </section>
+
       <section id="packages" className="on-dark bg-momentizing-slate px-6 py-24 text-white">
-        <div className="mx-auto max-w-7xl text-center">
+        <div data-reveal className="mx-auto max-w-7xl text-center">
           <h2 className="mb-12 font-marketing-serif text-4xl text-momentizing-gold">Care Packages</h2>
           {!packagesLoading && (packages ?? []).length === 0 ? (
             <div className="mx-auto max-w-md">
@@ -312,7 +334,7 @@ export default function MarketingHomePage() {
       </section>
 
       <section id="corporate" className="px-6 py-24">
-        <div className="mx-auto grid max-w-7xl items-center gap-16 md:grid-cols-2">
+        <div data-reveal className="mx-auto grid max-w-7xl items-center gap-16 md:grid-cols-2">
           <div className="overflow-hidden rounded-[3rem]">
             <div className="aspect-[12/11] w-full" role="img" aria-label="Illustration of a connected team supported by care">
               <BrandIllustration variant="team" />
@@ -351,7 +373,7 @@ export default function MarketingHomePage() {
       </section>
 
       <section id="associates-preview" className="bg-momentizing-peach/60 px-6 py-24">
-        <div className="mx-auto max-w-7xl text-center">
+        <div data-reveal className="mx-auto max-w-7xl text-center">
           <h2 className="mb-3 font-marketing-serif text-3xl text-momentizing-gold-deep">Our Top-Rated Specialists</h2>
           <p className="mx-auto mb-8 max-w-lg text-sm text-momentizing-muted">
             Our highest-rated associates, based on real client reviews — see their experience and fees, then
@@ -387,7 +409,7 @@ export default function MarketingHomePage() {
       </section>
 
       <section id="faq" className="px-6 py-24">
-        <div className="mx-auto max-w-3xl">
+        <div data-reveal className="mx-auto max-w-3xl">
           <h2 className="mb-12 text-center font-marketing-serif text-3xl text-momentizing-gold-deep">
             Common Inquiries
           </h2>

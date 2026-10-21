@@ -4,7 +4,7 @@ Docs: [CLAUDE.md](CLAUDE.md) (working rules) · [PRD.md](PRD.md) · [ARCHITECTUR
 
 The public marketing site and no-account booking flow, split out of the CRMS frontend. It talks to the CRMS backend over its public API only.
 
-Pages: `/` (home), `/associates`, `/associates/view?id=<id>`, `/book`, `/careers`, `/legal`, `/help`.
+Pages: `/` (home), `/associates`, `/associates/view?id=<id>`, `/book`, `/about`, `/careers`, `/legal`, `/help`.
 Login, registration, specialist sign-up and the app-install page stay in the CRMS app; the website links to them.
 
 ## Point it at a backend

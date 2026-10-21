@@ -2,7 +2,7 @@
  * Decorative only (aria-hidden); fills its parent, so size it from the outside. */
 const leaf = "M0 0 C 18 -14 40 -14 56 0 C 40 14 18 14 0 0 Z";
 
-function Sprig({ x, y, rotate, scale = 1 }: { x: number; y: number; rotate: number; scale?: number }) {
+export function Sprig({ x, y, rotate, scale = 1 }: { x: number; y: number; rotate: number; scale?: number }) {
   return (
     <g transform={`translate(${x} ${y}) rotate(${rotate}) scale(${scale})`}>
       <path d="M0 0 C 40 -6 80 -30 120 -70" fill="none" stroke="#3b6b58" strokeWidth="3" strokeLinecap="round" />

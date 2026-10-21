@@ -34,9 +34,10 @@ CI (`.github/workflows/deploy.yml`) runs `npm ci`, `npm test`, `npm run build`, 
 
 ```
 site.config.ts           the one file to edit to point at a backend (API URL, app URL, Turnstile key); env overrides win
-src/app/                 App Router pages: / · /associates · /associates/view?id= · /book · /careers · /legal · /help
+src/app/                 App Router pages: / · /associates · /associates/view?id= · /book · /about · /careers · /legal · /help
 src/components/marketing/        nav, footer, cards, specialist UI, floating WhatsApp button
 src/components/marketing/booking/  the /book wizard and its parts (wizard-state.ts holds step + draft types)
+src/components/marketing/about/    About page art (inline SVG), journey timeline, scroll reveal
 src/components/marketing/careers/  expert application form
 src/components/ui/       tiny shared primitives (Card)
 src/lib/                 api client, typed endpoint wrappers, hooks, pure helpers (+ *.test.ts next to them)

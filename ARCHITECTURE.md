@@ -45,6 +45,7 @@ Website/
     │   ├── marketing/        # MarketingNav/Footer/Fonts, SpecialistCard/BookingPanel/Reviews, BookingModal,
     │   │                     # StarRating, BrandIllustration, WhatsAppFloatingButton
     │   │   ├── booking/      # /book wizard (see §5)
+    │   │   ├── about/        # AboutArt (SVG), JourneyTimeline, Reveal
     │   │   └── careers/      # CareerForm
     │   └── ui/Card.tsx
     └── lib/                  # api, use-api-query, typed endpoint wrappers, helpers (+ tests)
@@ -69,13 +70,14 @@ Website/
 | `/associates` | `app/associates/page.tsx` | Specialist directory: search, filters, favorites, cards. |
 | `/associates/view?id=<id>` | `app/associates/view/page.tsx` | Specialist profile, reviews, booking panel. Query string instead of `/[id]` because a static export cannot serve unknown ids. |
 | `/book` | `app/book/page.tsx` | Guest booking wizard (§5). |
+| `/about` | `app/about/page.tsx` | Static brand-story page. Journey timeline is `components/marketing/about/JourneyTimeline.tsx` (desktop road segments + pins, mobile dashed rail); art is inline SVG in `AboutArt.tsx` using `--momentizing-*` tokens; `ScrollReveal.tsx` (shared, renders nothing) fades in `[data-reveal]` blocks once on `/` and `/about`; `Reveal.tsx` sets `data-seen` once on scroll and `globals.css` (`.journey-road`, `.journey-pin`) animates the road/pins, with a reduced-motion fallback. |
 | `/careers` | `app/careers/page.tsx` | Expert application form with resume upload (§6). |
 | `/my-bookings` | `app/my-bookings/page.tsx` | Upcoming sessions by phone number + WhatsApp code (`MyBookingsPanel.tsx`): `POST /public/my-bookings/request-code` (form token, Turnstile when enabled) → `POST …/verify` → list; the 15-minute `viewToken` is kept in `sessionStorage` and sent as `X-Lookup-Token` to `GET /public/my-bookings` after a reload. Times shown on the visitor's clock; offers *Create a free account* (claim link) or login. Not indexed. |
 | `/legal` | `app/legal/page.tsx` | Terms, privacy, disclaimers. |
 | `/help` | `app/help/page.tsx` | Crisis resources and support. |
 | 404 / error | `not-found.tsx`, `error.tsx` | Branded fallbacks. |
 
-Each section folder's `layout.tsx` sets page metadata (title template `%s | Momentizing`). There is no shared shell layout: each page renders its own `MarketingNav` (`full` or simple back-link variant; the full bar shows only Services · Packages · Corporate · Find an Associate · My bookings · Login · Book a Session from 1280 px up and a grouped hamburger menu below — *Get the App* and *Careers* live in the footer and mobile menu, so keep new links out of the bar), `MarketingFooter` and `WhatsAppFloatingButton`; a skip link and `.marketing-root` focus styles come from `globals.css`.
+Each section folder's `layout.tsx` sets page metadata (title template `%s | Momentizing`). There is no shared shell layout: each page renders its own `MarketingNav` (`full` or simple back-link variant; the full bar shows only Services · Packages · Corporate · Find an Associate · About · My bookings · Login · Book a Session from 1280 px up and a grouped hamburger menu below — *Get the App* and *Careers* live in the footer and mobile menu, so keep new links out of the bar; the bar gains a shadow once scrolled, on `/` it underlines the section in view, and on other pages the section links point to `/#id`), `MarketingFooter` and `WhatsAppFloatingButton`; a skip link and `.marketing-root` focus styles come from `globals.css`.
 
 ## 5. Guest booking (`/book`)
 

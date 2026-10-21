@@ -51,6 +51,7 @@ It lets a visitor, **without creating an account**: learn what Momentizing offer
 | **Specialist profile `/associates/view?id=`** | Built | Bio, specialisation, languages, locations, active days, fee, paginated reviews, booking panel. |
 | **Book `/book`** | Built | No-account guest booking wizard (§5). |
 | **My bookings `/my-bookings`** | Built | See upcoming sessions by phone number after a WhatsApp code; no history without an account. |
+| **About `/about`** | Built | Brand story: tagline and values, who we support (diaspora, expatriates, international students, cross-cultural couples), vision and mission, the "Our journey" timeline (2019 Taiwan → 2020–22 FIP → 2022 Jakarta → Now) and four commitments. All graphics are original SVG, no photos. Founder name/credentials are deliberately absent until the Team section. Bahasa Indonesia version not built. Home has a short "Our story" teaser linking here. |
 | **Careers `/careers`** | Built (resume upload untested against real S3) | Expert application with resume (§6). |
 | **Legal `/legal`** ("Transparency Hub") | Built | FAQ, Terms & Conditions, Privacy Policy. |
 | **Help `/help`** ("You're not alone") | Built | Crisis resources and support contacts, always reachable from nav/footer. |

@@ -21,6 +21,9 @@ export function MarketingFooter() {
         <Link href="/book" className="inline-flex min-h-11 items-center hover:opacity-70">
           Book a Session
         </Link>
+        <Link href="/about" className="inline-flex min-h-11 items-center hover:opacity-70">
+          About Us
+        </Link>
         <Link href="/careers" className="inline-flex min-h-11 items-center hover:opacity-70">
           Careers
         </Link>

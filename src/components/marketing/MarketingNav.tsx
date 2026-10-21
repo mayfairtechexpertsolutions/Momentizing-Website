@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { appLink } from "@config";
 import { withBase } from "@/lib/base-path";
+
+const SECTION_IDS = ["services", "packages", "corporate"];
 
 interface MarketingNavProps {
   variant?: "full" | "simple";
@@ -12,9 +15,43 @@ interface MarketingNavProps {
 
 export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: MarketingNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const onHome = usePathname() === "/";
+  const anchor = (id: string) => (onHome ? `#${id}` : `/#${id}`);
+
+  // Shadow once the page has scrolled; on the home page also mark the section currently in view.
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 8);
+      if (window.scrollY < 200) setActiveId(null);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    let io: IntersectionObserver | undefined;
+    if (onHome && typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) if (entry.isIntersecting) setActiveId(entry.target.id);
+        },
+        { rootMargin: "-30% 0px -60% 0px" },
+      );
+      for (const id of SECTION_IDS) {
+        const el = document.getElementById(id);
+        if (el) io.observe(el);
+      }
+    }
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      io?.disconnect();
+    };
+  }, [onHome]);
+
+  const linkClass = (id: string) =>
+    `transition hover:text-momentizing-gold-deep ${activeId === id ? "text-momentizing-gold-deep underline decoration-2 underline-offset-8" : ""}`;
 
   return (
-    <nav className="fixed z-50 w-full border-b border-momentizing-mint-deep bg-white/95 backdrop-blur-md shadow-sm">
+    <nav className={`fixed z-50 w-full border-b border-momentizing-mint-deep bg-white/95 backdrop-blur-md transition-shadow duration-300 ${scrolled ? "shadow-md" : "shadow-sm"}`}>
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <Link href="/" className="flex-shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -34,17 +71,20 @@ export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: Ma
                 (and the mobile menu) so the bar stays calm and the logo is never squeezed. */}
             <div className="hidden items-center gap-10 text-xs font-bold tracking-widest whitespace-nowrap uppercase xl:flex">
               <div className="flex items-center gap-7">
-                <a href="#services" className="transition hover:text-momentizing-gold-deep">
+                <Link href={anchor("services")} className={linkClass("services")} aria-current={activeId === "services" ? "location" : undefined}>
                   Services
-                </a>
-                <a href="#packages" className="transition hover:text-momentizing-gold-deep">
+                </Link>
+                <Link href={anchor("packages")} className={linkClass("packages")} aria-current={activeId === "packages" ? "location" : undefined}>
                   Packages
-                </a>
-                <a href="#corporate" className="transition hover:text-momentizing-gold-deep">
+                </Link>
+                <Link href={anchor("corporate")} className={linkClass("corporate")} aria-current={activeId === "corporate" ? "location" : undefined}>
                   Corporate
-                </a>
+                </Link>
                 <Link href="/associates" className="transition hover:text-momentizing-gold-deep">
                   Find an Associate
+                </Link>
+                <Link href="/about" className="transition hover:text-momentizing-gold-deep">
+                  About
                 </Link>
               </div>
               <div className="flex items-center gap-6">
@@ -78,17 +118,20 @@ export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: Ma
           id="marketing-mobile-menu"
           className="flex max-h-[calc(100dvh-5rem)] flex-col gap-1 overflow-y-auto border-t border-momentizing-gold/10 bg-white px-6 py-5 text-xs font-bold tracking-widest uppercase xl:hidden [&_a]:flex [&_a]:min-h-11 [&_a]:items-center"
         >
-          <a href="#services" onClick={() => setMenuOpen(false)}>
+          <Link href={anchor("services")} onClick={() => setMenuOpen(false)}>
             Services
-          </a>
-          <a href="#packages" onClick={() => setMenuOpen(false)}>
+          </Link>
+          <Link href={anchor("packages")} onClick={() => setMenuOpen(false)}>
             Packages
-          </a>
-          <a href="#corporate" onClick={() => setMenuOpen(false)}>
+          </Link>
+          <Link href={anchor("corporate")} onClick={() => setMenuOpen(false)}>
             Corporate
-          </a>
+          </Link>
           <Link href="/associates" onClick={() => setMenuOpen(false)}>
             Find an Associate
+          </Link>
+          <Link href="/about" onClick={() => setMenuOpen(false)}>
+            About
           </Link>
           <hr className="my-2 border-momentizing-gold/20" />
           <Link href="/my-bookings" onClick={() => setMenuOpen(false)}>
