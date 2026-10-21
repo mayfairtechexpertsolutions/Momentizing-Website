@@ -155,6 +155,7 @@ Authoritative detail in [template.md](template.md). In short: **mint wash, rust 
 | 3 | Careers + hiring pipeline | Built, S3 pending |
 | 4 | Provision Turnstile, wire Twilio, resolve timezone, S3 real test, production deploy | Not started |
 | 5 | Bahasa Indonesia, analytics (privacy-reviewed), E2E suite, custom domain | Not built |
+| — | SEO & GEO foundations: metadata, canonicals, Open Graph, sitemap, robots, `llms.txt`, Organization/WebSite/FAQPage JSON-LD | Built (needs real `SITE_URL`, search-console submission, 1200×630 share image) |
 
 ## 13. Risks
 

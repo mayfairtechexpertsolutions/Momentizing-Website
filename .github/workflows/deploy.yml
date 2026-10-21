@@ -30,6 +30,8 @@ jobs:
           # Project site => https://<user>.github.io/<repo>. Set the repo variable CUSTOM_DOMAIN=true to serve from the root instead.
           NEXT_PUBLIC_BASE_PATH: ${{ vars.CUSTOM_DOMAIN == 'true' && '' || format('/{0}', github.event.repository.name) }}
           # Set these under Settings > Secrets and variables > Actions > Variables (public values, baked into the bundle).
+          # Public origin for canonical URLs, sitemap and structured data, e.g. https://momentizing.com (leave unset for the github.io default).
+          NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL }}
           NEXT_PUBLIC_API_BASE_URL: ${{ vars.API_BASE_URL }}
           NEXT_PUBLIC_APP_URL: ${{ vars.APP_URL }}
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}

@@ -5,7 +5,8 @@ import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { BookingWizard } from "@/components/marketing/booking/BookingWizard";
 
 export const metadata: Metadata = {
-  title: "Book a session",
+  title: "Book a Session",
+  alternates: { canonical: "./" },
   description: "Pick a day, meet the right specialist and book a session in a few gentle steps. No account needed.",
 };
 

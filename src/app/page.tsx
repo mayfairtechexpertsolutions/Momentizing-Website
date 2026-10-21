@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { appLink } from "@config";
+import { JsonLd } from "@/components/marketing/JsonLd";
+import { faqPageSchema } from "@/lib/structured-data";
 import { MarketingFonts } from "@/components/marketing/MarketingFonts";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { BrandIllustration } from "@/components/marketing/BrandIllustration";
@@ -134,6 +136,7 @@ export default function MarketingHomePage() {
       <MarketingNav />
       <ScrollReveal />
 
+      <JsonLd data={faqPageSchema(FAQ_ITEMS)} />
       <main id="main">
       <header className="relative mx-auto max-w-7xl px-6 pt-36 pb-20 md:pt-44 md:pb-24">
         <div aria-hidden="true" className="pointer-events-none absolute -top-10 -left-24 -z-10 h-80 w-80 rounded-full bg-momentizing-mint blur-2xl" />
@@ -431,11 +434,16 @@ export default function MarketingHomePage() {
                     }`}
                   />
                 </button>
-                {openFaq === index && (
-                  <div id={`faq-panel-${index}`} role="region" aria-labelledby={`faq-button-${index}`} className="bg-white px-6 pb-8 text-base leading-relaxed text-momentizing-muted">
-                    {item.answer}
-                  </div>
-                )}
+                {/* Always in the HTML (collapsed with `hidden`) so crawlers and AI answer engines can read every answer. */}
+                <div
+                  id={`faq-panel-${index}`}
+                  role="region"
+                  aria-labelledby={`faq-button-${index}`}
+                  hidden={openFaq !== index}
+                  className="bg-white px-6 pb-8 text-base leading-relaxed text-momentizing-muted"
+                >
+                  {item.answer}
+                </div>
               </div>
             ))}
           </div>

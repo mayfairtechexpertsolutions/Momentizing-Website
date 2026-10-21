@@ -113,6 +113,8 @@ Status type: `AWAITING_VERIFICATION | CONFIRMED | EXPIRED | CANCELLED`. State ma
 | `local-date.ts` | Date helpers for the day strip, plus `utcToLocal` / `localToUtc` / `zoneLabel` / `formatSessionWhen` for UTC↔visitor-clock conversion. |
 | `whatsapp.ts` | Fallback business number (`+62 857 0220 0701`), `buildWhatsAppLink()` and the `useWhatsAppLink()` hook (live number from `/public/contact-info`). |
 | `base-path.ts` | `BASE_PATH`, `withBase()` for non-`Link` URLs. |
+| `site-url.ts` | `SITE_URL` / `absoluteUrl()` for canonicals, sitemap, Open Graph and JSON-LD; shared site name + description. |
+| `structured-data.ts` | schema.org JSON-LD: Organization + WebSite graph (root layout) and `faqPageSchema()` (home). Rendered by `components/marketing/JsonLd.tsx`. |
 | `types.ts` | Shared `ApiEnvelope`, `PageResponse`. |
 
 The WhatsApp links (`WhatsAppFloatingButton`, `MarketingFooter`, `SpecialistBookingPanel`, `BookingModal`) read the business number from `GET /public/contact-info` via `useWhatsAppLink()` in `lib/whatsapp.ts` (set in CRMS Admin → Settings → WhatsApp); the constant in that file is only the fallback.
@@ -131,13 +133,21 @@ All calls target `API_BASE_URL` = `…/api/v1`. **CORS:** the backend must list 
 | App URL | `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Login / register / download links |
 | Turnstile site key | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | empty (off) | Backend must not require a challenge when off |
 | Base path | `NEXT_PUBLIC_BASE_PATH` | empty | `/<repo>` on a GitHub Pages project site |
+| Site origin | `NEXT_PUBLIC_SITE_URL` | `https://mayfairtechexpertsolutions.github.io` | Public origin for canonical URLs, sitemap, Open Graph, JSON-LD. Set to the custom domain (repo variable `SITE_URL`) at launch |
 
 Everything is inlined at build time and public. Restart `npm run dev` or rebuild after changing any value. Note local dev defaults to port **3001** and the CRMS app to **3000**; backend dev often runs on **18080** on this machine (see CRM docs) — set `NEXT_PUBLIC_API_BASE_URL` accordingly.
+
+## SEO & GEO
+
+- Root `layout.tsx` sets `metadataBase`, default title/description, Open Graph, Twitter card and the site JSON-LD; each route layout sets its own title, description and `canonical: "./"`. `/my-bookings` and `/associates/view` are `noindex` (private / client-fetched).
+- `app/robots.ts`, `app/sitemap.ts` and `app/llms.txt/route.ts` are `force-static` and emitted into `out/`. robots allows all crawlers (including AI ones) except the two noindex routes. New indexable pages must be added to `sitemap.ts` and `llms.txt`.
+- Home FAQ answers are always in the HTML (collapsed with `hidden`) and mirrored as `FAQPage` JSON-LD.
+- Open Graph image is `public/website/heart-psychology.png` (780×541); a 1200×630 image would be better.
 
 ## 9. Build & deploy
 
 - `next build` with `output: "export"` writes `out/`. `trailingSlash: true` gives GitHub Pages-friendly `dir/index.html`.
-- `.github/workflows/deploy.yml`: on push to `main` (or manual dispatch) → `npm ci` → `npm test` → `npm run build` (env from repo **Variables** `API_BASE_URL`, `APP_URL`, `TURNSTILE_SITE_KEY`, `CUSTOM_DOMAIN`) → upload `out/` → `deploy-pages`. A failing test blocks the deploy.
+- `.github/workflows/deploy.yml`: on push to `main` (or manual dispatch) → `npm ci` → `npm test` → `npm run build` (env from repo **Variables** `API_BASE_URL`, `APP_URL`, `TURNSTILE_SITE_KEY`, `CUSTOM_DOMAIN`, `SITE_URL`) → upload `out/` → `deploy-pages`. A failing test blocks the deploy.
 - Project site → `https://<user>.github.io/Momentizing-Website` (base path set automatically). Custom domain → set `CUSTOM_DOMAIN=true`.
 - Local Pages check: `NEXT_PUBLIC_BASE_PATH=/Momentizing-Website npm run build && npx serve out`.
 

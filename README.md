@@ -39,7 +39,8 @@ The site is a static export (`output: "export"`), deployed by [.github/workflows
 3. Repo **Settings → Secrets and variables → Actions → Variables**, add (all public, baked into the bundle):
    `API_BASE_URL` (public **https** backend incl. `/api/v1`), `APP_URL`, `TURNSTILE_SITE_KEY` (optional).
    Using a custom domain? Also add `CUSTOM_DOMAIN` = `true` (serves from `/` instead of `/<repo-name>`).
-4. The backend must list the Pages origin (`https://mayfairtechexpertsolutions.github.io`, or your custom domain) under `cors.allowed-origins`.
+4. Set repo variable `SITE_URL` to the public origin (e.g. `https://momentizing.com`) once there is a custom domain; it feeds canonical URLs, the sitemap and structured data. Unset, it defaults to the `github.io` origin.
+5. The backend must list the Pages origin (`https://mayfairtechexpertsolutions.github.io`, or your custom domain) under `cors.allowed-origins`.
 
 Local check of the Pages build: `NEXT_PUBLIC_BASE_PATH=/Momentizing-Website npm run build && npx serve out` (served under that prefix).
 
