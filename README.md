@@ -1,8 +1,10 @@
 # Momentizing Website
 
+Docs: [CLAUDE.md](CLAUDE.md) (working rules) · [PRD.md](PRD.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [template.md](template.md) (theme & templates).
+
 The public marketing site and no-account booking flow, split out of the CRMS frontend. It talks to the CRMS backend over its public API only.
 
-Pages: `/` (home), `/associates`, `/associates/view?id=<id>`, `/book`, `/legal`, `/help`.
+Pages: `/` (home), `/associates`, `/associates/view?id=<id>`, `/book`, `/careers`, `/legal`, `/help`.
 Login, registration, specialist sign-up and the app-install page stay in the CRMS app; the website links to them.
 
 ## Point it at a backend
@@ -44,7 +46,7 @@ Local check of the Pages build: `NEXT_PUBLIC_BASE_PATH=/Momentizing-Website npm 
 Because Pages is static, the associate profile is `/associates/view?id=<id>` rather than `/associates/<id>`.
 
 ## Notes
-- The guest-booking claim token is handed to the app's register page via `sessionStorage`, which only works when the website and the app share an origin (e.g. both behind one domain). On separate origins the booking still succeeds but won't auto-link to the new account.
+- The guest-booking claim token is handed to the app's register page in the URL fragment, and also via `sessionStorage` when the website and the app share an origin. If the hand-off fails the booking still succeeds but won't auto-link to the new account.
 - The old static site's git history in this folder is untouched.
 
 ## Colour & type

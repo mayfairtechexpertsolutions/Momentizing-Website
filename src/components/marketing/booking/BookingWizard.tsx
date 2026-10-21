@@ -18,7 +18,7 @@ import {
   type PublicSlots,
   type PublicSpecialistCard,
 } from "@/lib/guest-booking";
-import { formatDateLong, formatTime, icsStamp, todayIso } from "@/lib/local-date";
+import { formatDateLong, formatSessionWhen, formatTime, icsStamp, localToUtc, todayIso, zoneLabel } from "@/lib/local-date";
 import { BookButton, BookCard, Field, InlineNotice, inputClass } from "./ui";
 import { DateStrip } from "./DateStrip";
 import { HelpSheet } from "./HelpSheet";
@@ -801,8 +801,9 @@ function StepReview({
       const booking = await createGuestBooking(
         {
           specialistId: specialist.id,
-          sessionDate: draft.date,
-          startTime: draft.time,
+          // The visitor picked on their own clock; the API stores UTC wall-clock.
+          sessionDate: localToUtc(draft.date, draft.time).date,
+          startTime: localToUtc(draft.date, draft.time).time,
           fullName: draft.fullName.trim(),
           whatsapp: draft.whatsapp.trim(),
           sessionType,
@@ -844,7 +845,7 @@ function StepReview({
         <StepHeading headingRef={headingRef} title="Check and hold your time" sub="Have a look that everything is right. We'll hold this time for you while you confirm on WhatsApp." />
         <dl className="grid gap-3">
           <ReviewRow label="Specialist" value={specialist.name} onEdit={() => onEdit("specialist")} />
-          <ReviewRow label="When" value={`${formatDateLong(draft.date)} at ${formatTime(draft.time)} (UTC)`} onEdit={() => onEdit("time")} />
+          <ReviewRow label="When" value={`${formatDateLong(draft.date)} at ${formatTime(draft.time)} (${zoneLabel()})`} onEdit={() => onEdit("time")} />
           <ReviewRow label="Your name" value={draft.fullName} onEdit={() => onEdit("about")} />
           <ReviewRow label="WhatsApp" value={draft.whatsapp} onEdit={() => onEdit("about")} />
         </dl>
@@ -1000,7 +1001,7 @@ function StepVerify({
       <div className="rounded-2xl bg-momentizing-mint/60 p-4">
         <p className="text-sm font-semibold text-momentizing-muted">Your held time</p>
         <p className="mt-1 text-lg font-semibold">
-          {formatDateLong(b.sessionDate)} at {formatTime(b.startTime)} (UTC)
+          {formatSessionWhen(b.sessionDate, b.startTime)}
         </p>
         <p className="text-momentizing-muted">with {b.specialistName}</p>
         <p className="mt-2 text-sm text-momentizing-muted" role="timer" aria-live="off">
@@ -1098,7 +1099,7 @@ function StepDone({ active, headingRef, onAnother }: { active: ActiveBooking; he
         <StepHeading headingRef={headingRef} title="You're all set" sub="Your session is confirmed. We're looking forward to seeing you." />
         <InlineNotice tone="success" role="status">
           <p className="text-lg font-semibold">
-            {formatDateLong(b.sessionDate)} at {formatTime(b.startTime)} (UTC)
+            {formatSessionWhen(b.sessionDate, b.startTime)}
           </p>
           <p>
             with {b.specialistName} · {b.durationMinutes} minutes

@@ -3,13 +3,27 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SlotPicker } from "./SlotPicker";
 import * as api from "@/lib/guest-booking";
+import { localToUtc } from "@/lib/local-date";
 
 vi.mock("@/lib/guest-booking", async (orig) => ({ ...(await orig<typeof import("@/lib/guest-booking")>()), fetchSlots: vi.fn() }));
 const fetchSlots = vi.mocked(api.fetchSlots);
 
-const slots = (days: { date: string; times: string[] }[], next: string | null = null): api.PublicSlots => ({
-  specialistId: 1, specialistName: "Dr A", durationMinutes: 60, sessionTypes: ["ONLINE"], timezone: "UTC", days, nextAvailableDate: next,
-});
+/** Describe the days as the VISITOR sees them (their own clock); the mock answers the way the API does, in UTC. */
+const slots = (days: { date: string; times: string[] }[], next: string | null = null): api.PublicSlots => {
+  const utc = new Map<string, string[]>();
+  for (const d of days) {
+    for (const t of d.times) {
+      const u = localToUtc(d.date, t);
+      utc.set(u.date, [...(utc.get(u.date) ?? []), u.time]);
+    }
+  }
+  const dates = [...new Set([...days.map((d) => localToUtc(d.date, "12:00").date), ...utc.keys()])].sort();
+  return {
+    specialistId: 1, specialistName: "Dr A", durationMinutes: 60, sessionTypes: ["ONLINE"], timezone: "UTC",
+    days: dates.map((date) => ({ date, times: (utc.get(date) ?? []).sort() })),
+    nextAvailableDate: next ? localToUtc(next, "12:00").date : null,
+  };
+};
 
 describe("SlotPicker", () => {
   beforeEach(() => fetchSlots.mockReset());

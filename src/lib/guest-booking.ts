@@ -1,4 +1,5 @@
 import { ApiError, apiFetch, type ApiFetchOptions } from "./api";
+import { addDaysIso, utcToLocal } from "./local-date";
 import { MOMENTIZING_WHATSAPP_NUMBER } from "./whatsapp";
 
 /** What an anonymous visitor may see about a specialist — the API deliberately omits licence numbers and street addresses. */
@@ -34,6 +35,8 @@ export interface PublicSlots {
   sessionTypes: string[];
   /** How the wall-clock times are to be read. */
   timezone: string;
+  /** The expert's own zone (their hours are written in it); display only. */
+  expertTimeZone?: string;
   days: { date: string; times: string[] }[];
   nextAvailableDate: string | null;
 }
@@ -155,3 +158,63 @@ export function friendlyError(e: unknown, fallback = "Something went wrong. Plea
   }
   return e instanceof Error && e.message ? e.message : fallback;
 }
+
+/**
+ * The API speaks UTC wall-clock; a visitor thinks in their own clock. Re-expresses a response so every day and time is in
+ * the visitor's zone: `from`-based windows are fetched one UTC day either side, flattened to instants, and regrouped by the
+ * visitor's local date for the `days` days starting at `localStart`.
+ */
+export function toViewerSlots(res: PublicSlots, localStart: string, days: number): PublicSlots {
+  const byDate = new Map<string, string[]>();
+  for (const d of res.days) {
+    for (const t of d.times) {
+      const local = utcToLocal(d.date, t);
+      const list = byDate.get(local.date) ?? [];
+      list.push(local.time);
+      byDate.set(local.date, list);
+    }
+  }
+  const out: PublicSlots["days"] = [];
+  for (let i = 0; i < days; i++) {
+    const date = addDaysIso(localStart, i);
+    out.push({ date, times: (byDate.get(date) ?? []).sort() });
+  }
+  return {
+    ...res,
+    days: out,
+    nextAvailableDate: res.nextAvailableDate ? utcToLocal(res.nextAvailableDate, "12:00").date : null,
+  };
+}
+
+// ---- "My upcoming bookings" by phone number + WhatsApp code -------------------------------------------------------
+
+export interface MyBooking {
+  referenceCode: string;
+  specialistName: string;
+  /** UTC wall-clock, like every stored session; display with `formatSessionWhen`. */
+  sessionDate: string;
+  startTime: string;
+  durationMinutes: number;
+  sessionType: string;
+  status: "PENDING" | "CONFIRMED";
+}
+
+export interface MyBookings {
+  viewToken: string;
+  bookings: MyBooking[];
+  /** The number already belongs to an account: past sessions need a login. */
+  hasAccount: boolean;
+  /** Present only for a website guest who has just proved their number and could now create an account. */
+  claimToken: string | null;
+  name: string | null;
+}
+
+export const requestMyBookingsCode = (payload: { whatsapp: string; formToken: string; turnstileToken?: string; website?: string }) =>
+  apiFetch<{ requested: boolean }>("/public/my-bookings/request-code", { ...json(payload) });
+
+export const verifyMyBookings = (whatsapp: string, code: string) =>
+  apiFetch<MyBookings>("/public/my-bookings/verify", { ...json({ whatsapp, code }) });
+
+/** The token goes in a header so it never lands in a URL or an access log. */
+export const refreshMyBookings = (viewToken: string) =>
+  apiFetch<MyBookings>("/public/my-bookings", { headers: { "X-Lookup-Token": viewToken }, anonymous: true });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDaysIso, dateParts, formatTime, icsStamp, parseIsoLocal, toIsoLocal } from "./local-date";
+import { addDaysIso, dateParts, formatSessionWhen, formatTime, icsStamp, localToUtc, parseIsoLocal, toIsoLocal, utcToLocal, zoneLabel } from "./local-date";
 
 describe("local-date", () => {
   it("parses a bare date as a LOCAL calendar date (the UTC-midnight bug shows the previous day west of UTC)", () => {
@@ -32,5 +32,25 @@ describe("local-date", () => {
     expect(icsStamp("2026-10-02", "10:00")).toBe("20261002T100000Z");
     expect(icsStamp("2026-10-02", "10:00", 60)).toBe("20261002T110000Z");
     expect(icsStamp("2026-10-02", "23:30", 60)).toBe("20261003T003000Z"); // rolls into the next day
+  });
+});
+
+describe("UTC <-> the visitor's clock (tests run in America/Los_Angeles, UTC-7 in October)", () => {
+  it("converts a UTC slot to local time, including across midnight", () => {
+    expect(utcToLocal("2026-10-03", "16:00")).toEqual({ date: "2026-10-03", time: "09:00" });
+    expect(utcToLocal("2026-10-03", "02:30")).toEqual({ date: "2026-10-02", time: "19:30" }); // previous local day
+  });
+
+  it("round-trips local -> UTC -> local", () => {
+    for (const [d, t] of [["2026-10-03", "09:00"], ["2026-10-03", "23:30"], ["2026-10-04", "00:00"]]) {
+      const u = localToUtc(d, t);
+      expect(utcToLocal(u.date, u.time)).toEqual({ date: d, time: t });
+    }
+    expect(localToUtc("2026-10-03", "20:00")).toEqual({ date: "2026-10-04", time: "03:00" });
+  });
+
+  it("labels the zone and formats a session in it", () => {
+    expect(zoneLabel(new Date("2026-10-03T12:00:00Z"))).toMatch(/PDT|GMT-7/);
+    expect(formatSessionWhen("2026-10-03", "16:00")).toMatch(/9:00\s?AM.*(PDT|GMT-7)/);
   });
 });

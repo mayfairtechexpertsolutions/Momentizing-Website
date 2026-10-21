@@ -1,13 +1,16 @@
-import { buildWhatsAppLink } from "@/lib/whatsapp";
+"use client";
+
+import { useWhatsAppLink } from "@/lib/whatsapp";
 
 /** Free, official WhatsApp "click to chat" widget (wa.me) — no third-party script, account, or API key
  * needed. Fixed bottom-right on every public page it's rendered on. Uses an inline SVG glyph (not the
  * Font Awesome `fab fa-whatsapp` class used elsewhere) so it renders correctly on pages that don't load
  * MarketingFonts' Font Awesome stylesheet (e.g. /login, /register, /help). */
 export function WhatsAppFloatingButton() {
+  const whatsAppLink = useWhatsAppLink();
   return (
     <a
-      href={buildWhatsAppLink("Hi Momentizing, I'd like to book a session.")}
+      href={whatsAppLink("Hi Momentizing, I'd like to book a session.")}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"

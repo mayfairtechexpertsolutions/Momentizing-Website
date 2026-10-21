@@ -65,3 +65,36 @@ export function icsStamp(dateIso: string, time: string, addMinutes = 0): string 
   const p = (n: number) => String(n).padStart(2, "0");
   return `${dt.getUTCFullYear()}${p(dt.getUTCMonth() + 1)}${p(dt.getUTCDate())}T${p(dt.getUTCHours())}${p(dt.getUTCMinutes())}00Z`;
 }
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+/** A slot the API reports as UTC wall-clock ("2026-10-03", "02:00") -> the same instant on the visitor's own clock. */
+export function utcToLocal(dateIso: string, time: string): { date: string; time: string } {
+  const [y, mo, d] = dateIso.split("-").map(Number);
+  const [h, mi] = time.split(":").map(Number);
+  const dt = new Date(Date.UTC(y, mo - 1, d, h, mi ?? 0));
+  return { date: toIsoLocal(dt), time: `${pad2(dt.getHours())}:${pad2(dt.getMinutes())}` };
+}
+
+/** The reverse: a time the visitor picked on their own clock -> the UTC wall-clock the API stores. */
+export function localToUtc(dateIso: string, time: string): { date: string; time: string } {
+  const [y, mo, d] = dateIso.split("-").map(Number);
+  const [h, mi] = time.split(":").map(Number);
+  const dt = new Date(y, mo - 1, d, h, mi ?? 0);
+  return { date: `${dt.getUTCFullYear()}-${pad2(dt.getUTCMonth() + 1)}-${pad2(dt.getUTCDate())}`, time: `${pad2(dt.getUTCHours())}:${pad2(dt.getUTCMinutes())}` };
+}
+
+/** Short name of the visitor's time zone for labels, e.g. "WIB", "GMT+7", "PDT". */
+export function zoneLabel(at: Date = new Date()): string {
+  try {
+    return new Intl.DateTimeFormat(undefined, { timeZoneName: "short" }).formatToParts(at).find((p) => p.type === "timeZoneName")?.value ?? "your time";
+  } catch {
+    return "your time";
+  }
+}
+
+/** "Friday, 3 October at 9:00 AM (WIB)" for a UTC wall-clock session, shown on the visitor's clock. */
+export function formatSessionWhen(dateIso: string, time: string): string {
+  const local = utcToLocal(dateIso, time);
+  return `${formatDateLong(local.date)} at ${formatTime(local.time)} (${zoneLabel()})`;
+}

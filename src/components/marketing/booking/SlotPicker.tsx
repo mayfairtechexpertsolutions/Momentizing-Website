@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { fetchSlots, friendlyError, type PublicSlots } from "@/lib/guest-booking";
-import { formatDateLong, formatDateShort, formatTime } from "@/lib/local-date";
+import { fetchSlots, friendlyError, toViewerSlots, type PublicSlots } from "@/lib/guest-booking";
+import { addDaysIso, formatDateLong, formatDateShort, formatTime, zoneLabel } from "@/lib/local-date";
 import { BookButton } from "./ui";
 
 const WINDOW_DAYS = 14;
@@ -42,8 +42,10 @@ export function SlotPicker({
     setLoading(true);
     setError(null);
     /* eslint-enable react-hooks/set-state-in-effect */
-    fetchSlots(specialistId, date, WINDOW_DAYS)
-      .then((res) => {
+    // One UTC day either side so the visitor's whole local day is covered, whichever side of UTC they live.
+    fetchSlots(specialistId, addDaysIso(date, -1), WINDOW_DAYS + 2)
+      .then((utc) => {
+        const res = toViewerSlots(utc, date, WINDOW_DAYS);
         if (!cancelled) {
           setData(res);
           onLoaded?.(res);
@@ -97,7 +99,7 @@ export function SlotPicker({
   return (
     <div className="flex flex-col gap-5">
       <p className="text-sm text-momentizing-muted">
-        Open times on <strong className="text-momentizing-slate">{formatDateLong(date)}</strong> · {data.durationMinutes}-minute session · times in {data.timezone}
+        Open times on <strong className="text-momentizing-slate">{formatDateLong(date)}</strong> · {data.durationMinutes}-minute session · times in your time zone ({zoneLabel()})
       </p>
 
       {times.length > 0 ? (
@@ -153,8 +155,6 @@ export function SlotPicker({
           )}
         </div>
       )}
-
-      <p className="text-xs text-momentizing-muted">All times are shown in {data.timezone}, the same clock the Momentizing app uses.</p>
     </div>
   );
 }

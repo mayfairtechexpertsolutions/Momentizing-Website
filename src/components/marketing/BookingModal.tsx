@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { apiFetch, ApiError } from "@/lib/api";
 import { usePackages } from "@/lib/session-packages";
-import { buildWhatsAppLink } from "@/lib/whatsapp";
+import { useWhatsAppLink } from "@/lib/whatsapp";
 import { BookButton, Field, InlineNotice, inputClass } from "./booking/ui";
 import { Sheet } from "./booking/Sheet";
 
@@ -27,6 +27,7 @@ function buildWhatsAppMessage(fullName: string, packageName: string | undefined,
  * accessible <Sheet> (real dialog: focus trap, Escape, scroll lock, labelled fields).
  */
 export function BookingModal({ open, initialPackageId, onClose }: BookingModalProps) {
+  const whatsAppLink = useWhatsAppLink();
   const { data: packages } = usePackages();
 
   const [fullName, setFullName] = useState("");
@@ -94,7 +95,7 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
     submitInquiry("WHATSAPP").catch(() => {
       /* best-effort — the visitor's WhatsApp conversation is the real record either way */
     });
-    window.open(buildWhatsAppLink(buildWhatsAppMessage(fullName, selectedPackage?.name, message)), "_blank", "noopener,noreferrer");
+    window.open(whatsAppLink(buildWhatsAppMessage(fullName, selectedPackage?.name, message)), "_blank", "noopener,noreferrer");
     handleClose();
   }
 

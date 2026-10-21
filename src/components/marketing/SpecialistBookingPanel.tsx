@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { buildWhatsAppLink } from "@/lib/whatsapp";
+import { useWhatsAppLink } from "@/lib/whatsapp";
 
 interface SpecialistBookingPanelProps {
   specialistId: number;
@@ -19,6 +19,7 @@ const primaryClass =
  * open times and can hold one — no account needed. A signed-in client goes to the in-app booking screen instead.
  */
 export function SpecialistBookingPanel({ specialistId, specialistName, acceptingNewClients }: SpecialistBookingPanelProps) {
+  const whatsAppLink = useWhatsAppLink();
   if (!acceptingNewClients) {
     return (
       <div className={`${cardClass} text-center`}>
@@ -46,7 +47,7 @@ export function SpecialistBookingPanel({ specialistId, specialistName, accepting
       <p className="mt-4 text-center text-sm text-momentizing-muted">
         Prefer to chat first?{" "}
         <a
-          href={buildWhatsAppLink(`Hi Momentizing, I'd like to book a session with ${specialistName}.`)}
+          href={whatsAppLink(`Hi Momentizing, I'd like to book a session with ${specialistName}.`)}
           target="_blank"
           rel="noopener noreferrer"
           className="font-semibold underline"

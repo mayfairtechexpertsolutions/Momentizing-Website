@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { appLink } from "@config";
-import { buildWhatsAppLink } from "@/lib/whatsapp";
+import { useWhatsAppLink } from "@/lib/whatsapp";
 
 export function MarketingFooter() {
+  const whatsAppLink = useWhatsAppLink();
   return (
     <footer className="border-t border-momentizing-mint-deep bg-momentizing-mint/50 pt-12 pb-28 text-center sm:pb-12">
       <p className="px-4 text-xs font-bold tracking-widest text-momentizing-muted uppercase">
@@ -18,11 +21,14 @@ export function MarketingFooter() {
         <Link href="/book" className="inline-flex min-h-11 items-center hover:opacity-70">
           Book a Session
         </Link>
+        <Link href="/careers" className="inline-flex min-h-11 items-center hover:opacity-70">
+          Careers
+        </Link>
         <a href={appLink("/download")} className="inline-flex min-h-11 items-center hover:opacity-70">
           Get the App
         </a>
         <a
-          href={buildWhatsAppLink("Hi Momentizing, I'd like to book a session.")}
+          href={whatsAppLink("Hi Momentizing, I'd like to book a session.")}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex min-h-11 items-center gap-1.5 hover:opacity-70"
