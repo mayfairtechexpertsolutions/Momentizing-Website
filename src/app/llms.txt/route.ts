@@ -19,7 +19,7 @@ Momentizing is not an emergency or crisis service. People in danger should conta
 - [About us](${absoluteUrl("/about/")}): vision, mission and the journey from Taiwan to Indonesia and beyond
 - [Get help now](${absoluteUrl("/help/")}): crisis and emergency resources
 - [Careers](${absoluteUrl("/careers/")}): join as an expert
-- [Legal & support](${absoluteUrl("/legal/")}): terms, privacy policy and support FAQ
+- [Legal & support](${absoluteUrl("/legal/")}): terms and privacy policy
 
 ## Facts
 

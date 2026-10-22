@@ -73,7 +73,7 @@ Website/
 | `/about` | `app/about/page.tsx` | Static brand-story page. Journey timeline is `components/marketing/about/JourneyTimeline.tsx` (desktop road segments + pins, mobile dashed rail); art is inline SVG in `AboutArt.tsx` using `--momentizing-*` tokens; `ScrollReveal.tsx` (shared, renders nothing) fades in `[data-reveal]` blocks once on `/` and `/about`; `Reveal.tsx` sets `data-seen` once on scroll and `globals.css` (`.journey-road`, `.journey-pin`) animates the road/pins, with a reduced-motion fallback. |
 | `/careers` | `app/careers/page.tsx` | Expert application form with resume upload (§6). |
 | `/my-bookings` | `app/my-bookings/page.tsx` | Upcoming sessions by phone number + WhatsApp code (`MyBookingsPanel.tsx`): `POST /public/my-bookings/request-code` (form token, Turnstile when enabled) → `POST …/verify` → list; the 15-minute `viewToken` is kept in `sessionStorage` and sent as `X-Lookup-Token` to `GET /public/my-bookings` after a reload. Times shown on the visitor's clock; offers *Create a free account* (claim link) or login. Not indexed. |
-| `/legal` | `app/legal/page.tsx` | Terms, privacy, disclaimers. |
+| `/legal` | `app/legal/page.tsx` | FAQ, Terms, Privacy. Active tab is read from the URL hash via `useSyncExternalStore`; the two documents are in `components/marketing/legal/LegalDocuments.tsx`. |
 | `/help` | `app/help/page.tsx` | Crisis resources and support. |
 | 404 / error | `not-found.tsx`, `error.tsx` | Branded fallbacks. |
 

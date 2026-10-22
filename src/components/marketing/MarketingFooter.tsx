@@ -12,6 +12,9 @@ export function MarketingFooter() {
         Momentizing Holistic Center | Secure &amp; Transparent Care
       </p>
       <div className="mt-3 flex flex-wrap justify-center gap-x-6 gap-y-1 px-4 text-xs font-bold tracking-widest text-momentizing-slate uppercase">
+        <Link href="/" className="inline-flex min-h-11 items-center hover:opacity-70">
+          Home
+        </Link>
         <Link href="/legal" className="inline-flex min-h-11 items-center hover:opacity-70">
           Legal &amp; Support
         </Link>
@@ -22,7 +25,7 @@ export function MarketingFooter() {
           Book a Session
         </Link>
         <Link href="/about" className="inline-flex min-h-11 items-center hover:opacity-70">
-          About Us
+          About
         </Link>
         <Link href="/careers" className="inline-flex min-h-11 items-center hover:opacity-70">
           Careers

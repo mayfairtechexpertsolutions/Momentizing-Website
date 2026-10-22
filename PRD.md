@@ -53,7 +53,7 @@ It lets a visitor, **without creating an account**: learn what Momentizing offer
 | **My bookings `/my-bookings`** | Built | See upcoming sessions by phone number after a WhatsApp code; no history without an account. |
 | **About `/about`** | Built | Brand story: tagline and values, who we support (diaspora, expatriates, international students, cross-cultural couples), vision and mission, the "Our journey" timeline (2019 Taiwan → 2020–22 FIP → 2022 Jakarta → Now) and four commitments. All graphics are original SVG, no photos. Founder name/credentials are deliberately absent until the Team section. Bahasa Indonesia version not built. Home has a short "Our story" teaser linking here. |
 | **Careers `/careers`** | Built (resume upload untested against real S3) | Expert application with resume (§6). |
-| **Legal `/legal`** ("Transparency Hub") | Built | FAQ, Terms & Conditions, Privacy Policy. |
+| **Legal `/legal`** ("Transparency Hub") | Built (wording needs lawyer review) | FAQ, full Terms & Conditions (18 sections) and Privacy Policy (13 sections), written from what the product actually does: WhatsApp-verified guest booking, pay-later on WhatsApp, wallet points, 30-min holds, 24 h emergency-reschedule fee, no cookies / no analytics, 12-month applicant retention, 30-day account erasure. Tab follows the URL hash (`/legal/#terms`, `/legal/#privacy`). Governing law: Indonesia (Jakarta courts). Text lives in `components/marketing/legal/LegalDocuments.tsx`; update it whenever a data practice, provider or payment rule changes. |
 | **Help `/help`** ("You're not alone") | Built | Crisis resources and support contacts, always reachable from nav/footer. |
 | **404 / error** | Built | Branded, with a way home. |
 

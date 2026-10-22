@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { MarketingFonts } from "@/components/marketing/MarketingFonts";
-import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { BookingWizard } from "@/components/marketing/booking/BookingWizard";
 
 export const metadata: Metadata = {
@@ -18,9 +16,7 @@ export const metadata: Metadata = {
 export default function BookPage() {
   return (
     <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
-      <MarketingFonts />
-      <MarketingNav variant="simple" simpleLabel="Back Home" />
-      <main className="mx-auto max-w-2xl px-4 pt-28 pb-40 sm:px-6 md:pb-20">
+      <main id="main" className="mx-auto max-w-2xl px-4 pt-28 pb-40 sm:px-6 md:pb-20">
         <Suspense
           fallback={
             <div className="flex min-h-[50dvh] items-center justify-center" aria-busy="true">

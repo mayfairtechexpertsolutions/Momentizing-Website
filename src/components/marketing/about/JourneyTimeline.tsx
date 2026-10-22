@@ -140,7 +140,7 @@ export function JourneyTimeline() {
                 <div
                   role="img"
                   aria-label={stop.artLabel}
-                  className={`aspect-[4/3] w-full max-w-sm overflow-hidden rounded-[2rem] border-[6px] border-white shadow-[0_8px_30px_rgba(47,62,70,0.1)] md:max-w-none ${textLeft ? "md:rotate-1" : "md:-rotate-1"}`}
+                  className={`aspect-[4/3] w-full max-w-sm overflow-hidden rounded-[2rem] border-[6px] border-white shadow-[0_8px_30px_rgba(47,62,70,0.1)] md:max-w-none`}
                 >
                   {stop.art}
                 </div>

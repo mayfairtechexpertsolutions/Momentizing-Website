@@ -4,10 +4,6 @@ import { initials } from "@/components/marketing/booking/SpecialistParts";
 import { Suspense, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { MarketingFonts } from "@/components/marketing/MarketingFonts";
-import { MarketingNav } from "@/components/marketing/MarketingNav";
-import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { WhatsAppFloatingButton } from "@/components/marketing/WhatsAppFloatingButton";
 import { SpecialistBookingPanel } from "@/components/marketing/SpecialistBookingPanel";
 import { SpecialistCard } from "@/components/marketing/SpecialistCard";
 import { SpecialistReviews } from "@/components/marketing/SpecialistReviews";
@@ -63,11 +59,9 @@ function AssociateDetail() {
   const otherAssociates = (others?.content ?? []).filter((p) => p.id !== psychId).slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-momentizing-cream font-marketing-sans text-momentizing-slate">
-      <MarketingFonts />
-      <MarketingNav variant="simple" simpleLabel="All Associates" />
+    <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
 
-      <main className="mx-auto max-w-6xl px-6 pt-40 pb-24">
+      <main id="main" className="mx-auto max-w-6xl px-6 pt-40 pb-24">
         {isLoading && (
           <p role="status" className="py-24 text-center font-marketing-serif text-lg text-momentizing-muted">
             Loading profile…
@@ -307,8 +301,6 @@ function AssociateDetail() {
         )}
       </main>
 
-      <MarketingFooter />
-      <WhatsAppFloatingButton />
     </div>
   );
 }

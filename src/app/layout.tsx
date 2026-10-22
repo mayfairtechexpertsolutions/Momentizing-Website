@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Nunito } from "next/font/google";
+import { SiteChrome } from "@/components/marketing/SiteChrome";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { siteGraph } from "@/lib/structured-data";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site-url";
@@ -30,10 +31,10 @@ export const metadata: Metadata = {
     locale: "en_US",
     title: "Momentizing — Healing Without Borders",
     description: SITE_DESCRIPTION,
-    images: [{ url: "/website/heart-psychology.png", width: 780, height: 541, alt: "A heart held in caring hands" }],
+    images: [{ url: "website/heart-psychology.png", width: 780, height: 541, alt: "A heart held in caring hands" }],
   },
   twitter: { card: "summary_large_image", title: "Momentizing — Healing Without Borders", description: SITE_DESCRIPTION },
-  icons: { icon: "/icon-192.png", apple: "/icon-192.png" },
+  icons: { icon: "icon-192.png", apple: "icon-192.png" },
 };
 
 export const viewport: Viewport = {
@@ -46,11 +47,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${fraunces.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="marketing-root min-h-full flex flex-col bg-momentizing-cream text-momentizing-slate">
         <JsonLd data={siteGraph} />
-        {children}
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

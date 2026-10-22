@@ -6,14 +6,9 @@ import { useRouter } from "next/navigation";
 import { appLink } from "@config";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { faqPageSchema } from "@/lib/structured-data";
-import { MarketingFonts } from "@/components/marketing/MarketingFonts";
-import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { BrandIllustration } from "@/components/marketing/BrandIllustration";
-import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { ScrollReveal } from "@/components/marketing/ScrollReveal";
 import { BookingModal } from "@/components/marketing/BookingModal";
 import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp";
-import { WhatsAppFloatingButton } from "@/components/marketing/WhatsAppFloatingButton";
 import { SpecialistCard } from "@/components/marketing/SpecialistCard";
 import { useMarketingDirectory, specialisationTags } from "@/lib/marketing-directory";
 import { usePackages, formatPackagePrice } from "@/lib/session-packages";
@@ -129,12 +124,6 @@ export default function MarketingHomePage() {
 
   return (
     <div className="marketing-root bg-momentizing-cream font-marketing-sans text-momentizing-slate">
-      <a href="#main" className="skip-link">
-        Skip to main content
-      </a>
-      <MarketingFonts />
-      <MarketingNav />
-      <ScrollReveal />
 
       <JsonLd data={faqPageSchema(FAQ_ITEMS)} />
       <main id="main">
@@ -480,10 +469,8 @@ export default function MarketingHomePage() {
       </section>
       </main>
 
-      <MarketingFooter />
 
       <BookingModal open={bookingOpen} initialPackageId={bookingPackageId} onClose={() => setBookingOpen(false)} />
-      <WhatsAppFloatingButton />
     </div>
   );
 }

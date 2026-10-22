@@ -1,6 +1,3 @@
-import { MarketingFonts } from "@/components/marketing/MarketingFonts";
-import { MarketingNav } from "@/components/marketing/MarketingNav";
-import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { CareerForm } from "@/components/marketing/careers/CareerForm";
 
 const STEPS = [
@@ -13,9 +10,7 @@ const STEPS = [
 export default function CareersPage() {
   return (
     <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
-      <MarketingFonts />
-      <MarketingNav variant="simple" simpleLabel="Back Home" />
-      <main className="mx-auto max-w-3xl px-4 pt-28 pb-20 sm:px-6">
+      <main id="main" className="mx-auto max-w-3xl px-4 pt-28 pb-20 sm:px-6">
         <p className="text-xs font-bold tracking-widest text-momentizing-muted uppercase">Careers</p>
         <h1 className="font-marketing-serif mt-2 text-4xl leading-tight font-semibold sm:text-5xl">Join Momentizing as an expert</h1>
         <p className="mt-4 text-lg leading-relaxed text-momentizing-muted">
@@ -42,7 +37,6 @@ export default function CareersPage() {
           </div>
         </section>
       </main>
-      <MarketingFooter />
     </div>
   );
 }

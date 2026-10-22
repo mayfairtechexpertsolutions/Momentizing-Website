@@ -1,15 +1,11 @@
 import Link from "next/link";
-import { MarketingFonts } from "@/components/marketing/MarketingFonts";
-import { MarketingNav } from "@/components/marketing/MarketingNav";
 
 export const metadata = { title: "Page not found" };
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-momentizing-cream font-marketing-sans text-momentizing-slate">
-      <MarketingFonts />
-      <MarketingNav variant="simple" />
-      <main className="mx-auto flex max-w-md flex-col items-center px-6 pt-40 pb-24 text-center">
+    <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
+      <main id="main" className="mx-auto flex max-w-md flex-col items-center px-6 pt-40 pb-24 text-center">
         <p className="text-xs font-bold tracking-[0.3em] text-momentizing-slate/70 uppercase">Error 404</p>
         <h1 className="mt-3 font-marketing-serif text-3xl text-momentizing-slate">We can&apos;t find that page</h1>
         <p className="mt-3 text-sm text-momentizing-muted">

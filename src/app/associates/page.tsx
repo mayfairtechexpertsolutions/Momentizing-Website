@@ -2,10 +2,6 @@
 
 import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { MarketingFonts } from "@/components/marketing/MarketingFonts";
-import { MarketingNav } from "@/components/marketing/MarketingNav";
-import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { WhatsAppFloatingButton } from "@/components/marketing/WhatsAppFloatingButton";
 import { SpecialistCard } from "@/components/marketing/SpecialistCard";
 import { useMarketingDirectory, specialisationTags } from "@/lib/marketing-directory";
 import { useFavorites } from "@/lib/favorites";
@@ -59,9 +55,7 @@ function AssociatesContent() {
   }, [specialists, search, activeTag, acceptingOnly, favoritesOnly, isFavorite]);
 
   return (
-    <div className="min-h-screen bg-momentizing-cream font-marketing-sans text-momentizing-slate">
-      <MarketingFonts />
-      <MarketingNav variant="simple" />
+    <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
 
       <header className="px-6 pt-40 pb-16 text-center">
         <h1 className="mb-4 font-marketing-serif text-5xl text-momentizing-gold-deep">Find Your Specialist</h1>
@@ -71,7 +65,7 @@ function AssociatesContent() {
         </p>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 pb-24">
+      <main id="main" className="mx-auto max-w-7xl px-6 pb-24">
         <div className="mb-8 flex flex-col gap-4 rounded-[2rem] border border-momentizing-gold/5 bg-white p-4 shadow-xl shadow-momentizing-gold/5 md:flex-row">
           <div className="relative flex-1">
             <i aria-hidden="true" className="fas fa-search absolute top-1/2 left-6 -translate-y-1/2 text-momentizing-teal" />
@@ -156,8 +150,6 @@ function AssociatesContent() {
         )}
       </main>
 
-      <MarketingFooter />
-      <WhatsAppFloatingButton />
     </div>
   );
 }

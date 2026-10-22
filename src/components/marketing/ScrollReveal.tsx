@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 /** Renders nothing. After mount, fades in each `[data-reveal]` block the first time it scrolls into view.
  * Blocks already on screen are left alone, and with reduced motion nothing is hidden at all. */
 export function ScrollReveal() {
+  const pathname = usePathname();
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const blocks = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
@@ -27,7 +29,7 @@ export function ScrollReveal() {
       io.disconnect();
       for (const el of blocks) if (el.dataset.reveal === "pending") el.dataset.reveal = "shown";
     };
-  }, []);
+  }, [pathname]);
 
   return null;
 }

@@ -1,9 +1,4 @@
 import Link from "next/link";
-import { MarketingFonts } from "@/components/marketing/MarketingFonts";
-import { MarketingNav } from "@/components/marketing/MarketingNav";
-import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { WhatsAppFloatingButton } from "@/components/marketing/WhatsAppFloatingButton";
-import { ScrollReveal } from "@/components/marketing/ScrollReveal";
 import { HeroGlobe } from "@/components/marketing/about/AboutArt";
 import { JourneyTimeline } from "@/components/marketing/about/JourneyTimeline";
 
@@ -37,16 +32,10 @@ const COMMITMENTS = [
 
 export default function AboutPage() {
   return (
-    <div className="marketing-root min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
-      <a href="#main" className="skip-link">
-        Skip to main content
-      </a>
-      <MarketingFonts />
-      <MarketingNav />
-      <ScrollReveal />
+    <div className="marketing-root min-h-dvh overflow-x-clip bg-momentizing-cream font-marketing-sans text-momentizing-slate">
 
       <main id="main">
-        <header className="relative mx-auto max-w-7xl px-6 pt-36 pb-20 md:pt-44 md:pb-24">
+        <header className="relative isolate mx-auto max-w-7xl px-6 pt-36 pb-20 md:pt-44 md:pb-24">
           <div aria-hidden="true" className="pointer-events-none absolute -top-10 -left-24 -z-10 h-80 w-80 rounded-full bg-momentizing-mint blur-2xl" />
           <div aria-hidden="true" className="pointer-events-none absolute right-0 bottom-0 -z-10 h-72 w-72 rounded-full bg-momentizing-peach blur-2xl" />
           <div className="grid items-center gap-14 md:grid-cols-[1.15fr_0.85fr]">
@@ -140,7 +129,7 @@ export default function AboutPage() {
 
         <section id="journey" aria-labelledby="journey-heading" className="relative overflow-hidden px-6 py-24">
           <div data-reveal className="mx-auto max-w-3xl text-center">
-            <h2 id="journey-heading" className="font-marketing-serif text-4xl font-bold text-momentizing-gold-deep md:text-5xl">
+            <h2 id="journey-heading" className="font-marketing-serif text-3xl font-semibold text-momentizing-gold-deep md:text-4xl">
               Our journey
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-momentizing-muted">
@@ -152,13 +141,13 @@ export default function AboutPage() {
 
         <section aria-labelledby="commitments" className="on-dark bg-momentizing-slate px-6 py-24 text-white">
           <div data-reveal className="mx-auto max-w-7xl">
-            <h2 id="commitments" className="font-marketing-serif text-3xl text-momentizing-gold md:text-4xl">
+            <h2 id="commitments" className="font-marketing-serif text-3xl font-semibold text-momentizing-gold md:text-4xl">
               Our commitment moving forward
             </h2>
             <ul className="mt-12 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
               {COMMITMENTS.map((item) => (
                 <li key={item.title} className="border-t border-white/20 pt-6">
-                  <i className={`${item.icon} text-xl text-momentizing-gold`} aria-hidden="true" />
+                  <i className={`${item.icon} inline-block h-6 w-6 text-xl text-momentizing-gold`} aria-hidden="true" />
                   <h3 className="mt-4 font-marketing-serif text-xl font-semibold">{item.title}</h3>
                   <p className="mt-2 leading-relaxed text-white/80">{item.body}</p>
                 </li>
@@ -191,8 +180,6 @@ export default function AboutPage() {
         </section>
       </main>
 
-      <MarketingFooter />
-      <WhatsAppFloatingButton />
     </div>
   );
 }
