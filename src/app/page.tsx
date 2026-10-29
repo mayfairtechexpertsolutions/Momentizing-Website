@@ -127,7 +127,7 @@ export default function MarketingHomePage() {
 
       <JsonLd data={faqPageSchema(FAQ_ITEMS)} />
       <main id="main">
-      <header className="relative mx-auto max-w-7xl px-6 pt-36 pb-20 md:pt-44 md:pb-24">
+      <header className="relative mx-auto max-w-7xl px-6 pt-28 pb-20 md:pt-32 md:pb-24">
         <div aria-hidden="true" className="pointer-events-none absolute -top-10 -left-24 -z-10 h-80 w-80 rounded-full bg-momentizing-mint blur-2xl" />
         <div aria-hidden="true" className="pointer-events-none absolute right-0 bottom-0 -z-10 h-72 w-72 rounded-full bg-momentizing-peach blur-2xl" />
         <div className="grid items-center gap-16 md:grid-cols-2">

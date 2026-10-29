@@ -26,7 +26,7 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
-      <header className="px-6 pt-40 pb-12 text-center">
+      <header className="px-6 pt-32 pb-12 text-center">
         <span className="inline-block rounded-full bg-momentizing-mint px-4 py-1.5 text-xs font-bold tracking-[0.18em] text-momentizing-teal uppercase">
           Events
         </span>

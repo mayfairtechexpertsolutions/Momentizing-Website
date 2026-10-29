@@ -32,7 +32,7 @@ export default function AssociatesPage() {
   return (
     <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
 
-      <header className="px-6 pt-40 pb-16 text-center">
+      <header className="px-6 pt-32 pb-16 text-center">
         <h1 className="mb-4 font-marketing-serif text-5xl text-momentizing-gold-deep">Find Your Specialist</h1>
         <p className="mx-auto max-w-xl text-base text-momentizing-muted">
           Filter by clinical expertise, language, or specific challenges to find the expert best suited for your

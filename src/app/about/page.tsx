@@ -35,7 +35,7 @@ export default function AboutPage() {
     <div className="marketing-root min-h-dvh overflow-x-clip bg-momentizing-cream font-marketing-sans text-momentizing-slate">
 
       <main id="main">
-        <header className="relative isolate mx-auto max-w-7xl px-6 pt-36 pb-20 md:pt-44 md:pb-24">
+        <header className="relative isolate mx-auto max-w-7xl px-6 pt-28 pb-20 md:pt-32 md:pb-24">
           <div aria-hidden="true" className="pointer-events-none absolute -top-10 -left-24 -z-10 h-80 w-80 rounded-full bg-momentizing-mint blur-2xl" />
           <div aria-hidden="true" className="pointer-events-none absolute right-0 bottom-0 -z-10 h-72 w-72 rounded-full bg-momentizing-peach blur-2xl" />
           <div className="grid items-center gap-14 md:grid-cols-[1.15fr_0.85fr]">

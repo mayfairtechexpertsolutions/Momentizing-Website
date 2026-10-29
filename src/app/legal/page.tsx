@@ -28,7 +28,7 @@ export default function LegalPage() {
   return (
     <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
 
-      <header className="bg-white/50 px-6 pt-40 pb-20 text-center">
+      <header className="bg-white/50 px-6 pt-32 pb-20 text-center">
         <span className="text-xs font-bold tracking-[0.3em] text-momentizing-teal uppercase">
           Governance &amp; Support
         </span>

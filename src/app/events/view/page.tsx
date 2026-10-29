@@ -87,7 +87,7 @@ function EventBody({ event: e }: { event: PublicEvent }) {
   return (
     <>
       <JsonLd data={eventSchema(e, pageUrl)} />
-      <main id="main" className="mx-auto max-w-6xl px-6 pt-32 pb-32 md:pt-40 md:pb-24">
+      <main id="main" className="mx-auto max-w-6xl px-6 pt-32 pb-32 md:pb-24">
         <Link href="/events" className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-momentizing-teal hover:underline">
           <i aria-hidden="true" className="fas fa-arrow-left" /> All events
         </Link>
