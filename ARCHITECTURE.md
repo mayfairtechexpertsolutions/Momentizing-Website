@@ -66,18 +66,20 @@ Website/
 
 | Route | File | Purpose |
 |---|---|---|
-| `/` | `app/page.tsx` | Home: hero, what we offer, services, care packages (live from API), corporate wellness, top-rated specialists, FAQ, final CTA. Anchored sections `#services #packages #corporate #associates-preview #faq`. |
+| `/` | `app/page.tsx` | Home: hero, what we offer, services, care packages (live from API), corporate wellness, top-rated specialists, FAQ, final CTA. Anchored sections `#services #packages #corporate #associates-preview #events #faq` (`#events` = `UpcomingEventsBand`, a mint band of up to three compact "date ticket" `EventCard`s, centred, rendered only when there are upcoming events). |
 | `/associates` | `app/associates/page.tsx` | Specialist directory: search, filters, favorites, cards. |
-| `/associates/view?id=<id>` | `app/associates/view/page.tsx` | Specialist profile, reviews, booking panel. Query string instead of `/[id]` because a static export cannot serve unknown ids. |
+| `/associates/view?id=<id>` | `app/associates/view/page.tsx` | Specialist profile: `specialist/ProfileHero` (portrait, teaser quote, trust cues, hero CTAs, favorite + Web Share/copy-link button, facts bar), `specialist/ProfileNav` (sticky section tabs with scroll-spy and offset-aware smooth scrolling), `specialist/ProfileSections` (About with long-bio fold, What to expect, Locations, Credentials, closing CTA), `SpecialistReviews`, `SpecialistBookingPanel` (+ `MobileBookBar`). Query string instead of `/[id]` because a static export cannot serve unknown ids. |
 | `/book` | `app/book/page.tsx` | Guest booking wizard (§5). |
 | `/about` | `app/about/page.tsx` | Static brand-story page. Journey timeline is `components/marketing/about/JourneyTimeline.tsx` (desktop road segments + pins, mobile dashed rail); art is inline SVG in `AboutArt.tsx` using `--momentizing-*` tokens; `ScrollReveal.tsx` (shared, renders nothing) fades in `[data-reveal]` blocks once on `/` and `/about`; `Reveal.tsx` sets `data-seen` once on scroll and `globals.css` (`.journey-road`, `.journey-pin`) animates the road/pins, with a reduced-motion fallback. |
+| `/events` | `app/events/page.tsx` | Event listing (cards fall back to `EventPosterFallback` when an event has no poster): filter pills (`when`/`format` query to `GET /public/events`), featured `EventCard` + grid; loading / error / empty states. |
+| `/events/view?id=<id>` | `app/events/view/page.tsx` | Event detail (`GET /public/events/{id}`): poster, dates with .ics download (`buildIcs`), where, description, video embed, Register / Share (pinned bar on phones, `pr-24` to clear the WhatsApp button), `Event` JSON-LD. `noindex` (`view/layout.tsx`). |
 | `/careers` | `app/careers/page.tsx` | Expert application form with resume upload (§6). |
 | `/my-bookings` | `app/my-bookings/page.tsx` | Upcoming sessions by phone number + WhatsApp code (`MyBookingsPanel.tsx`): `POST /public/my-bookings/request-code` (form token, Turnstile when enabled) → `POST …/verify` → list; the 15-minute `viewToken` is kept in `sessionStorage` and sent as `X-Lookup-Token` to `GET /public/my-bookings` after a reload. Times shown on the visitor's clock; offers *Create a free account* (claim link) or login. Not indexed. |
 | `/legal` | `app/legal/page.tsx` | FAQ, Terms, Privacy. Active tab is read from the URL hash via `useSyncExternalStore`; the two documents are in `components/marketing/legal/LegalDocuments.tsx`. |
 | `/help` | `app/help/page.tsx` | Crisis resources and support. |
 | 404 / error | `not-found.tsx`, `error.tsx` | Branded fallbacks. |
 
-Each section folder's `layout.tsx` sets page metadata (title template `%s | Momentizing`). There is no shared shell layout: each page renders its own `MarketingNav` (`full` or simple back-link variant; the full bar shows only Services · Packages · Corporate · Find an Associate · About · My bookings · Login · Book a Session from 1280 px up and a grouped hamburger menu below — *Get the App* and *Careers* live in the footer and mobile menu, so keep new links out of the bar; the bar gains a shadow once scrolled, on `/` it underlines the section in view, and on other pages the section links point to `/#id`), `MarketingFooter` and `WhatsAppFloatingButton`; a skip link and `.marketing-root` focus styles come from `globals.css`.
+Each section folder's `layout.tsx` sets page metadata (title template `%s | Momentizing`). There is no shared shell layout: each page renders its own `MarketingNav` (`full` or simple back-link variant; from 1024 px the bar is `Services ▾` · Find an Associate · Events · About · `Account ▾` · Book a Session, with the two dropdowns built on `NavMenu.tsx` (disclosure button + link list; click/Enter/Space, hover for mouse, Esc returns focus, arrow keys, outside click and route change close it); below 1024 px a hamburger menu grouped Explore / Company / Your account — the bar is full, so a new page goes into one of the dropdowns or the mobile menu and footer, not into the bar; the bar gains a shadow once scrolled, on `/` it underlines the section in view, and on other pages the section links point to `/#id`), `MarketingFooter` and `WhatsAppFloatingButton`; a skip link and `.marketing-root` focus styles come from `globals.css`.
 
 ## 5. Guest booking (`/book`)
 
@@ -93,6 +95,8 @@ Five steps defined in `booking/wizard-state.ts`: **Pick a day → About you → 
 
 Status type: `AWAITING_VERIFICATION | CONFIRMED | EXPIRED | CANCELLED`. State machine, rate limits and verification rules are owned by the backend; the frontend never infers confirmation.
 
+**Couple-session guard:** `couplesMismatch(answers, specialist)` and `COUPLE_MISMATCH_RE` (`wizard-state.ts`, tested) drive the checks. `SpecialistSuggestionCard`, `SpecialistProfileSheet` and `SpecialistNameSearch` take `forCouple` (from the About answer) to show "Couples welcome"/"Individual sessions only" and disable choosing; name search sorts couple-friendly first using `acceptsCouple` from the search results (no extra endpoint). `CoupleMismatchNotice` (in `BookingWizard.tsx`) appears on About you and Review; Review also maps the server's couple-session rejection to it. No backend change.
+
 **Client state:** `Draft` (step, date, name, WhatsApp, answers, concerns, consent, chosen specialist/time) and `ActiveBooking` (booking + claim token) are persisted to `sessionStorage` via guarded helpers in `wizard-state.ts` so a refresh or WhatsApp round-trip doesn't lose progress; storage failure degrades silently. `BookingWizard.tsx` (~1100 lines) is the integration point; pure pieces (`SlotPicker`, `YesNoField`, `DateStrip`, `Stepper`, `Sheet`, `ui.tsx` primitives) are split out and tested.
 
 ## 6. Careers (`/careers`)
@@ -103,18 +107,19 @@ Status type: `AWAITING_VERIFICATION | CONFIRMED | EXPIRED | CANCELLED`. State ma
 
 | Module | Role |
 |---|---|
-| `api.ts` | `apiFetch<T>(path, opts)` → unwraps the CRMS envelope `{success, data, message}`; throws `ApiError(message, status)`. Never sends credentials; `anonymous` is accepted for call-site parity with the CRMS app. |
+| `api.ts` | `apiFetch<T>(path, opts)` → unwraps the CRMS envelope `{success, data, message}`; throws `ApiError(message, status, fieldErrors)`; a 400 "Validation failed" is turned into a message that names each field ("Email: must be a well-formed email address"); `errorMessage(err)` gives catch blocks a safe string. The API sends error codes, not sentences: `src/i18n` (copied from `CRM/i18n` by `scripts/sync-i18n.sh`) turns a code + params into English or Bahasa Indonesia (`translateError`, `t`, `fieldLabel`); `hasCode(err, …)` is how logic reacts to an error (never by its wording); the language is the visitor's choice (footer selector) or their browser language. `field-errors.ts` + `components/FieldErrorOverlay.tsx` (root layout) outline the matching input/select/textarea and show the reason under it; give new controls `name="<request field>"`. Never sends credentials; `anonymous` is accepted for call-site parity with the CRMS app. |
 | `use-api-query.ts` | Small data-fetching hook (loading / error / data). |
 | `guest-booking.ts` | Types + wrappers for the booking endpoints, `friendlyError()`, `newIdempotencyKey()`, `verificationLink()`. |
 | `careers.ts` | Profession list, resume rules, careers endpoint wrappers, `putResume`. |
-| `marketing-directory.ts` | `useMarketingDirectory`, `useMarketingSpecialist`, `useSpecialistReviews` (`/specialist/directory…`), label/format helpers. |
+| `events.ts` | `PublicEvent` types, `useEvents(when, format, size)` / `useEvent(id)` (`/public/events…`), text helpers (`formatEventDate` without zone drift, `timeRange`, `placeText`, `priceText`, `headlineSession`), `videoEmbedUrl` (YouTube/Vimeo only, privacy-enhanced), `buildIcs`. |
+| `marketing-directory.ts` | `useMarketingDirectory`, `useMarketingSpecialist`, `useSpecialistReviews` (`/specialist/directory…`), label/format helpers (`professionLabel`, `formatSessionFee`, …). |
 | `session-packages.ts` | `usePackages()` → `GET /packages`; price formatting. |
 | `favorites.ts` | Device-local favorites in `localStorage` (no account). |
 | `local-date.ts` | Date helpers for the day strip, plus `utcToLocal` / `localToUtc` / `zoneLabel` / `formatSessionWhen` for UTC↔visitor-clock conversion. |
 | `whatsapp.ts` | Fallback business number (`+62 857 0220 0701`), `buildWhatsAppLink()` and the `useWhatsAppLink()` hook (live number from `/public/contact-info`). |
 | `base-path.ts` | `BASE_PATH`, `withBase()` for non-`Link` URLs. |
 | `site-url.ts` | `SITE_URL` / `absoluteUrl()` for canonicals, sitemap, Open Graph and JSON-LD; shared site name + description. |
-| `structured-data.ts` | schema.org JSON-LD: Organization + WebSite graph (root layout) and `faqPageSchema()` (home). Rendered by `components/marketing/JsonLd.tsx`. |
+| `structured-data.ts` | schema.org JSON-LD: Organization + WebSite graph (root layout), `faqPageSchema()` (home) and `eventSchema()` (event detail). Rendered by `components/marketing/JsonLd.tsx`. |
 | `types.ts` | Shared `ApiEnvelope`, `PageResponse`. |
 
 The WhatsApp links (`WhatsAppFloatingButton`, `MarketingFooter`, `SpecialistBookingPanel`, `BookingModal`) read the business number from `GET /public/contact-info` via `useWhatsAppLink()` in `lib/whatsapp.ts` (set in CRMS Admin → Settings → WhatsApp); the constant in that file is only the fallback.
@@ -169,6 +174,7 @@ Everything is inlined at build time and public. Restart `npm run dev` or rebuild
 | CORS allow-list | `application.yml` `cors.allowed-origins` |
 | Register page accepting the claim token fragment | `CRM/Frontend/src/app/register` |
 | Careers storage (S3 CORS PUT from website origin) | `CRM/QA-CHECKLIST.md` §17.7 |
+| Events (`/public/events` shape, PUBLISHED/CANCELLED only, wall-clock + instant per date) | CRM `ARCHITECTURE.md` §7 *Events*; `crms/event/` |
 
 ## 12. Known gaps
 

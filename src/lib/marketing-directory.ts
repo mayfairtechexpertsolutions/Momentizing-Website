@@ -15,6 +15,8 @@ export interface MarketingSpecialist {
   id: number;
   name: string;
   avatarUrl: string | null;
+  /** Profession enum from the backend (e.g. PSYCHOLOGIST); optional so older payloads still parse. */
+  professionType?: string | null;
   specialisation: string | null;
   bio: string | null;
   languages: string | null;
@@ -32,6 +34,8 @@ export interface MarketingSpecialist {
   proBonoAvailable: boolean;
   averageRating: number | null;
   reviewCount: number;
+  acceptsIndividual?: boolean;
+  acceptsCouple?: boolean;
 }
 
 export interface SpecialistReview {
@@ -48,6 +52,13 @@ export const PRACTICE_MODE_LABEL: Record<string, string> = {
   IN_PERSON: "In-person",
   HYBRID: "Online & in-person",
 };
+
+/** "PSYCHOLOGIST" -> "Psychologist", "SOCIAL_WORKER" -> "Social worker"; null when there is nothing to show. */
+export function professionLabel(professionType: string | null | undefined): string | null {
+  if (!professionType) return null;
+  const words = professionType.trim().toLowerCase().replace(/_/g, " ");
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : null;
+}
 
 export function formatSessionFee(cents: number | null, currency: string): string | null {
   if (cents == null) return null;

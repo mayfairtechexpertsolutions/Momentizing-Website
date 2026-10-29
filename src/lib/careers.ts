@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { apiFetch, type ApiFetchOptions } from "./api";
 
 export const PROFESSIONS = [
@@ -65,13 +66,13 @@ export const submitCareerApplication = (payload: CareerApplicationPayload, idemp
 /** PUT straight to storage with exactly the type and length the server pinned into the signed URL. */
 export async function putResume(upload: ResumeUpload, file: File): Promise<void> {
   const res = await fetch(upload.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
-  if (!res.ok) throw new Error("We couldn't upload your resume. Please try again.");
+  if (!res.ok) throw new Error(t("career.resumeUploadFailed"));
 }
 
 /** Client-side pre-check so people get an instant message; the server enforces the same rules. */
 export function resumeProblem(file: Pick<File, "type" | "size">): string | null {
-  if (!RESUME_TYPES[file.type]) return "Please upload your resume as a PDF or Word (.docx) file.";
-  if (file.size > RESUME_MAX_BYTES) return "Your resume must be 5 MB or smaller.";
-  if (file.size === 0) return "That file looks empty. Please choose another.";
+  if (!RESUME_TYPES[file.type]) return t("career.resumeType");
+  if (file.size > RESUME_MAX_BYTES) return t("career.resumeTooLarge");
+  if (file.size === 0) return t("career.resumeEmpty");
   return null;
 }

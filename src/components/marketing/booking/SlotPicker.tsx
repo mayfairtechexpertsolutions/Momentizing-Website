@@ -52,7 +52,7 @@ export function SlotPicker({
         }
       })
       .catch((e) => {
-        if (!cancelled) setError(friendlyError(e, "We couldn't load the available times."));
+        if (!cancelled) setError(friendlyError(e));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

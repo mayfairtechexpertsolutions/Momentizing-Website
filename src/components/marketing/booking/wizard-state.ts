@@ -9,6 +9,13 @@ export const STEPS: { id: StepId; label: string }[] = [
   { id: "review", label: "Review" },
 ];
 
+/** Arriving from a specialist's profile: the specialist is known, so day and time are chosen together, once. */
+export const LINKED_STEPS: { id: StepId; label: string }[] = [
+  { id: "time", label: "Pick a day and time" },
+  { id: "about", label: "About you" },
+  { id: "review", label: "Review" },
+];
+
 export interface Answers {
   firstTime: boolean | null;
   online: boolean | null;
@@ -93,6 +100,17 @@ export function answersToRecord(a: Answers, concerns: string[]): Record<string, 
   if (concerns.length) rec.concerns = concerns.join(", ");
   return rec;
 }
+
+/** True when the visitor wants a couple session but the chosen specialist doesn't offer them. */
+export function couplesMismatch(a: Answers, specialist: Pick<PublicSpecialistCard, "acceptsCouple"> | null): boolean {
+  return a.couple === true && specialist != null && !specialist.acceptsCouple;
+}
+
+/** The server's rejection codes for the same mismatch (the Review step's safety net). */
+export const COUPLE_MISMATCH_CODES = ["BOOKING_NO_COUPLE_SESSIONS", "BOOKING_NO_INDIVIDUAL_SESSIONS"];
+
+/** Codes meaning the chosen time is gone (taken by someone else, or no longer offered). */
+export const SLOT_GONE_CODES = ["GUEST_SLOT_UNAVAILABLE", "GUEST_SLOT_TAKEN", "BOOKING_SLOT_CONFLICT", "BOOKING_SPECIALIST_UNAVAILABLE_TIME"];
 
 /** Loose client-side sanity check only — the server is the authority on what is a valid mobile number. */
 export function looksLikePhone(v: string): boolean {

@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Nunito } from "next/font/google";
 import { SiteChrome } from "@/components/marketing/SiteChrome";
+import { FieldErrorOverlay } from "@/components/FieldErrorOverlay";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { siteGraph } from "@/lib/structured-data";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site-url";
+import { LocaleBoundary } from "@/i18n/LocaleBoundary";
 import "./globals.css";
 
 // Marketing pair: Fraunces is a soft, warm serif close to the rounded bold headlines on the brand's Instagram
@@ -52,7 +54,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="marketing-root min-h-full flex flex-col bg-momentizing-cream text-momentizing-slate">
         <JsonLd data={siteGraph} />
-        <SiteChrome>{children}</SiteChrome>
+        <FieldErrorOverlay />
+        <LocaleBoundary>
+          <SiteChrome>{children}</SiteChrome>
+        </LocaleBoundary>
       </body>
     </html>
   );

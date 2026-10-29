@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { ApiError, apiFetch, type ApiFetchOptions } from "./api";
 import { addDaysIso, utcToLocal } from "./local-date";
 import { MOMENTIZING_WHATSAPP_NUMBER } from "./whatsapp";
@@ -151,12 +152,12 @@ export function newIdempotencyKey(): string {
 }
 
 /** Browsers report a network failure as a bare "Failed to fetch" / "Load failed" — say something a person can act on. */
-export function friendlyError(e: unknown, fallback = "Something went wrong. Please try again."): string {
+export function friendlyError(e: unknown): string {
   if (e instanceof ApiError) return e.message;
   if (e instanceof TypeError || (e instanceof Error && /failed to fetch|load failed|networkerror/i.test(e.message))) {
-    return "We can't reach the server. Please check your connection and try again.";
+    return t("error.network");
   }
-  return e instanceof Error && e.message ? e.message : fallback;
+  return t("error.generic");
 }
 
 /**

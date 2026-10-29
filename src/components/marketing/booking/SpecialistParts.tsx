@@ -24,9 +24,15 @@ export function firstNameOf(name: string): string {
   return parts[0] || name;
 }
 
-/** Initials only, by design: the public site doesn't display specialists' photos. `url` is accepted so callers
- * stay unchanged if photos are ever switched back on. */
-export function SpecialistAvatar({ name, size = 64 }: { name: string; url?: string | null; size?: number }) {
+/** The specialist's profile photo when they uploaded one, otherwise their initials. */
+export function SpecialistAvatar({ name, url, size = 64 }: { name: string; url?: string | null; size?: number }) {
+  if (url) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={url} alt="" aria-hidden="true" width={size} height={size} loading="lazy"
+        className="flex-shrink-0 rounded-full bg-momentizing-mint object-cover" style={{ width: size, height: size }} />
+    );
+  }
   return (
     <span
       aria-hidden="true"
@@ -40,6 +46,10 @@ export function SpecialistAvatar({ name, size = 64 }: { name: string; url?: stri
 
 function Fact({ children }: { children: React.ReactNode }) {
   return <span className="rounded-full bg-momentizing-mint px-3 py-1 text-xs font-semibold text-momentizing-slate">{children}</span>;
+}
+
+function IndividualOnlyChip() {
+  return <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">Individual sessions only</span>;
 }
 
 function ratingText(s: PublicSpecialistCard): string | null {
@@ -60,15 +70,18 @@ export function SpecialistSuggestionCard({
   specialist,
   requestedDate,
   selected,
+  forCouple = false,
   onChoose,
   onViewProfile,
 }: {
   specialist: PublicSpecialistCard;
   requestedDate: string | null;
   selected?: boolean;
+  forCouple?: boolean;
   onChoose: () => void;
   onViewProfile: () => void;
 }) {
+  const noCouples = forCouple && !specialist.acceptsCouple;
   const fee = formatSessionFee(specialist.sessionFeeCents, specialist.sessionFeeCurrency ?? "IDR");
   const rating = ratingText(specialist);
   const availability = availabilityText(specialist, requestedDate);
@@ -89,6 +102,7 @@ export function SpecialistSuggestionCard({
       </div>
 
       <div className="flex flex-wrap gap-2">
+        {forCouple && (specialist.acceptsCouple ? <Fact>Couples welcome</Fact> : <IndividualOnlyChip />)}
         {availability && (
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -108,8 +122,8 @@ export function SpecialistSuggestionCard({
         <BookButton variant="secondary" onClick={onViewProfile} className="sm:flex-1" aria-label={`View ${specialist.name}'s profile`}>
           View profile
         </BookButton>
-        <BookButton onClick={onChoose} className="sm:flex-1" aria-label={`Choose ${specialist.name}`}>
-          {selected ? "Selected ✓" : `Choose ${firstName}`}
+        <BookButton onClick={onChoose} disabled={noCouples} className="sm:flex-1" aria-label={noCouples ? `${specialist.name} doesn't see couples` : `Choose ${specialist.name}`}>
+          {noCouples ? "Not available for couples" : selected ? "Selected ✓" : `Choose ${firstName}`}
         </BookButton>
       </div>
     </article>
@@ -120,11 +134,14 @@ export function SpecialistProfileSheet({
   specialist,
   onClose,
   onChoose,
+  forCouple = false,
 }: {
   specialist: PublicSpecialistCard | null;
   onClose: () => void;
   onChoose: (s: PublicSpecialistCard) => void;
+  forCouple?: boolean;
 }) {
+  const noCouples = forCouple && specialist != null && !specialist.acceptsCouple;
   const fee = specialist ? formatSessionFee(specialist.sessionFeeCents, specialist.sessionFeeCurrency ?? "IDR") : null;
   return (
     <Sheet open={specialist !== null} onClose={onClose} title={specialist?.name ?? "Specialist"}>
@@ -149,9 +166,15 @@ export function SpecialistProfileSheet({
             {specialist.credentialsSummary && <Detail label="Credentials" value={specialist.credentialsSummary} wide />}
           </dl>
 
+          {noCouples && (
+            <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              {firstNameOf(specialist.name)} sees individuals only, so can&apos;t take a couple session. Go back to pick someone who sees couples.
+            </p>
+          )}
+
           <div className="flex flex-col gap-2 sm:flex-row">
-            <BookButton onClick={() => onChoose(specialist)} className="sm:flex-1">
-              Choose {firstNameOf(specialist.name)}
+            <BookButton onClick={() => onChoose(specialist)} disabled={noCouples} className="sm:flex-1">
+              {noCouples ? "Not available for couples" : `Choose ${firstNameOf(specialist.name)}`}
             </BookButton>
             <Link
               href={`/associates/view?id=${specialist.id}`}
@@ -181,7 +204,15 @@ function Detail({ label, value, wide }: { label: string; value: string; wide?: b
  * "I already have a specialist in mind": type a name, pick from the list. ARIA 1.2 combobox (arrow keys, Enter,
  * Escape). Search is debounced and only ever returns approved, bookable specialists.
  */
-export function SpecialistNameSearch({ onPick, autoFocus = false }: { onPick: (s: PublicSpecialistCard) => void; autoFocus?: boolean }) {
+export function SpecialistNameSearch({
+  onPick,
+  autoFocus = false,
+  forCouple = false,
+}: {
+  onPick: (s: PublicSpecialistCard) => void;
+  autoFocus?: boolean;
+  forCouple?: boolean;
+}) {
   const inputId = useId();
   const listId = useId();
   const [query, setQuery] = useState("");
@@ -208,23 +239,33 @@ export function SpecialistNameSearch({ onPick, autoFocus = false }: { onPick: (s
       try {
         const found = await searchSpecialists(q);
         if (mine !== seq.current) return; // a newer keystroke superseded this response
-        setResults(found);
+        // Couple-friendly specialists first (stable), so the ones the visitor can actually book are on top.
+        setResults(forCouple ? [...found].sort((x, y) => Number(y.acceptsCouple) - Number(x.acceptsCouple)) : found);
         setActive(-1);
         setStatus("idle");
         setError(null);
       } catch (e) {
         if (mine !== seq.current) return;
         setStatus("error");
-        setError(friendlyError(e, "Search isn't working right now."));
+        setError(friendlyError(e));
       }
     }, 250);
     return () => clearTimeout(t);
-  }, [query]);
+  }, [query, forCouple]);
+
+  const blocked = (s: PublicSpecialistCard) => forCouple && !s.acceptsCouple;
 
   function choose(s: PublicSpecialistCard) {
+    if (blocked(s)) return;
     setOpen(false);
     setQuery(s.name);
     onPick(s);
+  }
+
+  /** Arrow-key step that skips options the visitor can't book. */
+  function nextEnabled(from: number, dir: 1 | -1): number {
+    for (let i = from + dir; i >= 0 && i < results.length; i += dir) if (!blocked(results[i])) return i;
+    return from;
   }
 
   const showList = open && query.trim().length >= 2 && status !== "error";
@@ -254,10 +295,10 @@ export function SpecialistNameSearch({ onPick, autoFocus = false }: { onPick: (s
         onKeyDown={(e) => {
           if (e.key === "ArrowDown") {
             e.preventDefault();
-            setActive((a) => Math.min(results.length - 1, a + 1));
+            setActive((a) => nextEnabled(a, 1));
           } else if (e.key === "ArrowUp") {
             e.preventDefault();
-            setActive((a) => Math.max(0, a - 1));
+            setActive((a) => nextEnabled(a, -1));
           } else if (e.key === "Enter" && active >= 0 && results[active]) {
             e.preventDefault();
             choose(results[active]);
@@ -270,6 +311,7 @@ export function SpecialistNameSearch({ onPick, autoFocus = false }: { onPick: (s
         autoFocus={autoFocus}
         className={inputClass}
       />
+      {forCouple && <p className="mt-1.5 text-sm text-momentizing-muted">Booking for a couple, so specialists who see couples are listed first.</p>}
       <div aria-live="polite" className="mt-2 min-h-5 text-sm text-momentizing-muted">
         {status === "loading" && "Searching…"}
         {status === "idle" && showList && results.length === 0 && "No specialist with that name is taking new clients online. Check the spelling, or ask us for help below."}
@@ -292,14 +334,18 @@ export function SpecialistNameSearch({ onPick, autoFocus = false }: { onPick: (s
               id={`${listId}-${i}`}
               role="option"
               aria-selected={i === active}
+              aria-disabled={blocked(s) || undefined}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => choose(s)}
-              className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-xl px-3 py-2 ${i === active ? "bg-momentizing-mint" : "hover:bg-momentizing-mint"}`}
+              className={`flex min-h-14 items-center gap-3 rounded-xl px-3 py-2 ${
+                blocked(s) ? "cursor-not-allowed opacity-70" : `cursor-pointer ${i === active ? "bg-momentizing-mint" : "hover:bg-momentizing-mint"}`
+              }`}
             >
               <SpecialistAvatar name={s.name} url={s.avatarUrl} size={40} />
               <span className="min-w-0">
                 <span className="block truncate font-semibold">{s.name}</span>
                 {s.specialisation && <span className="block truncate text-sm text-momentizing-muted">{s.specialisation}</span>}
+                {blocked(s) && <span className="block text-sm font-semibold text-amber-900">Individual sessions only</span>}
               </span>
             </li>
           ))}

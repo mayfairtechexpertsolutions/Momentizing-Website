@@ -1,3 +1,4 @@
+import type { PublicEvent } from "./events";
 import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME } from "./site-url";
 import { MOMENTIZING_WHATSAPP_NUMBER } from "./whatsapp";
 
@@ -44,3 +45,36 @@ export const faqPageSchema = (items: { question: string; answer: string }[]) => 
     acceptedAnswer: { "@type": "Answer", text: i.answer },
   })),
 });
+
+/** schema.org Event for an event detail page. Times are the session instants (UTC), which search engines localize. */
+export const eventSchema = (e: PublicEvent, pageUrl: string) => {
+  const first = e.sessions[0];
+  const last = e.sessions[e.sessions.length - 1];
+  const place = {
+    "@type": "Place",
+    name: e.venueName ?? e.city ?? "Momentizing",
+    address: [e.address, e.city].filter(Boolean).join(", ") || undefined,
+  };
+  const virtual = { "@type": "VirtualLocation", url: e.onlineUrl ?? pageUrl };
+  return {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: e.title,
+    description: e.summary ?? e.description ?? undefined,
+    url: pageUrl,
+    image: e.posterUrl ? [e.posterUrl] : undefined,
+    startDate: first?.startsAt,
+    endDate: last?.endsAt,
+    eventStatus: e.cancelled ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
+    eventAttendanceMode:
+      e.format === "ONLINE"
+        ? "https://schema.org/OnlineEventAttendanceMode"
+        : e.format === "HYBRID"
+          ? "https://schema.org/MixedEventAttendanceMode"
+          : "https://schema.org/OfflineEventAttendanceMode",
+    location: e.format === "ONLINE" ? virtual : e.format === "HYBRID" ? [place, virtual] : place,
+    isAccessibleForFree: e.priceType === "FREE",
+    organizer: { "@id": absoluteUrl("/#organization") },
+    offers: e.registrationUrl ? { "@type": "Offer", url: e.registrationUrl, availability: "https://schema.org/InStock" } : undefined,
+  };
+};

@@ -4,6 +4,9 @@ export interface ApiEnvelope<T> {
   data: T;
   message?: string | null;
   timestamp: string;
+  /** Stable error code (an ErrorCode name) on failure: translate this, not `message`. */
+  code?: string | null;
+  params?: Record<string, unknown> | null;
 }
 
 export interface PageResponse<T> {

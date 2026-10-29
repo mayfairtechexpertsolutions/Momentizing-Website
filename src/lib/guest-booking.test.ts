@@ -38,13 +38,13 @@ import { ApiError } from "./api";
 
 describe("friendlyError", () => {
   it("turns a raw network failure into words a person can act on", () => {
-    expect(friendlyError(new TypeError("Failed to fetch"))).toMatch(/can't reach the server/i);
-    expect(friendlyError(new Error("Load failed"))).toMatch(/can't reach the server/i);
+    expect(friendlyError(new TypeError("Failed to fetch"))).toMatch(/reach the server/i);
+    expect(friendlyError(new Error("Load failed"))).toMatch(/reach the server/i);
   });
   it("keeps the server's own message for API errors", () => {
     expect(friendlyError(new ApiError("That time is no longer available.", 409))).toBe("That time is no longer available.");
   });
-  it("uses the fallback for unknown values", () => {
-    expect(friendlyError("boom", "Try again")).toBe("Try again");
+  it("uses a generic message for unknown values", () => {
+    expect(friendlyError("boom")).toBe("Something went wrong. Please try again.");
   });
 });

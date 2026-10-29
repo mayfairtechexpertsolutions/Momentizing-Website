@@ -1,5 +1,6 @@
 "use client";
 
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import Link from "next/link";
 import { appLink } from "@config";
 import { useWhatsAppLink } from "@/lib/whatsapp";
@@ -24,6 +25,9 @@ export function MarketingFooter() {
         <Link href="/book" className="inline-flex min-h-11 items-center hover:opacity-70">
           Book a Session
         </Link>
+        <Link href="/events" className="inline-flex min-h-11 items-center hover:opacity-70">
+          Events
+        </Link>
         <Link href="/about" className="inline-flex min-h-11 items-center hover:opacity-70">
           About
         </Link>
@@ -42,6 +46,7 @@ export function MarketingFooter() {
           <i className="fab fa-whatsapp" aria-hidden="true" /> WhatsApp Us
         </a>
       </div>
+      <LocaleSwitcher className="mt-3 justify-center text-momentizing-muted" selectClassName="bg-white text-momentizing-slate" />
     </footer>
   );
 }

@@ -16,6 +16,7 @@ Momentizing is not an emergency or crisis service. People in danger should conta
 - [Home](${absoluteUrl("/")}): services, care packages, specialist highlights and frequently asked questions
 - [Book a session](${absoluteUrl("/book/")}): pick a day, a specialist and a time, then confirm on WhatsApp
 - [Find a specialist](${absoluteUrl("/associates/")}): directory of verified counselors, coaches and psychologists, with fees and reviews
+- [Events](${absoluteUrl("/events/")}): upcoming workshops, talks and wellbeing circles, in person and online
 - [About us](${absoluteUrl("/about/")}): vision, mission and the journey from Taiwan to Indonesia and beyond
 - [Get help now](${absoluteUrl("/help/")}): crisis and emergency resources
 - [Careers](${absoluteUrl("/careers/")}): join as an expert

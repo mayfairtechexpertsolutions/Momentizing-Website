@@ -1,5 +1,6 @@
 "use client";
 
+import { t } from "@/i18n";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { friendlyError, newIdempotencyKey } from "@/lib/guest-booking";
 import {
@@ -64,17 +65,17 @@ export function CareerForm() {
 
   function validate(): Errors {
     const e: Errors = {};
-    if (fullName.trim().length < 2) e.fullName = "Please enter your full name.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) e.email = "Please enter a valid email address.";
-    if (!looksLikePhone(whatsapp)) e.whatsapp = "Please enter a valid WhatsApp number.";
-    if (!professionType) e.professionType = "Please choose your profession.";
-    if (!file) e.resume = "Please attach your resume.";
+    if (fullName.trim().length < 2) e.fullName = t("career.nameRequired");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) e.email = t("career.emailInvalid");
+    if (!looksLikePhone(whatsapp)) e.whatsapp = t("career.whatsappInvalid");
+    if (!professionType) e.professionType = t("career.professionRequired");
+    if (!file) e.resume = t("career.resumeRequired");
     else {
       const p = resumeProblem(file);
       if (p) e.resume = p;
     }
-    if (portfolioUrl.trim() && !/^https?:\/\/\S+$/i.test(portfolioUrl.trim())) e.portfolioUrl = "The link must start with http:// or https://";
-    if (!consent) e.consent = "Please accept the privacy notice to continue.";
+    if (portfolioUrl.trim() && !/^https?:\/\/\S+$/i.test(portfolioUrl.trim())) e.portfolioUrl = t("career.linkInvalid");
+    if (!consent) e.consent = t("career.consentRequired");
     return e;
   }
 
@@ -85,7 +86,7 @@ export function CareerForm() {
     setErrors(found);
     if (Object.keys(found).length > 0) return;
     if (TURNSTILE_ENABLED && !turnstileToken) {
-      setFormError("Please wait for the security check to finish, then try again.");
+      setFormError(t("booking.securityWait"));
       return;
     }
 
@@ -142,16 +143,16 @@ export function CareerForm() {
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5" aria-label="Expert application">
         <div className="grid gap-5 sm:grid-cols-2">
           <Field id="career-name" label="Full name" error={errors.fullName}>
-            <input id="career-name" className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" maxLength={150} aria-invalid={!!errors.fullName} />
+            <input name="fullName" id="career-name" className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" maxLength={150} aria-invalid={!!errors.fullName} />
           </Field>
           <Field id="career-email" label="Email" error={errors.email}>
-            <input id="career-email" type="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" maxLength={255} aria-invalid={!!errors.email} />
+            <input name="email" id="career-email" type="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" maxLength={255} aria-invalid={!!errors.email} />
           </Field>
           <Field id="career-whatsapp" label="WhatsApp number" hint="We use this to reach you about your application." error={errors.whatsapp}>
-            <input id="career-whatsapp" type="tel" className={inputClass} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} autoComplete="tel" maxLength={40} aria-invalid={!!errors.whatsapp} />
+            <input name="whatsapp" id="career-whatsapp" type="tel" className={inputClass} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} autoComplete="tel" maxLength={40} aria-invalid={!!errors.whatsapp} />
           </Field>
           <Field id="career-profession" label="Profession" error={errors.professionType}>
-            <select id="career-profession" className={inputClass} value={professionType} onChange={(e) => setProfessionType(e.target.value as ProfessionValue)} aria-invalid={!!errors.professionType}>
+            <select name="professionType" id="career-profession" className={inputClass} value={professionType} onChange={(e) => setProfessionType(e.target.value as ProfessionValue)} aria-invalid={!!errors.professionType}>
               <option value="">Choose one</option>
               {PROFESSIONS.map((p) => (
                 <option key={p.value} value={p.value}>
@@ -161,28 +162,28 @@ export function CareerForm() {
             </select>
           </Field>
           <Field id="career-licence" label="Licence number (optional)">
-            <input id="career-licence" className={inputClass} value={licenceNumber} onChange={(e) => setLicenceNumber(e.target.value)} maxLength={100} />
+            <input name="licenceNumber" id="career-licence" className={inputClass} value={licenceNumber} onChange={(e) => setLicenceNumber(e.target.value)} maxLength={100} />
           </Field>
           <Field id="career-years" label="Years of experience (optional)">
-            <input id="career-years" type="number" inputMode="numeric" min={0} max={70} className={inputClass} value={yearsExperience} onChange={(e) => setYearsExperience(e.target.value)} />
+            <input name="yearsExperience" id="career-years" type="number" inputMode="numeric" min={0} max={70} className={inputClass} value={yearsExperience} onChange={(e) => setYearsExperience(e.target.value)} />
           </Field>
         </div>
 
         <Field id="career-languages" label="Languages you work in (optional)" hint="For example: Bahasa Indonesia, English">
-          <input id="career-languages" className={inputClass} value={languages} onChange={(e) => setLanguages(e.target.value)} maxLength={200} />
+          <input name="languages" id="career-languages" className={inputClass} value={languages} onChange={(e) => setLanguages(e.target.value)} maxLength={200} />
         </Field>
 
         <Field id="career-bio" label="About your practice (optional)" hint="Who you help and how you work. Up to 2000 characters.">
-          <textarea id="career-bio" rows={5} className={inputClass} value={bio} onChange={(e) => setBio(e.target.value)} maxLength={2000} />
+          <textarea name="bio" id="career-bio" rows={5} className={inputClass} value={bio} onChange={(e) => setBio(e.target.value)} maxLength={2000} />
         </Field>
 
         <Field id="career-portfolio" label="Website or LinkedIn (optional)" error={errors.portfolioUrl}>
-          <input id="career-portfolio" type="url" className={inputClass} value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} maxLength={500} aria-invalid={!!errors.portfolioUrl} />
+          <input name="portfolioUrl" id="career-portfolio" type="url" className={inputClass} value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} maxLength={500} aria-invalid={!!errors.portfolioUrl} />
         </Field>
 
         <Field id="career-resume" label="Resume" hint="PDF or Word (.docx), up to 5 MB." error={errors.resume}>
           <input
-            id="career-resume"
+            name="resume" id="career-resume"
             type="file"
             accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
@@ -199,7 +200,7 @@ export function CareerForm() {
 
         <div className="flex flex-col gap-1.5">
           <label className="flex min-h-11 items-start gap-3 text-sm leading-relaxed">
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-momentizing-teal" aria-invalid={!!errors.consent} />
+            <input name="consentAccepted" type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-momentizing-teal" aria-invalid={!!errors.consent} />
             <span>I agree that Momentizing may store my details and resume to assess my application, and keep them for up to 12 months.</span>
           </label>
           {errors.consent && (

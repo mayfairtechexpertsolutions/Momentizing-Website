@@ -52,7 +52,8 @@ Scale used on the home page: hero `text-5xl md:text-7xl` bold; section titles `t
 
 | Element | Pattern |
 |---|---|
-| Buttons | `rounded-full`, `px-6–8 py-3–4`, bold; min height 48px (`min-h-12`) |
+| Buttons | `rounded-full`, `px-6–8 py-3–4`, bold; min height 48px (`min-h-12`); every button has a hover state (primary → slate, outline → filled). On phones a section's CTA pair stacks full width (`flex-col sm:flex-row`, `justify-center`) |
+| Inline text actions | A link-style button inside a sentence (e.g. "Try again" in a notice) keeps the line height and gets an invisible ≥44px hit area: `relative after:absolute after:-inset-x-2 after:-inset-y-3 after:content-['']` |
 | Cards | `rounded-3xl`, white (or `white/70` on mint), border `slate/10`, soft shadow `0 8px 30px rgba(47,62,70,0.06)` |
 | Hero image frame | `rounded-[3rem] border-8 border-white shadow-2xl shadow-teal/15` |
 | Inputs | `.marketing-input`: cream fill, `1.5px` mint-deep border, `1.25rem` radius; on focus white fill, teal border + `0 0 0 3px rgba(59,107,88,.35)` ring |
@@ -71,9 +72,13 @@ Scale used on the home page: hero `text-5xl md:text-7xl` bold; section titles `t
 | Bottom/side sheet | `booking/Sheet.tsx` |
 | Step indicator | `booking/Stepper.tsx` |
 | Yes/No question | `booking/YesNoField.tsx` |
-| Star rating, specialist card | `StarRating.tsx`, `SpecialistCard.tsx` |
+| Eligibility chips and blocked-choice notice | "Couples welcome" uses the mint `Fact` chip; "Individual sessions only" uses `bg-amber-50 text-amber-900`. A choice the visitor can't make is disabled with a stated reason (never silently hidden), and a conflict is an amber `InlineNotice role="alert"` with one-tap fixes (`CoupleMismatchNotice`), buttons ≥44px |
+| Star rating, specialist card | `StarRating.tsx`, `SpecialistCard.tsx` (photo-first `rounded-3xl` card: full-bleed portrait with availability pill, name, ≤2 specialisation chips, 2-line bio, location/languages/experience, fee + "View profile" pill; "New" chip instead of repeating "no reviews yet") |
 | Hero art | `BrandIllustration` (`care` / `team`); About page art in `about/AboutArt.tsx` (SVG colours via `var(--momentizing-*)`, not hex) |
 | Nav, footer, WhatsApp button | `MarketingNav`, `MarketingFooter`, `WhatsAppFloatingButton` |
+| Nav dropdown | `NavMenu.tsx`: trigger keeps the bar's uppercase `text-xs font-bold tracking-widest` and gold-deep active underline; panel is a white `rounded-2xl` card, `border-momentizing-mint-deep`, `shadow-md`, rows with a mint icon tile + bold title + one-line muted description, ≥44px, cream hover. The bar is full: add new destinations to a dropdown, not as another bar link |
+| Event card | `EventCard.tsx`: `rounded-3xl` white card, 4:5 poster letterboxed on cream (`object-contain`, never cropped), peach date badge with gold-deep text, mint format pill, cream price pill, Fraunces gold-deep title; `featured` = poster beside text from `md` up with a fixed poster column; `compact` (home band) = "date ticket": no poster; peach date tile (Fraunces day number, uppercase month, weekday; `aria-hidden` with an `sr-only` full date) beside the format/price pills, title, 2-line summary, mint-deep divider, time/place, teal "View details →" footer; `h-full` so cards in a row match height. No poster → `EventPosterFallback` (decorative, `aria-hidden`; three palettes: cream/gold, mint/teal, peach/gold-deep; sized in container units with a 12px floor; mirrored in the CRM for the admin preview — keep in step) |
+| Pinned phone action bar | `fixed bottom-0 z-[80] … pr-24 pl-4` so the floating WhatsApp button never covers it (see `MobileBookBar`, event detail) |
 
 New components follow the same ingredients: tokens only, `rounded-full` actions, `rounded-3xl` cards, visible focus ring, ≥ 44px targets.
 
@@ -81,12 +86,13 @@ New components follow the same ingredients: tokens only, `rounded-full` actions,
 
 - [ ] Contrast AA for every text/background pair (use §2 table).
 - [ ] Visible keyboard focus: `.marketing-root` 3px teal outline (gold on `.on-dark`).
-- [ ] Skip link present; one `h1` per page; landmarks (`main#main`, `nav`, `footer`).
+- [ ] Skip link present; one `h1` per page; heading levels never skip (cards under an `h2` use `h3`, styled as needed); landmarks (`main#main`, `nav`, `footer`).
 - [ ] Every input has a visible label (placeholders are never the only label), errors wired by id and `role`/`aria-live` where dynamic.
-- [ ] Decorative graphics `aria-hidden`; meaningful images have `role="img"` + `aria-label`.
+- [ ] Decorative graphics and every Font Awesome `<i>` icon `aria-hidden`; meaningful images have `role="img"` + `aria-label`; star ratings carry `sr-only` text ("Rated 4.5 out of 5 from 12 reviews").
 - [ ] Touch targets ≥ 44px; no horizontal scroll at 375px.
 - [ ] `prefers-reduced-motion` respected; no autoplay.
 - [ ] Works with `localStorage`/`sessionStorage` blocked; failures show an error, never an empty "no data".
+- [ ] Every fetched block has three states: a pulse skeleton shaped like the content (`animate-pulse motion-reduce:animate-none`, `aria-busy` + `sr-only role="status"`), an error with a "Try again" button (`refetch`), and a calm empty message.
 
 ## 7. Page template (copy for a new page)
 

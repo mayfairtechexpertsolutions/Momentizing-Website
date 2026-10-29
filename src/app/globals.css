@@ -336,3 +336,15 @@ html {
     overflow: visible !important;
   }
 }
+
+/* Server-reported field problems (FieldErrorOverlay) */
+.field-error-outline {
+  border-color: #b3261e !important;
+  outline: 1px solid #b3261e;
+}
+.field-error-message {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #b3261e;
+}

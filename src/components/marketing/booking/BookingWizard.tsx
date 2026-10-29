@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ApiError } from "@/lib/api";
+import { ApiError, hasCode } from "@/lib/api";
+import { t } from "@/i18n";
 import {
   createGuestBooking,
   fetchFormToken,
@@ -23,18 +24,22 @@ import { BookButton, BookCard, Field, InlineNotice, inputClass } from "./ui";
 import { DateStrip } from "./DateStrip";
 import { HelpSheet } from "./HelpSheet";
 import { SlotPicker } from "./SlotPicker";
-import { SpecialistNameSearch, SpecialistProfileSheet, SpecialistSuggestionCard } from "./SpecialistParts";
+import { SpecialistNameSearch, SpecialistProfileSheet, SpecialistSuggestionCard, firstNameOf } from "./SpecialistParts";
 import { Stepper } from "./Stepper";
 import { TurnstileWidget, TURNSTILE_ENABLED } from "./TurnstileWidget";
 import { WhyJoinCard } from "./WhyJoinCard";
 import { YesNoField } from "./YesNoField";
 import {
   CONCERNS,
+  COUPLE_MISMATCH_CODES,
+  SLOT_GONE_CODES,
   EMPTY_DRAFT,
+  LINKED_STEPS,
   STEPS,
   answersToRecord,
   clearActiveBooking,
   clearDraft,
+  couplesMismatch,
   loadActiveBooking,
   loadDraft,
   looksLikePhone,
@@ -51,6 +56,9 @@ import { withBase } from "@/lib/base-path";
  * number they gave (so nobody can hold slots with someone else's number), then offers a free account.
  *
  *   date -> about you -> specialist -> time -> review -> [verify on WhatsApp] -> done
+ *
+ * Arriving from a specialist's profile (`?specialist=`) the specialist is already chosen, so the day is picked together
+ * with the time and is never asked twice:  time -> about you -> review -> [verify on WhatsApp] -> done
  *
  * "I can't find my schedule, please help me find one" is reachable from every step after the first; it sends the
  * request to the team, who follow up on WhatsApp.
@@ -97,11 +105,12 @@ export function BookingWizard() {
         // The link is the visitor's latest intent: it beats a specialist left over in an old draft. Switching to a
         // different specialist drops the old time (it belonged to someone else's calendar).
         if (!cancelled && s.acceptingNewClients) {
-          setDraft((d) =>
-            d.specialist?.id === s.id
-              ? d
-              : { ...d, specialist: s, mode: "SPECIFIC", time: null, step: d.step === "specialist" || d.step === "review" ? "time" : d.step }
-          );
+          setDraft((d) => {
+            // The day and time are chosen together on the time step, so a linked visitor skips the standalone day step.
+            const step: StepId = d.step === "date" || d.step === "specialist" || d.step === "review" ? "time" : d.step;
+            const date = d.date ?? todayIso();
+            return d.specialist?.id === s.id ? { ...d, date, step } : { ...d, specialist: s, mode: "SPECIFIC", time: null, date, step };
+          });
         }
       })
       .catch(() => {
@@ -122,7 +131,7 @@ export function BookingWizard() {
         setFormToken(t.formToken);
         setFormTokenError(null);
       })
-      .catch((e) => setFormTokenError(friendlyError(e, "We couldn't start the booking form.")));
+      .catch((e) => setFormTokenError(friendlyError(e)));
   }, []);
   useEffect(() => {
     loadFormToken();
@@ -134,7 +143,9 @@ export function BookingWizard() {
     if (hydrated) headingRef.current?.focus();
   }, [stepKey, hydrated]);
 
-  const stepIndex = STEPS.findIndex((s) => s.id === draft.step);
+  const linked = !!specialistParam && draft.mode === "SPECIFIC" && draft.specialist?.id === Number(specialistParam);
+  const steps = linked ? LINKED_STEPS : STEPS;
+  const stepIndex = Math.max(0, steps.findIndex((s) => s.id === draft.step));
   const goto = (id: StepId) => {
     patch({ step: id });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -206,13 +217,13 @@ export function BookingWizard() {
 
   return (
     <>
-      <Stepper step={stepIndex + 1} total={STEPS.length} label={STEPS[stepIndex].label} />
+      <Stepper step={stepIndex + 1} total={steps.length} label={steps[stepIndex].label} />
 
       {formTokenError && (
         <div className="mb-4">
           <InlineNotice tone="error" role="alert">
             {formTokenError}{" "}
-            <button type="button" onClick={loadFormToken} className="font-semibold underline">
+            <button type="button" onClick={loadFormToken} className="relative font-semibold underline underline-offset-2 after:absolute after:-inset-x-2 after:-inset-y-3 after:content-['']">
               Try again
             </button>
           </InlineNotice>
@@ -220,7 +231,7 @@ export function BookingWizard() {
       )}
 
       {draft.step === "date" && <StepDate draft={draft} patch={patch} headingRef={headingRef} onNext={() => goto("about")} />}
-      {draft.step === "about" && <StepAbout draft={draft} patch={patch} headingRef={headingRef} onBack={() => goto("date")} onNext={() => goto(draft.specialist ? "time" : "specialist")} />}
+      {draft.step === "about" && <StepAbout draft={draft} patch={patch} headingRef={headingRef} onBack={linked ? () => goto("time") : () => goto("date")} onNext={() => goto(linked ? "review" : draft.specialist ? "time" : "specialist")} />}
       {draft.step === "specialist" && (
         <StepSpecialist
           draft={draft}
@@ -236,10 +247,11 @@ export function BookingWizard() {
           draft={draft}
           patch={patch}
           headingRef={headingRef}
-          onBack={() => goto(draft.mode === "SPECIFIC" && specialistParam ? "about" : "specialist")}
+          linked={linked}
+          onBack={linked ? undefined : () => goto("specialist")}
           onNext={() => {
             setSlotNotice(null);
-            goto("review");
+            goto(linked ? "about" : "review");
           }}
           onHelp={() => setHelpOpen(true)}
           notice={slotNotice}
@@ -252,14 +264,19 @@ export function BookingWizard() {
           headingRef={headingRef}
           formToken={formToken}
           refreshFormToken={loadFormToken}
-          onBack={() => goto("time")}
-          onEdit={goto}
+          onBack={() => goto(linked ? "about" : "time")}
+          onEdit={(id) => goto(linked && id === "specialist" ? "time" : id)}
           onHelp={() => setHelpOpen(true)}
           onSlotGone={(message) => {
             setSlotNotice(message);
             patch({ time: null });
             goto("time");
           }}
+          onChangeSpecialist={() => {
+            patch({ specialist: null, mode: "SUGGESTED", time: null });
+            goto("specialist");
+          }}
+          onIndividual={() => patch({ answers: { ...draft.answers, couple: false } })}
           onHeld={(booking) => {
             const a: ActiveBooking = { booking, claimToken: booking.claimToken ?? "", fullName: draft.fullName };
             // Keep the draft while the hold is unverified: if the hold lapses, "choose a time again" must not make the
@@ -391,9 +408,10 @@ function StepAbout({
     phone: !looksLikePhone(draft.whatsapp) ? "Please enter a WhatsApp number we can reach you on, e.g. +62 812 3456 7890." : null,
     unanswered: Object.values(a).some((v) => v === null),
     minor: a.adult === false,
+    mismatch: couplesMismatch(a, draft.specialist),
     consent: !draft.consent,
   };
-  const valid = !errors.name && !errors.phone && !errors.unanswered && !errors.minor && !errors.consent;
+  const valid = !errors.name && !errors.phone && !errors.unanswered && !errors.minor && !errors.mismatch && !errors.consent;
 
   function next() {
     setTried(true);
@@ -415,7 +433,7 @@ function StepAbout({
       <div className="flex flex-col gap-6">
         <Field id="fullName" label="Your name" error={tried ? errors.name : null}>
           <input
-            id="fullName"
+            name="fullName" id="fullName"
             autoComplete="name"
             autoCapitalize="words"
             autoCorrect="off"
@@ -431,7 +449,7 @@ function StepAbout({
 
         <Field id="whatsapp" label="WhatsApp number" hint="We'll ask you to confirm it on WhatsApp, and use it only for your booking." error={tried ? errors.phone : null}>
           <input
-            id="whatsapp"
+            name="whatsapp" id="whatsapp"
             type="tel"
             autoCorrect="off"
             spellCheck={false}
@@ -450,6 +468,13 @@ function StepAbout({
         <YesNoField name="firstTime" legend="Is this your first time seeing a therapist or counsellor?" value={a.firstTime} onChange={(v) => setAnswer("firstTime", v)} error={tried && a.firstTime === null ? "Please choose yes or no." : null} />
         <YesNoField name="online" legend="Would you prefer online sessions?" value={a.online} onChange={(v) => setAnswer("online", v)} error={tried && a.online === null ? "Please choose yes or no." : null} />
         <YesNoField name="couple" legend="Is this session for a couple?" value={a.couple} onChange={(v) => setAnswer("couple", v)} error={tried && a.couple === null ? "Please choose yes or no." : null} />
+        {errors.mismatch && draft.specialist && (
+          <CoupleMismatchNotice
+            name={draft.specialist.name}
+            onChangeSpecialist={() => patch({ specialist: null, mode: "SUGGESTED", time: null })}
+            onIndividual={() => setAnswer("couple", false)}
+          />
+        )}
         <YesNoField name="adult" legend="Are you 18 or older?" value={a.adult} onChange={(v) => setAnswer("adult", v)} error={tried && a.adult === null ? "Please choose yes or no." : null} />
         {a.adult === false && (
           <InlineNotice tone="warn" role="alert">
@@ -499,12 +524,13 @@ function StepAbout({
         </fieldset>
 
         <Field id="note" label="Anything you'd like us to know? (optional)">
-          <textarea id="note" rows={3} maxLength={500} value={draft.note} onChange={(e) => patch({ note: e.target.value })} className={`${inputClass} resize-y`} />
+          <textarea name="note" id="note" rows={3} maxLength={500} value={draft.note} onChange={(e) => patch({ note: e.target.value })} className={`${inputClass} resize-y`} />
         </Field>
 
         <div>
           <label className="flex cursor-pointer items-start gap-3 text-sm text-momentizing-muted">
             <input
+              name="consentAccepted"
               type="checkbox"
               checked={draft.consent}
               onChange={(e) => patch({ consent: e.target.checked })}
@@ -515,8 +541,9 @@ function StepAbout({
               I agree to the{" "}
               <a href={withBase("/legal/")} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
                 Terms &amp; Privacy
-              </a>{" "}
-              and to being contacted on WhatsApp about this booking.
+              </a>
+              , to being contacted on WhatsApp about this booking, and that a session running past its booked time may be charged
+              at the overtime rate.
             </span>
           </label>
           {tried && errors.consent && (
@@ -570,7 +597,7 @@ function StepSpecialist({
       forCouple: draft.answers.couple === true,
     })
       .then((s) => !cancelled && setSuggestions(s))
-      .catch((e) => !cancelled && setError(friendlyError(e, "We couldn't load suggestions.")));
+      .catch((e) => !cancelled && setError(friendlyError(e)));
     return () => {
       cancelled = true;
     };
@@ -618,6 +645,7 @@ function StepSpecialist({
                   specialist={s}
                   requestedDate={draft.date}
                   selected={draft.specialist?.id === s.id}
+                  forCouple={draft.answers.couple === true}
                   onChoose={() => choose(s, "SUGGESTED")}
                   onViewProfile={() => setProfile(s)}
                 />
@@ -627,7 +655,7 @@ function StepSpecialist({
 
           <div className="mt-8 border-t border-momentizing-slate/10 pt-6">
             {byName ? (
-              <SpecialistNameSearch autoFocus={justOpenedByName} onPick={(s) => choose(s, "SPECIFIC")} />
+              <SpecialistNameSearch autoFocus={justOpenedByName} forCouple={draft.answers.couple === true} onPick={(s) => choose(s, "SPECIFIC")} />
             ) : (
               <BookButton
                 variant="ghost"
@@ -646,7 +674,7 @@ function StepSpecialist({
 
       <HelpMeFind onHelp={onHelp} />
       <ActionBar onBack={onBack} onNext={onNext} nextDisabled={!draft.specialist} nextLabel="Continue" hint={!draft.specialist ? "Choose a specialist to continue" : undefined} />
-      <SpecialistProfileSheet specialist={profile} onClose={() => setProfile(null)} onChoose={(s) => choose(s, "SUGGESTED")} />
+      <SpecialistProfileSheet specialist={profile} onClose={() => setProfile(null)} onChoose={(s) => choose(s, "SUGGESTED")} forCouple={draft.answers.couple === true} />
     </>
   );
 }
@@ -657,6 +685,7 @@ function StepTime({
   draft,
   patch,
   headingRef,
+  linked,
   onBack,
   onNext,
   onHelp,
@@ -666,7 +695,8 @@ function StepTime({
   draft: Draft;
   patch: Patch;
   headingRef: HeadingRef;
-  onBack: () => void;
+  linked: boolean;
+  onBack?: () => void;
   onNext: () => void;
   onHelp: () => void;
   notice: string | null;
@@ -680,7 +710,7 @@ function StepTime({
       <BookCard>
         <StepHeading headingRef={headingRef} title="Choose a time" />
         <InlineNotice tone="warn">Please choose a specialist first.</InlineNotice>
-        <ActionBar onBack={onBack} onNext={onBack} nextLabel="Choose a specialist" />
+        <ActionBar onBack={onBack} onNext={onBack ?? onNext} nextLabel="Choose a specialist" />
       </BookCard>
     );
   }
@@ -688,7 +718,7 @@ function StepTime({
   return (
     <>
       <BookCard>
-        <StepHeading headingRef={headingRef} title="Choose a time" sub={`Real open times with ${specialist.name}.`} />
+        <StepHeading headingRef={headingRef} title={linked ? "Pick a day and time" : "Choose a time"} sub={`Real open times with ${specialist.name}.`} />
         {notice && (
           <div className="mb-5">
             <InlineNotice tone="warn" role="alert">
@@ -728,6 +758,8 @@ function StepReview({
   onHelp,
   onSlotGone,
   onHeld,
+  onChangeSpecialist,
+  onIndividual,
 }: {
   draft: Draft;
   headingRef: HeadingRef;
@@ -738,9 +770,11 @@ function StepReview({
   onHelp: () => void;
   onSlotGone: (message: string) => void;
   onHeld: (b: GuestBooking) => void;
+  onChangeSpecialist: () => void;
+  onIndividual: () => void;
 }) {
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<{ text: string; help?: boolean } | null>(null);
+  const [error, setError] = useState<{ text: string; help?: boolean; couple?: boolean } | null>(null);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [resetSignal, setResetSignal] = useState(0);
   const [sessionTypes, setSessionTypes] = useState<string[]>([]);
@@ -781,8 +815,10 @@ function StepReview({
     ? "ONLINE"
     : (sessionTypes.find((t) => t !== "ONLINE") ?? "ONLINE");
 
+  const mismatch = couplesMismatch(draft.answers, specialist) || error?.couple === true;
+
   async function hold() {
-    if (submitting || !specialist || !draft.date || !draft.time) return;
+    if (mismatch || submitting || !specialist || !draft.date || !draft.time) return;
     setError(null);
     if (!formToken) {
       setError({ text: "The form isn't ready yet. Please wait a moment and try again." });
@@ -790,7 +826,7 @@ function StepReview({
       return;
     }
     if (TURNSTILE_ENABLED && !turnstileToken) {
-      setError({ text: "Please wait for the security check to finish, then try again." });
+      setError({ text: t("booking.securityWait") });
       return;
     }
     if (!attempt.current || attempt.current.fingerprint !== fingerprint) {
@@ -822,15 +858,17 @@ function StepReview({
       onHeld(booking);
     } catch (e) {
       if (e instanceof ApiError) {
-        if (e.status === 409 && /no longer available|just taken|Time slot|time is/i.test(e.message)) {
-          onSlotGone("That time was just taken by someone else. Please pick another — the list below is up to date.");
+        if (hasCode(e, ...SLOT_GONE_CODES)) {
+          onSlotGone(t("error.slotGone"));
+        } else if (hasCode(e, ...COUPLE_MISMATCH_CODES)) {
+          setError({ text: e.message, couple: true });
         } else if (e.status === 422) {
           setError({ text: e.message, help: true });
         } else {
           setError({ text: e.message, help: e.status === 409 || e.status === 429 });
         }
       } else {
-        setError({ text: "We couldn't reach the server. Please check your connection and try again — your details are saved." });
+        setError({ text: t("error.networkSaved") });
       }
       refreshFormToken();
     } finally {
@@ -859,7 +897,20 @@ function StepReview({
           <TurnstileWidget onToken={setTurnstileToken} onError={(m) => setError({ text: m })} resetSignal={resetSignal} />
         </div>
 
-        {error && (
+        {mismatch && (
+          <div className="mt-5">
+            <CoupleMismatchNotice
+              name={specialist.name}
+              onChangeSpecialist={onChangeSpecialist}
+              onIndividual={() => {
+                setError(null);
+                onIndividual();
+              }}
+            />
+          </div>
+        )}
+
+        {error && !mismatch && (
           <div className="mt-5">
             <InlineNotice tone="error" role="alert">
               <p>{error.text}</p>
@@ -873,8 +924,33 @@ function StepReview({
         )}
       </BookCard>
       <HelpMeFind onHelp={onHelp} />
-      <ActionBar onBack={onBack} onNext={hold} loading={submitting} nextLabel={submitting ? "Holding your time…" : "Hold my time"} />
+      <ActionBar onBack={onBack} onNext={hold} nextDisabled={mismatch} loading={submitting} nextLabel={submitting ? "Holding your time…" : "Hold my time"} />
     </>
+  );
+}
+
+/** Shown wherever a couple session meets a specialist who only sees individuals; both ways out are one tap. */
+function CoupleMismatchNotice({
+  name,
+  onChangeSpecialist,
+  onIndividual,
+}: {
+  name: string;
+  onChangeSpecialist: () => void;
+  onIndividual: () => void;
+}) {
+  return (
+    <InlineNotice tone="warn" role="alert">
+      <p>
+        <strong>{firstNameOf(name)} sees individuals only</strong>, so can&apos;t take a couple session. Your details are saved, so this only takes a moment.
+      </p>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <BookButton onClick={onChangeSpecialist}>Choose a couple-friendly specialist</BookButton>
+        <BookButton variant="secondary" onClick={onIndividual}>
+          Book as an individual instead
+        </BookButton>
+      </div>
+    </InlineNotice>
   );
 }
 

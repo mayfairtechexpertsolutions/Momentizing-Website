@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, errorMessage } from "@/lib/api";
 import { usePackages } from "@/lib/session-packages";
 import { useWhatsAppLink } from "@/lib/whatsapp";
 import { BookButton, Field, InlineNotice, inputClass } from "./booking/ui";
@@ -83,7 +83,7 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
       await submitInquiry("WEBSITE_FORM");
       setSubmitted(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Couldn't send that — please check your connection and try again.");
+      setError(errorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -117,17 +117,17 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           <p className="text-momentizing-muted">Questions about a package or a corporate plan? Leave your details and we&apos;ll get back to you.</p>
           <Field id="enq-name" label="Your name">
-            <input id="enq-name" required autoComplete="name" autoCapitalize="words" autoCorrect="off" spellCheck={false} value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
+            <input name="fullName" id="enq-name" required autoComplete="name" autoCapitalize="words" autoCorrect="off" spellCheck={false} value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
           </Field>
           <Field id="enq-email" label="Email">
-            <input id="enq-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+            <input name="email" id="enq-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
           </Field>
           <Field id="enq-phone" label="WhatsApp or phone (optional)">
-            <input id="enq-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
+            <input name="phone" id="enq-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
           </Field>
           {(packages ?? []).length > 0 && (
             <Field id="enq-package" label="I'm interested in">
-              <select id="enq-package" value={packageId ?? ""} onChange={(e) => setPickedPackageId(Number(e.target.value))} className={inputClass}>
+              <select name="packageId" id="enq-package" value={packageId ?? ""} onChange={(e) => setPickedPackageId(Number(e.target.value))} className={inputClass}>
                 {(packages ?? []).map((pkg) => (
                   <option key={pkg.id} value={pkg.id}>
                     {pkg.name}
@@ -137,7 +137,7 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
             </Field>
           )}
           <Field id="enq-message" label="How can we help? (optional)">
-            <textarea id="enq-message" rows={3} maxLength={2000} value={message} onChange={(e) => setMessage(e.target.value)} className={`${inputClass} resize-y`} />
+            <textarea name="message" id="enq-message" rows={3} maxLength={2000} value={message} onChange={(e) => setMessage(e.target.value)} className={`${inputClass} resize-y`} />
           </Field>
           {error && (
             <InlineNotice tone="error" role="alert">

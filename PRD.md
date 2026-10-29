@@ -46,18 +46,20 @@ It lets a visitor, **without creating an account**: learn what Momentizing offer
 
 | Page | Status | Requirements |
 |---|---|---|
-| **Home `/`** | Built | Hero ("Healing Without Borders", Book a Session + View Packages), what-we-offer strip, Services ("Clinical Excellence": individual approach and more), **Care Packages** (live from the API; dark band), Corporate wellness with enquiry, Top-Rated Specialists preview, FAQ, final CTA. In-page anchors from the nav. |
-| **Find a specialist `/associates`** | Built | Directory of approved specialists with search and filters, specialisation/language tags, session fee, practice mode, location, rating; device-local favorites. |
-| **Specialist profile `/associates/view?id=`** | Built | Bio, specialisation, languages, locations, active days, fee, paginated reviews, booking panel. |
+| **Home `/`** | Built | Hero ("Healing Without Borders", Book a Session + View Packages), what-we-offer strip, Services ("Clinical Excellence": individual approach and more), **Care Packages** (live from the API; dark band; skeleton while loading, error with *Try again* + *Talk to our team* on failure, a "being finalized" note only when the catalog is genuinely empty), Corporate wellness with enquiry, Top-Rated Specialists preview (same skeleton / error-with-retry / empty-message states), **Upcoming events** band (up to 3 cards + *See all events*; hidden while loading, on error or when nothing is scheduled), FAQ, final CTA. In-page anchors from the nav. |
+| **Find a specialist `/associates`** | Built | Directory of approved specialists with search and filters, specialisation/language tags, session fee, practice mode, location, rating; device-local favorites. Cards are photo-first (square photo) with an availability pill and a free-first-session ribbon, then profession and years, name, rating or "New to Momentizing", two specialisation chips, a short bio, session format, main city, languages, and the fee beside a "View profile" button (the compact homepage card drops bio and languages). Admins can hide a specialist or disable one who left; those profiles never appear here (listing, search, profile page, booking). |
+| **Specialist profile `/associates/view?id=`** | Built | Mint hero (tall 4:5 portrait with an "Accepting new clients" / "Fully booked" pill, profession and years of experience, bio teaser quote, a highlights row: rating or "New to Momentizing", licensed, free first session, pro-bono; "Helps with" specialty chips; "Book with {name}" (or "Meet other associates" when fully booked) plus WhatsApp, save-to-favorites and share buttons, where share uses the phone's share sheet or copies the link; booking reassurances; a facts bar for session format, fee and languages), a sticky section nav (highlights the section being read; a tap glides to it and lands the heading just under the bars), then one scrolling column of cards: About (bio, folded with "Read more" past ~600 characters; "a good fit if you are" chips; specialties), What to expect (3 steps), Location(s), main one first, with active days, a Get-directions link and an "also online" note for hybrid practices, Credentials (licence on file + one line per training entry; hidden when empty), Reviews (rating summary, paginated; a "{name} is new to Momentizing" note when there are none), a closing "Ready to meet…?" call to action; sticky booking card with fee on desktop (the only sidebar item, so it always fits the screen), pinned "Choose a time" bar on phones; "Fully booked" state points to other associates. |
 | **Book `/book`** | Built | No-account guest booking wizard (§5). |
 | **My bookings `/my-bookings`** | Built | See upcoming sessions by phone number after a WhatsApp code; no history without an account. |
 | **About `/about`** | Built | Brand story: tagline and values, who we support (diaspora, expatriates, international students, cross-cultural couples), vision and mission, the "Our journey" timeline (2019 Taiwan → 2020–22 FIP → 2022 Jakarta → Now) and four commitments. All graphics are original SVG, no photos. Founder name/credentials are deliberately absent until the Team section. Bahasa Indonesia version not built. Home has a short "Our story" teaser linking here. |
+| **Events `/events`** | Built | Workshops and talks published from CRMS Admin (§6b). Filter pills *Upcoming · Online · In person · Past events*; the soonest upcoming event is a wide featured card, the rest a grid. Cards: uncropped 4:5 poster (or, when the event has none, a **default poster**: title and format on a cream/mint/peach brand card with soft circles, palette picked from the title), date badge, format and price pills, title, summary, time on the event's clock ("19:00–21:00 WIB") with "+N more dates", place. Loading, error with Try again, and an empty state with a WhatsApp "tell me about new events" link. |
+| **Event `/events/view?id=`** | Built | Poster, format/price/tag pills, title, summary, every date with *Add to calendar* (.ics), where (venue + map link and/or "Online — link sent when you register" or a public *Join online* link), description, promo video (YouTube/Vimeo embed or MP4), Register (opens the organizer's registration link) and Share (share sheet or copy link); on phones Register and Share sit in a bar pinned to the bottom. Cancelled and finished events say so and hide Register. Not indexed; `Event` JSON-LD. |
 | **Careers `/careers`** | Built (resume upload untested against real S3) | Expert application with resume (§6). |
 | **Legal `/legal`** ("Transparency Hub") | Built (wording needs lawyer review) | FAQ, full Terms & Conditions (18 sections) and Privacy Policy (13 sections), written from what the product actually does: WhatsApp-verified guest booking, pay-later on WhatsApp, wallet points, 30-min holds, 24 h emergency-reschedule fee, no cookies / no analytics, 12-month applicant retention, 30-day account erasure. Tab follows the URL hash (`/legal/#terms`, `/legal/#privacy`). Governing law: Indonesia (Jakarta courts). Text lives in `components/marketing/legal/LegalDocuments.tsx`; update it whenever a data practice, provider or payment rule changes. |
 | **Help `/help`** ("You're not alone") | Built | Crisis resources and support contacts, always reachable from nav/footer. |
 | **404 / error** | Built | Branded, with a way home. |
 
-**Global chrome (Built):** fixed nav with anchors and links to Associates, Careers, Login, Get the App, and a primary *Book* button (mobile menu included); footer; floating WhatsApp button; skip-to-content link. Login, Create account and Get the app link to the CRMS app (`APP_URL`).
+**Global chrome (Built):** fixed nav. From 1024 px the bar is *Services ▾* (1:1 services, Packages, Corporate wellbeing) · Find an Associate · **Events** · About, then an *Account ▾* pill (My bookings, Log in, Get the App, language) and the primary *Book a Session* button; below 1024 px a hamburger menu grouped *Explore / Company / Your account* (includes Careers and the language switch). Menus open by click or Enter/Space (and hover with a mouse), close with Esc (focus returns) or an outside click; footer; floating WhatsApp button; skip-to-content link. Login, Create account and Get the app link to the CRMS app (`APP_URL`).
 
 ## 5. Guest booking — Built
 
@@ -65,8 +67,8 @@ It lets a visitor, **without creating an account**: learn what Momentizing offer
 
 ### 5.1 Flow
 1. **Pick a day** — date strip of upcoming days.
-2. **About you** — name, WhatsApp number, five short yes/no questions (first time? online? couple? adult? urgent?), optional concerns and note, consent.
-3. **Your specialist** — three matched suggestions with reasons, **or** search by full name.
+2. **About you** — name, WhatsApp number, five short yes/no questions (first time? online? couple? adult? urgent?), optional concerns and note, consent (Terms & Privacy, WhatsApp contact, and that a session running past its booked time may be charged at the overtime rate).
+3. **Your specialist** — three matched suggestions with reasons, **or** search by full name. Only specialists with an active assistant are ever suggested, searchable, shown in the directory or bookable (backend rule, CRM PRD §6.7); others are simply absent. **Couple sessions (Built):** when the visitor said the session is for a couple, specialists who don't accept couples are marked "Individual sessions only" and cannot be chosen (cards, profile sheet and name search; couple-friendly ones are listed first). If the couple answer and the chosen specialist ever disagree (answer changed later, or arriving from a specialist's profile), the About you and Review steps show a notice with two one-tap fixes — "Choose a couple-friendly specialist" or "Book as an individual instead" — and Continue/Hold is blocked until resolved. The server's "doesn't accept couple sessions" rejection is handled the same way, with all details kept.
 4. **Choose a time** — real open slots only; times shown on the **visitor's own clock** with the zone named (experts' hours are entered in their own zone).
 5. **Review** — summary, consent, optional Turnstile challenge, confirm.
 6. **Verify on WhatsApp** — the booking is held for **30 minutes**. The visitor taps a button that opens WhatsApp with a pre-filled `MOM-XXXXXX` code to send **from their own number** to the business line **+62 857-0220-0701**. When the backend receives it, the booking auto-confirms and the screen updates (polling).
@@ -93,6 +95,12 @@ It lets a visitor, **without creating an account**: learn what Momentizing offer
 - Instant client-side validation with the same rules the server enforces; honeypot and form token; idempotent submit.
 - Staff handle applicants in CRMS Admin (`/admin/careers`): stages, notes, resume link, **Hire** sends the specialist invite. A hired expert lands in `PENDING_APPROVAL` after registering.
 - **Owed before cloud deployment:** bucket env vars, CORS `PUT` from the website origin, IAM on `careers/*`, private prefix, 12-month lifecycle, and a real upload test (CRM QA §17.7).
+
+## 6b. Events — Built
+- Events are created by Super Admins and **Event Organizers** in CRMS Admin (`/admin/events`), reviewed by a Super Admin, and only **published** (or cancelled) events reach this site. See CRM `PRD.md` §9.7.
+- Event times are shown on the **event's own clock** with its zone name (usually WIB), not converted to the visitor's clock — unlike bookings. The .ics file carries exact UTC times so calendars place it correctly.
+- A private meeting link is never sent to the site; registration happens on the organizer's own link (no RSVP, tickets or payment here).
+- Static export limit: one HTML page serves every event, so shared links show the general site preview, not the poster.
 
 ## 7. Safety & trust requirements
 
@@ -145,6 +153,7 @@ Authoritative detail in [template.md](template.md). In short: **mint wash, rust 
 10. **Automated E2E tests** (Playwright) for the booking flow not built.
 11. Public copy (FAQ, packages, legal) needs client/legal review before launch; legal text here is not legal advice.
 12. Uncommitted work: careers feature, nav and footer changes.
+13. **Events:** per-event social preview images, RSVP/tickets and Bahasa Indonesia event copy are not built (§6b).
 
 ## 12. Phasing
 
@@ -167,3 +176,6 @@ Authoritative detail in [template.md](template.md). In short: **mint wash, rust 
 | Static-hosting limits (no server redirects, no dynamic routes) | Query-string profile URLs; client-side fetch; revisit hosting if SEO per-profile pages are needed |
 | API outage makes site look empty | Error states everywhere, never "no data" |
 | Crisis content out of date | Review `/help` on a schedule; owner named in the client's ops plan |
+
+
+**Specialist photos.** Specialist cards, the profile page and booking suggestions show the profile photo the specialist uploaded during onboarding (`avatarUrl`), falling back to initials when there is none. This replaces the earlier initials-only rule.

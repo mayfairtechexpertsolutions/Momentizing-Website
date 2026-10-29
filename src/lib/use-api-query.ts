@@ -1,5 +1,6 @@
 "use client";
 
+import { errorMessage } from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch, ApiError, type ApiFetchOptions } from "./api";
 
@@ -37,7 +38,7 @@ export function useApiQuery<T>(path: string | null, options?: ApiFetchOptions, d
         if (!cancelled) setData(result);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof ApiError ? err.message : "Something went wrong");
+        if (!cancelled) setError(errorMessage(err));
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);

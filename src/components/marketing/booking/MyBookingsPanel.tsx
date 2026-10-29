@@ -1,5 +1,6 @@
 "use client";
 
+import { t } from "@/i18n";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   fetchFormToken,
@@ -84,11 +85,11 @@ export function MyBookingsPanel() {
     e.preventDefault();
     setError(null);
     if (!formToken) {
-      setError("The page isn't ready yet. Please wait a moment and try again.");
+      setError(t("booking.pageNotReady"));
       return;
     }
     if (TURNSTILE_ENABLED && !turnstileToken) {
-      setError("Please wait for the security check to finish, then try again.");
+      setError(t("booking.securityWait"));
       return;
     }
     setBusy(true);
@@ -146,7 +147,7 @@ export function MyBookingsPanel() {
           </p>
           <Field id="mb-whatsapp" label="Your WhatsApp number" hint="For example 0812 3456 7890">
             <input
-              id="mb-whatsapp"
+              name="whatsapp" id="mb-whatsapp"
               type="tel"
               inputMode="tel"
               autoComplete="tel"
@@ -171,7 +172,7 @@ export function MyBookingsPanel() {
           </InlineNotice>
           <Field id="mb-code" label="The 6-digit code" hint="Nothing arrived? Check you used the number you booked with.">
             <input
-              id="mb-code"
+              name="code" id="mb-code"
               inputMode="numeric"
               autoComplete="one-time-code"
               maxLength={8}

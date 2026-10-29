@@ -1,31 +1,12 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import { SpecialistCard } from "@/components/marketing/SpecialistCard";
-import { useMarketingDirectory, specialisationTags } from "@/lib/marketing-directory";
+import { useMarketingDirectory } from "@/lib/marketing-directory";
 import { useFavorites } from "@/lib/favorites";
 
-/** `useSearchParams` (the ?specialisation= deep link) opts the page out of static prerendering unless it sits inside a
- * Suspense boundary — without this `next build` fails on this route. */
 export default function AssociatesPage() {
-  return (
-    <Suspense
-      fallback={
-        <div role="status" className="flex min-h-dvh items-center justify-center bg-momentizing-cream font-marketing-serif text-lg text-momentizing-muted">
-          Loading associates…
-        </div>
-      }
-    >
-      <AssociatesContent />
-    </Suspense>
-  );
-}
-
-function AssociatesContent() {
-  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
-  const [activeTag, setActiveTag] = useState<string | null>(() => searchParams.get("specialisation"));
   const [acceptingOnly, setAcceptingOnly] = useState(false);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const { favorites, isFavorite } = useFavorites();
@@ -33,15 +14,9 @@ function AssociatesContent() {
   const { data: page, error, isLoading, refetch } = useMarketingDirectory(100);
   const specialists = useMemo(() => page?.content ?? [], [page]);
 
-  const allTags = useMemo(
-    () => [...new Set(specialists.flatMap((p) => specialisationTags(p.specialisation)))].sort(),
-    [specialists]
-  );
-
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     return specialists.filter((p) => {
-      const matchesTag = !activeTag || specialisationTags(p.specialisation).includes(activeTag);
       const matchesAccepting = !acceptingOnly || p.acceptingNewClients;
       const matchesFavorite = !favoritesOnly || isFavorite(p.id);
       const matchesSearch =
@@ -50,9 +25,9 @@ function AssociatesContent() {
         (p.specialisation ?? "").toLowerCase().includes(term) ||
         (p.languages ?? "").toLowerCase().includes(term) ||
         (p.bio ?? "").toLowerCase().includes(term);
-      return matchesTag && matchesAccepting && matchesFavorite && matchesSearch;
+      return matchesAccepting && matchesFavorite && matchesSearch;
     });
-  }, [specialists, search, activeTag, acceptingOnly, favoritesOnly, isFavorite]);
+  }, [specialists, search, acceptingOnly, favoritesOnly, isFavorite]);
 
   return (
     <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
@@ -101,25 +76,6 @@ function AssociatesContent() {
           </div>
         </div>
 
-        {allTags.length > 0 && (
-          <div className="mb-16 flex flex-wrap gap-2">
-            {allTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                aria-pressed={activeTag === tag}
-                className={`min-h-11 rounded-full border px-4 py-2 text-xs font-bold tracking-widest uppercase transition ${
-                  activeTag === tag
-                    ? "border-momentizing-teal bg-momentizing-teal text-white"
-                    : "border-momentizing-slate/25 text-momentizing-slate hover:bg-momentizing-slate/5"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        )}
-
         {isLoading ? (
           <div role="status" className="py-24 text-center font-marketing-serif text-lg text-momentizing-muted">
             Loading associates…
@@ -132,7 +88,7 @@ function AssociatesContent() {
             <button
               type="button"
               onClick={refetch}
-              className="mt-6 min-h-12 rounded-full bg-momentizing-teal px-8 py-3 text-sm font-semibold text-white hover:bg-momentizing-slate/90"
+              className="mt-6 min-h-12 rounded-full bg-momentizing-teal px-8 py-3 text-sm font-semibold text-white transition hover:bg-momentizing-slate"
             >
               Try again
             </button>

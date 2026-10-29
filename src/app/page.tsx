@@ -10,7 +10,8 @@ import { BrandIllustration } from "@/components/marketing/BrandIllustration";
 import { BookingModal } from "@/components/marketing/BookingModal";
 import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp";
 import { SpecialistCard } from "@/components/marketing/SpecialistCard";
-import { useMarketingDirectory, specialisationTags } from "@/lib/marketing-directory";
+import { UpcomingEventsBand } from "@/components/marketing/UpcomingEventsBand";
+import { useMarketingDirectory } from "@/lib/marketing-directory";
 import { usePackages, formatPackagePrice } from "@/lib/session-packages";
 
 // Mirrors the "Our service" row on the brand's Instagram artwork.
@@ -105,9 +106,8 @@ export default function MarketingHomePage() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingPackageId, setBookingPackageId] = useState<number | undefined>(undefined);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const { data: directoryPage } = useMarketingDirectory(50);
+  const { data: directoryPage, isLoading: directoryLoading, error: directoryError, refetch: refetchDirectory } = useMarketingDirectory(50);
   const associates = directoryPage?.content ?? [];
-  const specialties = [...new Set(associates.flatMap((a) => specialisationTags(a.specialisation)))].slice(0, 6);
   // Highest-rated first (no-review associates sort last); review count breaks ties between equal averages.
   const topRatedAssociates = [...associates]
     .sort((a, b) => {
@@ -115,7 +115,7 @@ export default function MarketingHomePage() {
       return ratingDiff !== 0 ? ratingDiff : b.reviewCount - a.reviewCount;
     })
     .slice(0, 8);
-  const { data: packages, isLoading: packagesLoading } = usePackages();
+  const { data: packages, isLoading: packagesLoading, error: packagesError, refetch: refetchPackages } = usePackages();
 
   const openBooking = (packageId?: number) => {
     setBookingPackageId(packageId);
@@ -142,16 +142,16 @@ export default function MarketingHomePage() {
               Culturally-attuned psychological support for individuals and organizations navigating life across
               cultures.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
               <Link
                 href="/book"
-                className="rounded-full bg-momentizing-teal px-8 py-4 font-bold text-white shadow-md shadow-momentizing-teal/25 transition hover:bg-momentizing-slate"
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-momentizing-teal px-8 py-4 font-bold text-white shadow-md shadow-momentizing-teal/25 transition hover:bg-momentizing-slate"
               >
                 Book a Session
               </Link>
               <a
                 href="#packages"
-                className="rounded-full border-2 border-momentizing-gold-deep px-8 py-4 font-bold text-momentizing-gold-deep transition hover:bg-momentizing-gold-deep hover:text-white"
+                className="inline-flex min-h-12 items-center justify-center rounded-full border-2 border-momentizing-gold-deep px-8 py-4 font-bold text-momentizing-gold-deep transition hover:bg-momentizing-gold-deep hover:text-white"
               >
                 View Packages
               </a>
@@ -195,12 +195,12 @@ export default function MarketingHomePage() {
             <div className="space-y-8">
               <div className="flex items-start gap-6">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-momentizing-teal/10 text-momentizing-teal">
-                  <i className="fas fa-brain" />
+                  <i aria-hidden="true" className="fas fa-brain" />
                 </div>
                 <div>
-                  <h4 className="mb-2 text-sm font-bold tracking-wider text-momentizing-slate uppercase">
+                  <h3 className="mb-2 font-marketing-sans text-sm font-bold tracking-wider text-momentizing-slate uppercase">
                     Psychological Assessment
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed text-momentizing-muted">
                     In-depth clinical evaluation for ADHD, anxiety, depression, and cross-cultural adjustment
                     issues.
@@ -209,12 +209,12 @@ export default function MarketingHomePage() {
               </div>
               <div className="flex items-start gap-6">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-momentizing-gold/10 text-momentizing-gold-deep">
-                  <i className="fas fa-heart" />
+                  <i aria-hidden="true" className="fas fa-heart" />
                 </div>
                 <div>
-                  <h4 className="mb-2 text-sm font-bold tracking-wider text-momentizing-slate uppercase">
+                  <h3 className="mb-2 font-marketing-sans text-sm font-bold tracking-wider text-momentizing-slate uppercase">
                     Intercultural Relationship Therapy
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed text-momentizing-muted">
                     Helping couples navigate communication barriers and cultural value differences using the
                     Gottman Method.
@@ -230,13 +230,13 @@ export default function MarketingHomePage() {
               </p>
               <ul className="space-y-3 text-sm font-bold text-momentizing-teal">
                 <li>
-                  <i className="fas fa-check mr-2" /> Evidence-Based CBT &amp; DBT
+                  <i aria-hidden="true" className="fas fa-check mr-2" /> Evidence-Based CBT &amp; DBT
                 </li>
                 <li>
-                  <i className="fas fa-check mr-2" /> Multi-Lingual Support
+                  <i aria-hidden="true" className="fas fa-check mr-2" /> Multi-Lingual Support
                 </li>
                 <li>
-                  <i className="fas fa-check mr-2" /> Trauma-Informed Framework
+                  <i aria-hidden="true" className="fas fa-check mr-2" /> Trauma-Informed Framework
                 </li>
               </ul>
             </div>
@@ -267,15 +267,45 @@ export default function MarketingHomePage() {
       <section id="packages" className="on-dark bg-momentizing-slate px-6 py-24 text-white">
         <div data-reveal className="mx-auto max-w-7xl text-center">
           <h2 className="mb-12 font-marketing-serif text-4xl text-momentizing-gold">Care Packages</h2>
-          {!packagesLoading && (packages ?? []).length === 0 ? (
+          {packagesLoading ? (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3" aria-busy="true">
+              <span className="sr-only" role="status">Loading packages…</span>
+              {[0, 1, 2].map((i) => (
+                <div key={i} aria-hidden="true" className="h-72 animate-pulse rounded-[2.5rem] bg-white/10 motion-reduce:animate-none" />
+              ))}
+            </div>
+          ) : packagesError ? (
+            <div role="alert" className="mx-auto max-w-md">
+              <p className="mb-8 text-white/85">
+                We couldn&apos;t load our packages just now. Try again, or talk to our team and we&apos;ll share the options.
+              </p>
+              <div className="flex flex-col justify-center gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={refetchPackages}
+                  className="min-h-12 rounded-full border border-white/40 px-8 py-3 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-white hover:text-momentizing-slate"
+                >
+                  Try again
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openBooking()}
+                  className="min-h-12 rounded-full bg-momentizing-gold-deep px-8 py-3 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-white hover:text-momentizing-gold-deep"
+                >
+                  Talk to Our Team
+                </button>
+              </div>
+            </div>
+          ) : (packages ?? []).length === 0 ? (
             <div className="mx-auto max-w-md">
               <p className="mb-8 text-sm text-white/85">
                 Our package catalog is being finalized — reach out and our team will put together the right plan
                 for you.
               </p>
               <button
+                type="button"
                 onClick={() => openBooking()}
-                className="rounded-full bg-momentizing-gold-deep px-10 py-4 text-xs font-bold tracking-widest text-white uppercase shadow-lg shadow-momentizing-gold/20"
+                className="min-h-12 rounded-full bg-momentizing-gold-deep px-10 py-4 text-xs font-bold tracking-widest text-white uppercase shadow-lg shadow-momentizing-gold/20 transition hover:bg-white hover:text-momentizing-gold-deep"
               >
                 Talk to Our Team
               </button>
@@ -298,20 +328,21 @@ export default function MarketingHomePage() {
                       {pkg.badgeLabel}
                     </div>
                   )}
-                  <h4
-                    className={`mb-4 text-xs font-bold tracking-widest uppercase ${
+                  <h3
+                    className={`mb-4 font-marketing-sans text-xs font-bold tracking-widest uppercase ${
                       popular ? "text-momentizing-mint-deep" : "text-momentizing-gold"
                     }`}
                   >
                     {pkg.name}
-                  </h4>
+                  </h3>
                   <div className="mb-6 font-marketing-serif text-4xl">{formatPackagePrice(pkg)}</div>
                   {pkg.description && <p className="mb-8 text-sm text-white/85">{pkg.description}</p>}
                   <button
+                    type="button"
                     onClick={() => (pkg.sessionCount === 1 ? router.push("/book") : openBooking(pkg.id))}
                     className={
                       popular
-                        ? "w-full rounded-full bg-momentizing-gold-deep py-4 text-xs font-bold tracking-widest text-white uppercase shadow-lg shadow-momentizing-gold/20 transition"
+                        ? "w-full rounded-full bg-momentizing-gold-deep py-4 text-xs font-bold tracking-widest text-white uppercase shadow-lg shadow-momentizing-gold/20 transition hover:bg-white hover:text-momentizing-gold-deep"
                         : "w-full rounded-full bg-white/15 py-4 text-xs font-bold tracking-widest uppercase transition hover:bg-white hover:text-momentizing-slate"
                     }
                   >
@@ -355,8 +386,9 @@ export default function MarketingHomePage() {
               </div>
             </div>
             <button
+              type="button"
               onClick={() => openBooking()}
-              className="rounded-full bg-momentizing-teal px-10 py-4 text-xs font-bold tracking-widest text-white uppercase"
+              className="min-h-12 w-full rounded-full bg-momentizing-teal px-10 py-4 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-slate sm:w-auto"
             >
               Inquire for Corporate
             </button>
@@ -372,33 +404,46 @@ export default function MarketingHomePage() {
             request a preferred date and time. No account needed to get started.
           </p>
 
-          {specialties.length > 0 && (
-            <div className="mb-12 flex flex-wrap justify-center gap-2">
-              {specialties.map((tag) => (
-                <Link
-                  key={tag}
-                  href={`/associates?specialisation=${encodeURIComponent(tag)}`}
-                  className="rounded-full border border-momentizing-gold/20 bg-white px-4 py-2 text-xs font-bold tracking-widest text-momentizing-gold-deep uppercase transition hover:bg-momentizing-gold-deep hover:text-white"
-                >
-                  {tag}
-                </Link>
+          {directoryLoading ? (
+            <div className="mb-16 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4" aria-busy="true">
+              <span className="sr-only" role="status">Loading specialists…</span>
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} aria-hidden="true" className={`aspect-[3/5] animate-pulse rounded-3xl bg-white/70 motion-reduce:animate-none ${i === 3 ? "hidden lg:block" : i === 2 ? "hidden sm:block" : ""}`} />
               ))}
             </div>
+          ) : directoryError ? (
+            <div role="alert" className="mx-auto mb-16 max-w-md rounded-3xl bg-white/70 p-8">
+              <p className="font-marketing-serif text-xl text-momentizing-slate">We couldn&apos;t load our specialists just now.</p>
+              <p className="mt-2 text-sm text-momentizing-muted">Please check your connection and try again.</p>
+              <button
+                type="button"
+                onClick={refetchDirectory}
+                className="mt-6 min-h-12 rounded-full border-2 border-momentizing-gold-deep px-8 py-3 text-xs font-bold tracking-widest text-momentizing-gold-deep uppercase transition hover:bg-momentizing-gold-deep hover:text-white"
+              >
+                Try again
+              </button>
+            </div>
+          ) : topRatedAssociates.length > 0 ? (
+            <div className="mb-16 grid grid-cols-2 gap-4 text-left sm:grid-cols-3 sm:gap-6 lg:grid-cols-4 lg:gap-6">
+              {topRatedAssociates.map((associate) => (
+                <SpecialistCard key={associate.id} specialist={associate} size="compact" />
+              ))}
+            </div>
+          ) : (
+            <p className="mx-auto mb-12 max-w-md text-momentizing-muted">
+              Our specialists&apos; profiles are being finalised. Book a session and we&apos;ll match you with someone who fits.
+            </p>
           )}
-
-          <div className="mb-16 grid grid-cols-2 gap-4 text-left sm:grid-cols-3 sm:gap-6 lg:grid-cols-4 lg:gap-6">
-            {topRatedAssociates.map((associate) => (
-              <SpecialistCard key={associate.id} specialist={associate} size="compact" />
-            ))}
-          </div>
           <Link
             href="/associates"
-            className="inline-flex items-center rounded-full bg-momentizing-teal px-10 py-4 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-teal"
+            className="inline-flex min-h-12 items-center rounded-full bg-momentizing-teal px-10 py-4 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-slate"
           >
-            View All Associates <i className="fas fa-arrow-right ml-3" />
+            View All Associates <i aria-hidden="true" className="fas fa-arrow-right ml-3" />
           </Link>
         </div>
       </section>
+
+      <UpcomingEventsBand />
 
       <section id="faq" className="px-6 py-24">
         <div data-reveal className="mx-auto max-w-3xl">
@@ -448,16 +493,16 @@ export default function MarketingHomePage() {
             Log in to your Momentizing account to message your specialist, track your mood, and use your ADHD
             tools.
           </p>
-          <div className="mt-2 flex flex-wrap justify-center gap-4">
+          <div className="mt-2 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
             <a
               href={appLink("/register")}
-              className="rounded-full bg-momentizing-gold-deep px-8 py-4 text-xs font-bold tracking-widest text-white uppercase"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-momentizing-gold-deep px-8 py-4 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-slate"
             >
               Create an Account
             </a>
             <a
               href={appLink("/login")}
-              className="rounded-full border border-momentizing-slate px-8 py-4 text-xs font-bold tracking-widest text-momentizing-slate uppercase"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-momentizing-slate px-8 py-4 text-xs font-bold tracking-widest text-momentizing-slate uppercase transition hover:bg-momentizing-slate hover:text-white"
             >
               Login
             </a>

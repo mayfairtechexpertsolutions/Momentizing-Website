@@ -1,7 +1,8 @@
 "use client";
 
+import { t } from "@/i18n";
 import { useEffect, useState, type FormEvent } from "react";
-import { ApiError } from "@/lib/api";
+import { errorMessage } from "@/lib/api";
 import { requestBookingHelp } from "@/lib/guest-booking";
 import { BookButton, Field, InlineNotice, inputClass } from "./ui";
 import { Sheet } from "./Sheet";
@@ -58,7 +59,7 @@ export function HelpSheet({
     if (submitting) return;
     setError(null);
     if (TURNSTILE_ENABLED && !turnstileToken) {
-      setError("Please wait for the security check to finish, then try again.");
+      setError(t("booking.securityWait"));
       return;
     }
     setSubmitting(true);
@@ -78,7 +79,7 @@ export function HelpSheet({
       });
       setDone(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "We couldn't send your request. Please check your connection and try again.");
+      setError(errorMessage(err));
     } finally {
       setSubmitting(false);
       setResetSignal((n) => n + 1); // a Turnstile token is single-use
@@ -99,11 +100,11 @@ export function HelpSheet({
         <form onSubmit={submit} className="flex flex-col gap-5" noValidate={false}>
           <p className="text-momentizing-muted">Tell us roughly what suits you and we&apos;ll come back to you on WhatsApp. It only takes a moment.</p>
           <Field id="help-name" label="Your name">
-            <input id="help-name" required autoComplete="name" autoCapitalize="words" autoCorrect="off" spellCheck={false} value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
+            <input name="fullName" id="help-name" required autoComplete="name" autoCapitalize="words" autoCorrect="off" spellCheck={false} value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
           </Field>
           <Field id="help-wa" label="WhatsApp number" hint="We'll only use this to arrange your session.">
             <input
-              id="help-wa"
+              name="whatsapp" id="help-wa"
               required
               type="tel"
               inputMode="tel"
@@ -116,13 +117,13 @@ export function HelpSheet({
             />
           </Field>
           <Field id="help-times" label="When would suit you? (optional)">
-            <input id="help-times" value={times} onChange={(e) => setTimes(e.target.value)} placeholder="e.g. weekday evenings, Saturday mornings" maxLength={300} className={inputClass} />
+            <input name="preferredTimes" id="help-times" value={times} onChange={(e) => setTimes(e.target.value)} placeholder="e.g. weekday evenings, Saturday mornings" maxLength={300} className={inputClass} />
           </Field>
           <Field id="help-note" label="Anything else we should know? (optional)">
-            <textarea id="help-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} maxLength={1000} className={`${inputClass} resize-y`} />
+            <textarea name="note" id="help-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} maxLength={1000} className={`${inputClass} resize-y`} />
           </Field>
           <label className="flex cursor-pointer items-start gap-3 text-sm text-momentizing-muted">
-            <input type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 h-5 w-5 flex-shrink-0 accent-[var(--momentizing-teal)]" />
+            <input name="consentAccepted" type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 h-5 w-5 flex-shrink-0 accent-[var(--momentizing-teal)]" />
             <span>
               I agree to be contacted on WhatsApp about this request, and to the{" "}
               <a href={withBase("/legal/")} target="_blank" rel="noopener noreferrer" className="font-semibold underline">

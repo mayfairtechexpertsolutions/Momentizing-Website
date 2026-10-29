@@ -97,7 +97,7 @@ export default function LegalPage() {
                   onClick={() => window.print()}
                   className="rounded-lg border border-momentizing-teal/30 px-4 py-2 text-xs font-bold tracking-widest text-momentizing-teal uppercase transition hover:bg-momentizing-teal hover:text-white"
                 >
-                  <i className="fas fa-download mr-2" /> Save PDF
+                  <i aria-hidden="true" className="fas fa-download mr-2" /> Save PDF
                 </button>
               </div>
               <TermsDocument />
@@ -112,7 +112,7 @@ export default function LegalPage() {
                   onClick={() => window.print()}
                   className="rounded-lg border border-momentizing-teal/30 px-4 py-2 text-xs font-bold tracking-widest text-momentizing-teal uppercase transition hover:bg-momentizing-teal hover:text-white"
                 >
-                  <i className="fas fa-download mr-2" /> Save PDF
+                  <i aria-hidden="true" className="fas fa-download mr-2" /> Save PDF
                 </button>
               </div>
               <PrivacyDocument />
