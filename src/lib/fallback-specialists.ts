@@ -39,8 +39,8 @@ export interface FallbackSpecialist extends MarketingSpecialist {
 }
 
 const PRACTICE_MODES = ["ONLINE", "IN_PERSON", "HYBRID"];
-const GENDERS = ["FEMALE", "MALE", ""];
-const DEFAULT_PHOTO_BY_GENDER: Record<string, string> = { FEMALE: "female", MALE: "male", "": "neutral" };
+const GENDERS = ["FEMALE", "MALE", "NEUTRAL"];
+const DEFAULT_PHOTO_BY_GENDER: Record<string, string> = { FEMALE: "female", MALE: "male", NEUTRAL: "neutral" };
 
 /** One entry of `src/data/fallback-specialists.json` — the file the team edits. */
 interface FallbackProfileRecord {
@@ -57,7 +57,7 @@ interface FallbackProfileRecord {
   timeZone: string;
   /** File name inside public/team/ ("" = use the default portrait). */
   photo: string;
-  /** "FEMALE" | "MALE" | "": chooses the default portrait only. */
+  /** "FEMALE" | "MALE" | "NEUTRAL": chooses the default portrait only. */
   gender: string;
   /** "ONLINE" | "IN_PERSON" | "HYBRID". */
   practiceMode: string;

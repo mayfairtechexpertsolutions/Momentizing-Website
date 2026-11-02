@@ -1,6 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" role="img" aria-label="Portrait placeholder">
-<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6f0ea"/><stop offset="1" stop-color="#fbe6d8"/></linearGradient></defs><rect width="400" height="500" fill="url(#bg)"/>
-<path d="M40 500c0-92 70-148 160-148s160 56 160 148z" fill="#3b6b58"/><path d="M168 330h64v40q-32 22-64 0z" fill="#e8a07e"/>
-<ellipse cx="200" cy="235" rx="64" ry="80" fill="#e8a07e"/>
-<path d="M134 225c-4-60 30-92 68-92 40 0 70 32 64 92-10-34-34-52-66-52s-52 18-66 52z" fill="#24382f"/>
-</svg>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6f0ea"/><stop offset="1" stop-color="#fbe6d8"/></linearGradient></defs>
+<rect width="400" height="500" fill="url(#bg)"/>
+<circle cx="70" cy="95" r="62" fill="#ffffff" opacity=".45"/><circle cx="340" cy="170" r="44" fill="#cfe3d8" opacity=".7"/><circle cx="318" cy="60" r="22" fill="#fbe6d8" opacity=".9"/><circle cx="60" cy="300" r="26" fill="#e8a07e" opacity=".22"/>
+<g transform="translate(-24 -52) scale(1.12)">
+<path d="M24 500c0-92 78-138 176-138s176 46 176 138z" fill="#9cc4b0"/>
+<path d="M179 312c1 24-1 46-9 66 10 10 20 14 30 14s20-4 30-14c-8-20-10-42-9-66z" fill="#f0c3a4"/>
+<path d="M158 374c12 26 30 38 42 38s30-12 42-38c-16-8-28-10-42-10s-26 2-42 10z" fill="#fbe6d8"/>
+<path d="M179 306v18q21 14 42 0v-18z" fill="#e0a98a" opacity=".7"/>
+<circle cx="136" cy="238" r="13" fill="#f3c6a5"/><circle cx="264" cy="238" r="13" fill="#f3c6a5"/>
+<ellipse cx="200" cy="232" rx="66" ry="76" fill="#f8d8c0"/>
+<ellipse cx="164" cy="262" rx="15" ry="9" fill="#f2a98f" opacity=".5"/><ellipse cx="236" cy="262" rx="15" ry="9" fill="#f2a98f" opacity=".5"/>
+<path d="M162 238q10-10 20 0M218 238q10-10 20 0" fill="none" stroke="#5b4a42" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M185 272q15 14 30 0" fill="none" stroke="#c9735a" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M130 236c-12-84 18-132 76-132 54 0 84 46 68 132-4-30-16-52-34-62-18 14-50 18-82 10-10 14-22 32-28 52z" fill="#6b5448"/>
+<path d="M156 128c18-34 66-38 90-6-26-12-62-12-90 6z" fill="#7d6356"/>
+<path d="M178 122c10 14 14 28 12 44M214 118c16 8 28 22 32 40" fill="none" stroke="#8a6c5e" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+</g></svg>
