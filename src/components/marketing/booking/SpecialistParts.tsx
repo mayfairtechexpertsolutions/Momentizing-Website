@@ -1,5 +1,7 @@
 "use client";
 
+import { AvatarImage } from "../AvatarImage";
+import { fallbackPhotoFor } from "@/lib/fallback-specialists";
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { formatSessionFee, practiceModeLabel } from "@/lib/marketing-directory";
@@ -26,11 +28,10 @@ export function firstNameOf(name: string): string {
 }
 
 /** The specialist's profile photo when they uploaded one, otherwise their initials. */
-export function SpecialistAvatar({ name, url, size = 64 }: { name: string; url?: string | null; size?: number }) {
+export function SpecialistAvatar({ name, url, size = 64, fallbackSrc }: { name: string; url?: string | null; size?: number; fallbackSrc?: string }) {
   if (url) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={url} alt="" aria-hidden="true" width={size} height={size} loading="lazy"
+      <AvatarImage src={url} fallbackSrc={fallbackSrc} alt="" aria-hidden="true" width={size} height={size} loading="lazy"
         className="flex-shrink-0 rounded-full bg-momentizing-mint object-cover" style={{ width: size, height: size }} />
     );
   }
@@ -95,7 +96,7 @@ export function SpecialistSuggestionCard({
       }`}
     >
       <div className="flex items-start gap-4">
-        <SpecialistAvatar name={specialist.name} url={specialist.avatarUrl} />
+        <SpecialistAvatar name={specialist.name} url={specialist.avatarUrl} fallbackSrc={fallbackPhotoFor(specialist.id)} />
         <div className="min-w-0">
           <h3 className="font-marketing-serif text-xl leading-tight">{specialist.name}</h3>
           {specialist.specialisation && <p className="mt-1 text-sm text-momentizing-muted">{specialist.specialisation}</p>}
@@ -149,7 +150,7 @@ export function SpecialistProfileSheet({
       {specialist && (
         <div className="flex flex-col gap-5">
           <div className="flex items-center gap-4">
-            <SpecialistAvatar name={specialist.name} url={specialist.avatarUrl} size={80} />
+            <SpecialistAvatar name={specialist.name} url={specialist.avatarUrl} size={80} fallbackSrc={fallbackPhotoFor(specialist.id)} />
             <div>
               {specialist.specialisation && <p className="text-base text-momentizing-muted">{specialist.specialisation}</p>}
               {ratingText(specialist) && <p className="mt-1 text-sm font-semibold">{ratingText(specialist)}</p>}
@@ -342,7 +343,7 @@ export function SpecialistNameSearch({
                 blocked(s) ? "cursor-not-allowed opacity-70" : `cursor-pointer ${i === active ? "bg-momentizing-mint" : "hover:bg-momentizing-mint"}`
               }`}
             >
-              <SpecialistAvatar name={s.name} url={s.avatarUrl} size={40} />
+              <SpecialistAvatar name={s.name} url={s.avatarUrl} size={40} fallbackSrc={fallbackPhotoFor(s.id)} />
               <span className="min-w-0">
                 <span className="block truncate font-semibold">{s.name}</span>
                 {s.specialisation && <span className="block truncate text-sm text-momentizing-muted">{s.specialisation}</span>}

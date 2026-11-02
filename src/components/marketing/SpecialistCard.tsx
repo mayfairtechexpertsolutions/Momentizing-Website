@@ -1,5 +1,7 @@
 "use client";
 
+import { AvatarImage } from "./AvatarImage";
+import { fallbackPhotoFor } from "@/lib/fallback-specialists";
 import { initials } from "@/components/marketing/booking/SpecialistParts";
 import Link from "next/link";
 import { isFallbackSpecialistId } from "@/lib/fallback-specialists";
@@ -62,9 +64,9 @@ export function SpecialistCard({ specialist: p, size = "default" }: SpecialistCa
          * far more often than the old 4:3 crop did. */}
         <div className="relative aspect-square w-full overflow-hidden bg-momentizing-mint">
           {p.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <AvatarImage
               src={p.avatarUrl}
+              fallbackSrc={fallbackPhotoFor(p.id)}
               alt=""
               loading="lazy"
               className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"

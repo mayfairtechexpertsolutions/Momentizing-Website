@@ -1,8 +1,9 @@
 import fallbackData from "@/data/fallback-specialists.json";
 import type { PublicSlots, PublicSpecialistCard } from "./guest-booking";
+import { withBase } from "./base-path";
 import { addDaysIso, parseIsoLocal } from "./local-date";
 import { intlLocale } from "@/i18n";
-import type { MarketingSpecialist } from "./marketing-directory";
+import type { MarketingSpecialist, MarketingSpecialistLocation } from "./marketing-directory";
 import type { PageResponse } from "./types";
 
 /**
@@ -31,7 +32,15 @@ export interface FallbackSpecialist extends MarketingSpecialist {
   durationMinutes: number;
   /** IANA name the weekly times are written in, e.g. "Asia/Jakarta". */
   timeZone: string;
+  /** Portrait shown when the profile has no photo (or its file is missing); picked by the JSON `gender`. */
+  defaultPhotoUrl: string;
+  /** Kept for the team, deliberately NOT mapped to `sessionFeeCents` so the website never displays it. */
+  recordedSessionFee: { cents: number | null; currency: string };
 }
+
+const PRACTICE_MODES = ["ONLINE", "IN_PERSON", "HYBRID"];
+const GENDERS = ["FEMALE", "MALE", ""];
+const DEFAULT_PHOTO_BY_GENDER: Record<string, string> = { FEMALE: "female", MALE: "male", "": "neutral" };
 
 /** One entry of `src/data/fallback-specialists.json` — the file the team edits. */
 interface FallbackProfileRecord {
@@ -46,6 +55,19 @@ interface FallbackProfileRecord {
   durationMinutes?: number;
   /** IANA time zone name ("Area/City", e.g. "Asia/Jakarta") the weekly times are written in. */
   timeZone: string;
+  /** File name inside public/team/ ("" = use the default portrait). */
+  photo: string;
+  /** "FEMALE" | "MALE" | "": chooses the default portrait only. */
+  gender: string;
+  /** "ONLINE" | "IN_PERSON" | "HYBRID". */
+  practiceMode: string;
+  /** Required (at least one) for IN_PERSON and HYBRID. The first is the main location. */
+  locations: { label: string; address: string }[];
+  languages: string[];
+  yearsExperience: number | null;
+  licenceNumber: string | null;
+  sessionFeeCents: number | null;
+  sessionFeeCurrency: string;
   /** Weekday name -> session start times (24h "HH:mm", in `timeZone`). */
   weeklySlots: Record<string, string[]>;
 }
@@ -70,7 +92,33 @@ function assertValidTimeZone(timeZone: string, who: string): string {
   }
 }
 
+function assertOneOf(value: string, allowed: string[], field: string, who: string): string {
+  if (!allowed.includes(value)) {
+    throw new Error(`fallback-specialists.json: "${who}" has ${field} "${value}" (allowed: ${allowed.map((a) => `"${a}"`).join(", ")})`);
+  }
+  return value;
+}
+
+function toLocations(record: FallbackProfileRecord): MarketingSpecialistLocation[] {
+  return record.locations.map((l, index) => ({ id: index + 1, label: l.label || null, address: l.address, primary: index === 0, activeDays: null }));
+}
+
+/** Public URL of a team photo file, or null when the profile has none. Only a bare file name is accepted. */
+function photoUrl(photo: string): string | null {
+  const name = photo.trim();
+  if (!name) return null;
+  if (/[\\/]/.test(name)) throw new Error(`fallback-specialists.json: photo "${photo}" must be a file name only (put the file in public/team/)`);
+  return withBase(`/team/${encodeURIComponent(name)}`);
+}
+
 function toSpecialist(record: FallbackProfileRecord): FallbackSpecialist {
+  const practiceMode = assertOneOf(record.practiceMode, PRACTICE_MODES, "practiceMode", record.name);
+  const gender = assertOneOf(record.gender, GENDERS, "gender", record.name);
+  const locations = toLocations(record);
+  if (practiceMode !== "ONLINE" && locations.length === 0) {
+    throw new Error(`fallback-specialists.json: "${record.name}" is ${practiceMode} but has no locations (add { "label", "address" })`);
+  }
+  const defaultPhotoUrl = withBase(`/team/default/${DEFAULT_PHOTO_BY_GENDER[gender]}.svg`);
   return {
     id: record.id,
     name: record.name,
@@ -83,17 +131,19 @@ function toSpecialist(record: FallbackProfileRecord): FallbackSpecialist {
       .sort((a, b) => a.day - b.day),
     durationMinutes: record.durationMinutes ?? DEFAULT_DURATION_MINUTES,
     timeZone: assertValidTimeZone(record.timeZone, record.name),
-    avatarUrl: null,
-    languages: null,
+    avatarUrl: photoUrl(record.photo) ?? defaultPhotoUrl,
+    defaultPhotoUrl,
+    languages: record.languages.length > 0 ? record.languages.join(", ") : null,
     acceptingNewClients: true,
-    licenceNumber: null,
-    yearsExperience: null,
+    licenceNumber: record.licenceNumber,
+    yearsExperience: record.yearsExperience,
     sessionFormats: null,
     preferredContact: null,
-    practiceMode: "ONLINE",
-    locations: [],
+    practiceMode,
+    locations,
     sessionFeeCents: null,
-    sessionFeeCurrency: "IDR",
+    sessionFeeCurrency: record.sessionFeeCurrency,
+    recordedSessionFee: { cents: record.sessionFeeCents, currency: record.sessionFeeCurrency },
     freeFirstSession: false,
     proBonoAvailable: false,
     averageRating: null,
@@ -104,6 +154,11 @@ function toSpecialist(record: FallbackProfileRecord): FallbackSpecialist {
 }
 
 export const FALLBACK_SPECIALISTS: FallbackSpecialist[] = (fallbackData.specialists as unknown as FallbackProfileRecord[]).map(toSpecialist);
+
+/** The default portrait to fall back to if a built-in profile's photo file is missing; undefined for live profiles. */
+export function fallbackPhotoFor(id: number): string | undefined {
+  return isFallbackSpecialistId(id) ? getFallbackSpecialist(id)?.defaultPhotoUrl : undefined;
+}
 
 export function getFallbackSpecialist(id: number): FallbackSpecialist | null {
   return FALLBACK_SPECIALISTS.find((s) => s.id === id) ?? null;
@@ -137,7 +192,7 @@ export function toPublicCard(s: FallbackSpecialist): PublicSpecialistCard {
     credentialsSummary: s.credentialsSummary,
     practiceMode: s.practiceMode,
     sessionFormats: s.sessionFormats,
-    locationLabel: null,
+    locationLabel: s.locations[0] ? (s.locations[0].label ?? s.locations[0].address) : null,
     sessionFeeCents: s.sessionFeeCents,
     sessionFeeCurrency: s.sessionFeeCurrency,
     freeFirstSession: s.freeFirstSession,
@@ -258,7 +313,7 @@ export function fallbackSlots(specialist: FallbackSpecialist, fromUtc: string, d
     specialistId: specialist.id,
     specialistName: specialist.name,
     durationMinutes: specialist.durationMinutes,
-    sessionTypes: ["ONLINE"],
+    sessionTypes: specialist.practiceMode === "HYBRID" ? ["ONLINE", "IN_PERSON"] : [specialist.practiceMode],
     timezone: "UTC",
     expertTimeZone: specialist.timeZone,
     days: windowDays,
