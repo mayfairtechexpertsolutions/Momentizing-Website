@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MANUAL_TIME_OPTIONS, MAX_MANUAL_NOTE_CHARS, buildManualBookingMessage, type ManualBookingRequest } from "./manual-booking";
+import { MAX_MANUAL_NOTE_CHARS, buildManualBookingMessage, formatManualWhen, toWibClock, type ManualBookingRequest } from "./manual-booking";
 
 const base: ManualBookingRequest = {
   specialistName: "Adeline Herdianto",
@@ -16,7 +16,8 @@ describe("buildManualBookingMessage", () => {
   it("summarises the request for the team", () => {
     const text = buildManualBookingMessage(base);
     expect(text).toContain("Specialist: Adeline Herdianto");
-    expect(text).toContain("1:00 PM (WIB)");
+    expect(text).toContain("Preferred time: ");
+    expect(text).toContain("1:00 PM");
     expect(text).toContain("Name: Sari");
     expect(text).toContain("WhatsApp: +62 812 3456 7890");
     expect(text).toContain("Session for a couple: No");
@@ -44,10 +45,17 @@ describe("buildManualBookingMessage", () => {
   });
 });
 
-describe("MANUAL_TIME_OPTIONS", () => {
-  it("lists half-hour starts from 06:00 to 21:30", () => {
-    expect(MANUAL_TIME_OPTIONS[0]).toBe("06:00");
-    expect(MANUAL_TIME_OPTIONS[1]).toBe("06:30");
-    expect(MANUAL_TIME_OPTIONS.at(-1)).toBe("21:30");
+describe("time zones", () => {
+  // vitest.setup.ts runs the suite in America/Los_Angeles (PST, UTC-8, in November) unless TEST_TZ says otherwise.
+  it("converts the visitor's clock to the expert's WIB clock", () => {
+    const zoneOffsetHours = -new Date(2026, 10, 3, 12).getTimezoneOffset() / 60;
+    const expectedHour = (13 - zoneOffsetHours + 7 + 24) % 24;
+    expect(toWibClock("2026-11-03", "13:00")).toBe(`${String(expectedHour).padStart(2, "0")}:00`);
+  });
+
+  it("states the time on the visitor's clock and, when not on WIB, the WIB equivalent", () => {
+    const when = formatManualWhen("2026-11-03", "13:00");
+    expect(when).toContain("1:00 PM");
+    expect(when.includes("= ")).toBe(!when.includes("(WIB)"));
   });
 });

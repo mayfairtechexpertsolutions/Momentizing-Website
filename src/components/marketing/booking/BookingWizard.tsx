@@ -25,7 +25,6 @@ import { ActionBar, BookButton, BookCard, Field, InlineNotice, ReviewRow, StepHe
 import { DateStrip } from "./DateStrip";
 import { HelpSheet } from "./HelpSheet";
 import { ManualReview } from "./ManualReview";
-import { ManualTimeStep } from "./ManualTimeStep";
 import { SlotPicker } from "./SlotPicker";
 import { SpecialistNameSearch, SpecialistProfileSheet, SpecialistSuggestionCard, firstNameOf } from "./SpecialistParts";
 import { Stepper } from "./Stepper";
@@ -249,16 +248,7 @@ export function BookingWizard() {
           onHelp={() => setHelpOpen(true)}
         />
       )}
-      {draft.step === "time" && draft.specialist && isFallbackSpecialistId(draft.specialist.id) && (
-        <ManualTimeStep
-          draft={draft}
-          patch={patch}
-          headingRef={headingRef}
-          onBack={linked ? undefined : () => goto("specialist")}
-          onNext={() => goto(linked ? "about" : "review")}
-        />
-      )}
-      {draft.step === "time" && !(draft.specialist && isFallbackSpecialistId(draft.specialist.id)) && (
+      {draft.step === "time" && (
         <StepTime
           draft={draft}
           patch={patch}
@@ -716,7 +706,7 @@ function StepTime({
   return (
     <>
       <BookCard>
-        <StepHeading headingRef={headingRef} title={linked ? t("site.book.step.dayTime") : t("site.spec.chooseTime")} sub={t("site.book.realTimesWith", { name: specialist.name })} />
+        <StepHeading headingRef={headingRef} title={linked ? t("site.book.step.dayTime") : t("site.spec.chooseTime")} sub={isFallbackSpecialistId(specialist.id) ? t("site.fallback.timeSub", { name: firstNameOf(specialist.name) }) : t("site.book.realTimesWith", { name: specialist.name })} />
         {notice && (
           <div className="mb-5">
             <InlineNotice tone="warn" role="alert">

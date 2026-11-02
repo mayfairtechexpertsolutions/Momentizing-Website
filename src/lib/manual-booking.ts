@@ -1,5 +1,5 @@
-import { FALLBACK_TIME_ZONE_LABEL, formatClock } from "./fallback-specialists";
-import { formatDateLong } from "./local-date";
+import { FALLBACK_TIME_ZONE_LABEL, WIB_OFFSET_MINUTES, formatClock } from "./fallback-specialists";
+import { formatDateLong, localToUtc, parseIsoLocal, zoneLabel } from "./local-date";
 
 /**
  * Booking by WhatsApp request, used when the backend is unavailable and a specialist has no real calendar.
@@ -10,23 +10,11 @@ import { formatDateLong } from "./local-date";
 /** Keeps the wa.me link comfortably under common URL length limits even with a long note. */
 export const MAX_MANUAL_NOTE_CHARS = 500;
 
-/** Start times offered in the manual picker (WIB), every 30 minutes. */
-const FIRST_START_HOUR = 6;
-const LAST_START_HOUR = 21;
-const START_STEP_MINUTES = 30;
-
-export const MANUAL_TIME_OPTIONS: string[] = Array.from({ length: (LAST_START_HOUR - FIRST_START_HOUR + 1) * (60 / START_STEP_MINUTES) }, (_, i) => {
-  const totalMinutes = FIRST_START_HOUR * 60 + i * START_STEP_MINUTES;
-  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
-  const minutes = String(totalMinutes % 60).padStart(2, "0");
-  return `${hours}:${minutes}`;
-});
-
 export interface ManualBookingRequest {
   specialistName: string;
-  /** Local calendar date, "YYYY-MM-DD". */
+  /** The visitor's own calendar date, "YYYY-MM-DD". */
   date: string;
-  /** WIB start time, "HH:mm". */
+  /** Start time on the visitor's own clock, "HH:mm" (as picked in the slot picker). */
   time: string;
   fullName: string;
   whatsapp: string;
@@ -43,9 +31,20 @@ export interface ManualBookingRequest {
 
 const yesNo = (value: boolean | null): string => (value === null ? "Not answered" : value ? "Yes" : "No");
 
-/** "Friday, 3 October at 1:00 PM (WIB)" */
+/** The same instant on the expert's WIB clock, as "HH:mm" (the posters' zone, which the team reads). */
+export function toWibClock(date: string, time: string): string {
+  const utc = localToUtc(date, time);
+  const [h, m] = utc.time.split(":").map(Number);
+  const total = (h * 60 + m + WIB_OFFSET_MINUTES) % (24 * 60);
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
+/** "Friday, 3 October at 1:00 PM (WIB)"; when the visitor is not on WIB, also "= 2:00 PM WIB". */
 export function formatManualWhen(date: string, time: string): string {
-  return `${formatDateLong(date)} at ${formatClock(time)} (${FALLBACK_TIME_ZONE_LABEL})`;
+  const zone = zoneLabel(parseIsoLocal(date));
+  const wib = formatClock(toWibClock(date, time));
+  const base = `${formatDateLong(date)} at ${formatClock(time)} (${zone})`;
+  return zone === FALLBACK_TIME_ZONE_LABEL ? base : `${base} = ${wib} ${FALLBACK_TIME_ZONE_LABEL}`;
 }
 
 function truncateNote(note: string): string {

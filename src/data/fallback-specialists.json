@@ -1,5 +1,6 @@
 {
-  "_help": "Team profiles shown ONLY when the live backend is unavailable (transcribed from the 'Our Experts' posters). Ids must be unique negative numbers. Days are full English names. Times are 24h HH:mm in WIB (UTC+7). Leave out acceptsCouple to mean false.",
+  "_help": "Team profiles shown ONLY when the live backend is unavailable (transcribed from the 'Our Experts' posters). Ids must be unique negative numbers. weeklySlots lists the session start times per weekday (full English day names, 24h HH:mm, WIB = UTC+7); each slot lasts durationMinutes. A profile may set its own durationMinutes, otherwise defaultDurationMinutes applies. Leave out acceptsCouple to mean false.",
+  "defaultDurationMinutes": 60,
   "specialists": [
     {
       "id": -1,
@@ -8,7 +9,9 @@
       "bio": "Clinical Psychologist of Momentizing.",
       "areasOfExpertise": ["Anxiety/Depression", "Mood related issues", "Sleep disorder", "Eating disorder", "Personality disorder", "Career mapping", "Identity development", "Gender role issues"],
       "credentials": ["Therapy modality: Solution Focused-Brief Therapy approach", "Therapy modality: Reality Therapy approach", "Therapy modality: Emotion-Focused Therapy approach"],
-      "workingHours": [{ "days": ["Tuesday"], "from": "13:00", "to": "15:00" }]
+      "weeklySlots": {
+        "Tuesday": ["13:00", "14:00"]
+      }
     },
     {
       "id": -2,
@@ -17,7 +20,9 @@
       "bio": "Personal Development Counselor of Momentizing.",
       "areasOfExpertise": ["Personal development", "Career mapping"],
       "credentials": ["Gestalt Therapy approach", "Rational Emotive Behavioral Therapy (REBT) Training"],
-      "workingHours": [{ "days": ["Friday"], "from": "13:00", "to": "16:00" }]
+      "weeklySlots": {
+        "Friday": ["13:00", "14:00", "15:00"]
+      }
     },
     {
       "id": -3,
@@ -26,10 +31,10 @@
       "bio": "Relationship Counselor of Momentizing.",
       "areasOfExpertise": ["Anxiety/Depression", "Mood related issues", "Identity development"],
       "credentials": ["Art & Dance Therapy Trainee"],
-      "workingHours": [
-        { "days": ["Saturday"], "from": "07:00", "to": "21:00" },
-        { "days": ["Tuesday"], "from": "15:00", "to": "18:00" }
-      ]
+      "weeklySlots": {
+        "Saturday": ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"],
+        "Tuesday": ["15:00", "16:00", "17:00"]
+      }
     },
     {
       "id": -4,
@@ -39,7 +44,10 @@
       "acceptsCouple": true,
       "areasOfExpertise": ["Third Culture Kid (TCK)", "Intercultural relationship", "Parenting", "Self-development", "Courtship counseling"],
       "credentials": ["Certified International Coach", "Mixed married couples (Courtship coaching)", "Training in corporate for Intercultural workspace & workers", "International Schools"],
-      "workingHours": [{ "days": ["Wednesday", "Friday"], "from": "09:00", "to": "11:00" }]
+      "weeklySlots": {
+        "Wednesday": ["09:00", "10:00"],
+        "Friday": ["09:00", "10:00"]
+      }
     },
     {
       "id": -5,
@@ -48,7 +56,10 @@
       "bio": "Yoga Instructor & Access Bars Practitioner of Momentizing.",
       "areasOfExpertise": ["Anxiety/Depression", "Mood related issues", "Burnout", "Grief", "Marital & Family", "Trauma"],
       "credentials": ["Certified Yoga Practitioner", "Certified Access Bars"],
-      "workingHours": [{ "days": ["Friday", "Saturday"], "from": "09:00", "to": "11:00" }]
+      "weeklySlots": {
+        "Friday": ["09:00", "10:00"],
+        "Saturday": ["09:00", "10:00"]
+      }
     }
   ]
 }
