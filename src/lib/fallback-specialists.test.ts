@@ -1,4 +1,7 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
+import fallbackData from "@/data/fallback-specialists.json";
 import {
   FALLBACK_SPECIALISTS,
   fallbackDirectoryPage,
@@ -34,6 +37,34 @@ describe("fallback specialists data", () => {
 
   it("gives every profile a valid IANA time zone", () => {
     expect(FALLBACK_SPECIALISTS.every((s) => s.timeZone === "Asia/Jakarta")).toBe(true);
+  });
+
+  it("always has a photo to show: the profile's own, or a default portrait that exists", () => {
+    for (const s of FALLBACK_SPECIALISTS) {
+      expect(s.avatarUrl).toBeTruthy();
+      expect(s.defaultPhotoUrl).toMatch(/\/team\/default\/(female|male|neutral)\.svg$/);
+      expect(existsSync(path.join(process.cwd(), "public", s.defaultPhotoUrl))).toBe(true);
+    }
+  });
+
+  it("only references photo files that exist in public/team", () => {
+    for (const record of fallbackData.specialists) {
+      if (record.photo) expect(existsSync(path.join(process.cwd(), "public/team", record.photo))).toBe(true);
+    }
+  });
+
+  it("has a valid practice mode, with a location for every on-site or hybrid profile", () => {
+    for (const s of FALLBACK_SPECIALISTS) {
+      expect(["ONLINE", "IN_PERSON", "HYBRID"]).toContain(s.practiceMode);
+      if (s.practiceMode !== "ONLINE") expect(s.locations.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("keeps the session fee for the team but never exposes it to the website", () => {
+    for (const s of FALLBACK_SPECIALISTS) {
+      expect(s.sessionFeeCents).toBeNull();
+      expect(s.recordedSessionFee.currency).toBeTruthy();
+    }
   });
 
   it("only Fida accepts couples", () => {

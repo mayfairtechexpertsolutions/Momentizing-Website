@@ -1,5 +1,7 @@
 "use client";
 
+import { AvatarImage } from "../AvatarImage";
+import { fallbackPhotoFor } from "@/lib/fallback-specialists";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -138,8 +140,7 @@ export function ProfileHero({ specialist: p }: { specialist: MarketingSpecialist
             <div aria-hidden="true" className="absolute inset-0 translate-x-3 translate-y-3 rotate-3 rounded-[2.5rem] bg-momentizing-peach md:rounded-[3rem]" />
             <div className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] border-[6px] border-white bg-momentizing-cream shadow-2xl shadow-momentizing-teal/20 md:rounded-[3rem]">
               {p.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.avatarUrl} alt={t("site.spec.portrait", { name: p.name })} className="h-full w-full object-cover object-top" />
+                <AvatarImage src={p.avatarUrl} fallbackSrc={fallbackPhotoFor(p.id)} alt={t("site.spec.portrait", { name: p.name })} className="h-full w-full object-cover object-top" />
               ) : (
                 <div
                   aria-hidden="true"
