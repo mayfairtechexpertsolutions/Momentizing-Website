@@ -24,7 +24,7 @@ npm install
 npm run dev          # http://localhost:3001
 npm test             # vitest (jsdom + Testing Library)
 npm run lint
-npx tsc --noEmit     # type-check
+npm run typecheck    # type-check (generates Next route types first, so it works on a fresh checkout)
 npm run build        # static export to out/
 ```
 

@@ -1,6 +1,7 @@
 import fallbackData from "@/data/fallback-specialists.json";
 import type { PublicSlots, PublicSpecialistCard } from "./guest-booking";
-import { addDaysIso } from "./local-date";
+import { addDaysIso, parseIsoLocal } from "./local-date";
+import { intlLocale } from "@/i18n";
 import type { MarketingSpecialist } from "./marketing-directory";
 import type { PageResponse } from "./types";
 
@@ -11,14 +12,9 @@ import type { PageResponse } from "./types";
  * When a poster changes, edit `src/data/fallback-specialists.json`; the live directory always wins when the backend answers.
  */
 
-/** Hours on the posters are written in Western Indonesia Time (UTC+7). */
-export const FALLBACK_TIME_ZONE_LABEL = "WIB";
-
 /** Full English day names; the position is the 0 = Monday … 6 = Sunday index used by `DAY_LABELS` in marketing-directory. */
 const WEEKDAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-/** WIB is UTC+7 all year (Indonesia has no daylight saving). */
-export const WIB_OFFSET_MINUTES = 7 * 60;
 const MINUTES_PER_DAY = 24 * 60;
 const MS_PER_MINUTE = 60_000;
 
@@ -26,13 +22,15 @@ const MS_PER_MINUTE = 60_000;
 export interface WeeklySlotDay {
   /** 0 = Monday … 6 = Sunday. */
   day: number;
-  /** 24h "HH:mm", WIB, ascending. */
+  /** 24h "HH:mm" in the profile's own time zone, ascending. */
   times: string[];
 }
 
 export interface FallbackSpecialist extends MarketingSpecialist {
   weeklySlots: WeeklySlotDay[];
   durationMinutes: number;
+  /** IANA name the weekly times are written in, e.g. "Asia/Jakarta". */
+  timeZone: string;
 }
 
 /** One entry of `src/data/fallback-specialists.json` — the file the team edits. */
@@ -46,7 +44,9 @@ interface FallbackProfileRecord {
   credentials: string[];
   /** Optional; `defaultDurationMinutes` applies when absent. */
   durationMinutes?: number;
-  /** Weekday name -> session start times (24h "HH:mm", WIB). */
+  /** IANA time zone name ("Area/City", e.g. "Asia/Jakarta") the weekly times are written in. */
+  timeZone: string;
+  /** Weekday name -> session start times (24h "HH:mm", in `timeZone`). */
   weeklySlots: Record<string, string[]>;
 }
 
@@ -61,6 +61,15 @@ function dayIndex(name: string): number {
   return index;
 }
 
+function assertValidTimeZone(timeZone: string, who: string): string {
+  try {
+    new Intl.DateTimeFormat("en", { timeZone });
+    return timeZone;
+  } catch {
+    throw new Error(`fallback-specialists.json: "${who}" has an invalid timeZone "${timeZone}" (use an IANA name such as "Asia/Jakarta", not "WIB" or "UTC+7")`);
+  }
+}
+
 function toSpecialist(record: FallbackProfileRecord): FallbackSpecialist {
   return {
     id: record.id,
@@ -73,6 +82,7 @@ function toSpecialist(record: FallbackProfileRecord): FallbackSpecialist {
       .map(([name, times]) => ({ day: dayIndex(name), times: [...times].sort() }))
       .sort((a, b) => a.day - b.day),
     durationMinutes: record.durationMinutes ?? DEFAULT_DURATION_MINUTES,
+    timeZone: assertValidTimeZone(record.timeZone, record.name),
     avatarUrl: null,
     languages: null,
     acceptingNewClients: true,
@@ -175,6 +185,45 @@ export function describeWorkingHours(s: Pick<FallbackSpecialist, "weeklySlots" |
   return [...daysByHours].map(([hours, days]) => `${days.join(" & ")} · ${hours}`);
 }
 
+/** Minutes the zone is ahead of UTC at that instant (e.g. 420 for Asia/Jakarta). */
+function zoneOffsetMinutes(timeZone: string, utcMs: number): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  }).formatToParts(new Date(utcMs));
+  const value = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  const wallAsUtc = Date.UTC(value("year"), value("month") - 1, value("day"), value("hour"), value("minute"));
+  return Math.round((wallAsUtc - Math.floor(utcMs / MS_PER_MINUTE) * MS_PER_MINUTE) / MS_PER_MINUTE);
+}
+
+/** The UTC instant at which the clock in `timeZone` reads the given wall time. Handles zones with daylight saving. */
+function zonedWallTimeToUtcMs(timeZone: string, year: number, month: number, day: number, hour: number, minute: number): number {
+  const wallAsUtc = Date.UTC(year, month - 1, day, hour, minute);
+  const firstGuess = wallAsUtc - zoneOffsetMinutes(timeZone, wallAsUtc) * MS_PER_MINUTE;
+  return wallAsUtc - zoneOffsetMinutes(timeZone, firstGuess) * MS_PER_MINUTE;
+}
+
+/** Short zone name on a date as the reader's language shows it, e.g. "WIB" (Indonesian) or "GMT+7" (English). */
+export function expertZoneLabel(timeZone: string, dateIso: string): string {
+  return (
+    new Intl.DateTimeFormat(intlLocale(), { timeZone, timeZoneName: "short" })
+      .formatToParts(parseIsoLocal(dateIso))
+      .find((p) => p.type === "timeZoneName")?.value ?? timeZone
+  );
+}
+
+/** The clock reading in `timeZone` at a UTC instant, as "HH:mm". */
+export function clockInZone(timeZone: string, utcMs: number): string {
+  const offset = zoneOffsetMinutes(timeZone, utcMs);
+  const total = (((Math.floor(utcMs / MS_PER_MINUTE) + offset) % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
 function isoOfUtcMs(ms: number): string {
   return new Date(ms).toISOString().slice(0, 10);
 }
@@ -186,15 +235,15 @@ function isoOfUtcMs(ms: number): string {
  */
 export function fallbackSlots(specialist: FallbackSpecialist, fromUtc: string, days: number): PublicSlots {
   const byUtcDate = new Map<string, string[]>();
-  // Start one day early: a morning WIB slot falls on the previous UTC date.
+  // Start one day early: a morning slot east of UTC falls on the previous UTC date.
   for (let offset = -1; offset <= days; offset++) {
-    const wibDate = addDaysIso(fromUtc, offset);
-    const [y, mo, d] = wibDate.split("-").map(Number);
+    const expertDate = addDaysIso(fromUtc, offset);
+    const [y, mo, d] = expertDate.split("-").map(Number);
     const weekday = (new Date(Date.UTC(y, mo - 1, d)).getUTCDay() + 6) % 7;
     const day = specialist.weeklySlots.find((w) => w.day === weekday);
     for (const time of day?.times ?? []) {
       const [h, mi] = time.split(":").map(Number);
-      const utcMs = Date.UTC(y, mo - 1, d, h, mi ?? 0) - WIB_OFFSET_MINUTES * MS_PER_MINUTE;
+      const utcMs = zonedWallTimeToUtcMs(specialist.timeZone, y, mo, d, h, mi ?? 0);
       const utc = new Date(utcMs);
       const utcDate = isoOfUtcMs(utcMs);
       const utcTime = `${String(utc.getUTCHours()).padStart(2, "0")}:${String(utc.getUTCMinutes()).padStart(2, "0")}`;
@@ -211,7 +260,7 @@ export function fallbackSlots(specialist: FallbackSpecialist, fromUtc: string, d
     durationMinutes: specialist.durationMinutes,
     sessionTypes: ["ONLINE"],
     timezone: "UTC",
-    expertTimeZone: FALLBACK_TIME_ZONE_LABEL,
+    expertTimeZone: specialist.timeZone,
     days: windowDays,
     nextAvailableDate: windowDays.find((d) => d.times.length > 0)?.date ?? null,
   };

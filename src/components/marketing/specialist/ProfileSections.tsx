@@ -2,7 +2,8 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { FALLBACK_TIME_ZONE_LABEL, describeWorkingHours, getFallbackSpecialist, isFallbackSpecialistId } from "@/lib/fallback-specialists";
+import { todayIso } from "@/lib/local-date";
+import { describeWorkingHours, expertZoneLabel, getFallbackSpecialist, isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import {
   practiceModeLabel,
   formatActiveDays,
@@ -301,7 +302,7 @@ export function WorkingHoursSection({ specialist: p }: { specialist: MarketingSp
   const windows = fallback ? describeWorkingHours(fallback) : [];
   if (windows.length === 0) return null;
   return (
-    <SectionCard id="hours" icon="fa-clock" title={t("site.fallback.workingHours", { zone: FALLBACK_TIME_ZONE_LABEL })}>
+    <SectionCard id="hours" icon="fa-clock" title={t("site.fallback.workingHours", { zone: expertZoneLabel(fallback?.timeZone ?? "UTC", todayIso()) })}>
       <ul className="space-y-2 text-base text-momentizing-slate/90">
         {windows.map((w) => (
           <li key={w} className="flex items-start gap-3">

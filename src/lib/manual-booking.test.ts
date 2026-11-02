@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { MAX_MANUAL_NOTE_CHARS, buildManualBookingMessage, formatManualWhen, toWibClock, type ManualBookingRequest } from "./manual-booking";
+import { MAX_MANUAL_NOTE_CHARS, buildManualBookingMessage, formatManualWhen, toExpertClock, type ManualBookingRequest } from "./manual-booking";
 
 const base: ManualBookingRequest = {
   specialistName: "Adeline Herdianto",
+  expertTimeZone: "Asia/Jakarta",
   date: "2026-11-03",
   time: "13:00",
   fullName: " Sari ",
@@ -47,15 +48,16 @@ describe("buildManualBookingMessage", () => {
 
 describe("time zones", () => {
   // vitest.setup.ts runs the suite in America/Los_Angeles (PST, UTC-8, in November) unless TEST_TZ says otherwise.
-  it("converts the visitor's clock to the expert's WIB clock", () => {
+  it("converts the visitor's clock to the expert's clock", () => {
     const zoneOffsetHours = -new Date(2026, 10, 3, 12).getTimezoneOffset() / 60;
     const expectedHour = (13 - zoneOffsetHours + 7 + 24) % 24;
-    expect(toWibClock("2026-11-03", "13:00")).toBe(`${String(expectedHour).padStart(2, "0")}:00`);
+    expect(toExpertClock("2026-11-03", "13:00", "Asia/Jakarta")).toBe(`${String(expectedHour).padStart(2, "0")}:00`);
   });
 
   it("states the time on the visitor's clock and, when not on WIB, the WIB equivalent", () => {
-    const when = formatManualWhen("2026-11-03", "13:00");
+    const when = formatManualWhen("2026-11-03", "13:00", "Asia/Jakarta");
     expect(when).toContain("1:00 PM");
-    expect(when.includes("= ")).toBe(!when.includes("(WIB)"));
+    // Visitor in Los Angeles: 13:00 PST is 04:00 the next day in Jakarta. On a Jakarta clock no conversion is added.
+    expect(when.includes("= ")).toBe(!/\((WIB|GMT\+7)\)/.test(when));
   });
 });

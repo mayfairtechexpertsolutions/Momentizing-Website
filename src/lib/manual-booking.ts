@@ -1,4 +1,4 @@
-import { FALLBACK_TIME_ZONE_LABEL, WIB_OFFSET_MINUTES, formatClock } from "./fallback-specialists";
+import { clockInZone, expertZoneLabel, formatClock } from "./fallback-specialists";
 import { formatDateLong, localToUtc, parseIsoLocal, zoneLabel } from "./local-date";
 
 /**
@@ -12,6 +12,8 @@ export const MAX_MANUAL_NOTE_CHARS = 500;
 
 export interface ManualBookingRequest {
   specialistName: string;
+  /** IANA zone the expert's hours are written in, e.g. "Asia/Jakarta". */
+  expertTimeZone: string;
   /** The visitor's own calendar date, "YYYY-MM-DD". */
   date: string;
   /** Start time on the visitor's own clock, "HH:mm" (as picked in the slot picker). */
@@ -31,20 +33,20 @@ export interface ManualBookingRequest {
 
 const yesNo = (value: boolean | null): string => (value === null ? "Not answered" : value ? "Yes" : "No");
 
-/** The same instant on the expert's WIB clock, as "HH:mm" (the posters' zone, which the team reads). */
-export function toWibClock(date: string, time: string): string {
+/** The visitor's local `date` + `time` on the expert's clock, as "HH:mm". */
+export function toExpertClock(date: string, time: string, expertTimeZone: string): string {
   const utc = localToUtc(date, time);
+  const [y, mo, d] = utc.date.split("-").map(Number);
   const [h, m] = utc.time.split(":").map(Number);
-  const total = (h * 60 + m + WIB_OFFSET_MINUTES) % (24 * 60);
-  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+  return clockInZone(expertTimeZone, Date.UTC(y, mo - 1, d, h, m));
 }
 
-/** "Friday, 3 October at 1:00 PM (WIB)"; when the visitor is not on WIB, also "= 2:00 PM WIB". */
-export function formatManualWhen(date: string, time: string): string {
-  const zone = zoneLabel(parseIsoLocal(date));
-  const wib = formatClock(toWibClock(date, time));
-  const base = `${formatDateLong(date)} at ${formatClock(time)} (${zone})`;
-  return zone === FALLBACK_TIME_ZONE_LABEL ? base : `${base} = ${wib} ${FALLBACK_TIME_ZONE_LABEL}`;
+/** "Friday, 3 October at 1:00 PM (WIB)"; when the visitor is in another zone, also "= 2:00 PM WIB". */
+export function formatManualWhen(date: string, time: string, expertTimeZone: string): string {
+  const visitorZone = zoneLabel(parseIsoLocal(date));
+  const expertZone = expertZoneLabel(expertTimeZone, date);
+  const base = `${formatDateLong(date)} at ${formatClock(time)} (${visitorZone})`;
+  return visitorZone === expertZone ? base : `${base} = ${formatClock(toExpertClock(date, time, expertTimeZone))} ${expertZone}`;
 }
 
 function truncateNote(note: string): string {
@@ -58,7 +60,7 @@ export function buildManualBookingMessage(req: ManualBookingRequest): string {
     "Hi Momentizing, I'd like to request a session.",
     "",
     `Specialist: ${req.specialistName}`,
-    `Preferred time: ${formatManualWhen(req.date, req.time)}`,
+    `Preferred time: ${formatManualWhen(req.date, req.time, req.expertTimeZone)}`,
     `Name: ${req.fullName.trim()}`,
     `WhatsApp: ${req.whatsapp.trim()}`,
     `First time seeing a therapist or counsellor: ${yesNo(req.answers.firstTime)}`,

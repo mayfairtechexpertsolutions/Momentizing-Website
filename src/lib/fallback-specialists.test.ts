@@ -32,6 +32,10 @@ describe("fallback specialists data", () => {
     }
   });
 
+  it("gives every profile a valid IANA time zone", () => {
+    expect(FALLBACK_SPECIALISTS.every((s) => s.timeZone === "Asia/Jakarta")).toBe(true);
+  });
+
   it("only Fida accepts couples", () => {
     expect(FALLBACK_SPECIALISTS.filter((s) => s.acceptsCouple).map((s) => s.name)).toEqual(["Fida Muljono"]);
   });
@@ -77,6 +81,14 @@ describe("fallbackSlots", () => {
     expect(res.days.find((d) => d.date === "2026-11-10")?.times).toEqual(["06:00", "07:00"]);
     expect(res.nextAvailableDate).toBe("2026-11-03");
     expect(res.durationMinutes).toBe(60);
+  });
+
+  it("honours the profile's own time zone, daylight saving included", () => {
+    // Sydney is UTC+11 in November (AEDT): Tuesday 13:00 there = Tuesday 02:00 UTC.
+    const sydney = { ...getFallbackSpecialist(-1)!, timeZone: "Australia/Sydney" };
+    expect(fallbackSlots(sydney, "2026-11-01", 14).days.find((d) => d.date === "2026-11-03")?.times).toEqual(["02:00", "03:00"]);
+    // ...and UTC+10 in July (AEST): the same wall time is an hour later in UTC terms.
+    expect(fallbackSlots(sydney, "2026-07-01", 14).days.find((d) => d.date === "2026-07-07")?.times).toEqual(["03:00", "04:00"]);
   });
 
   it("keeps the earliest WIB slot on its own UTC date and lists every slot of a long day", () => {
