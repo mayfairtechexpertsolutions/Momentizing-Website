@@ -1,11 +1,12 @@
-import { t } from "@/i18n";
+import { t, getLocale } from "@/i18n";
 import { apiFetch, type ApiFetchOptions } from "./api";
 
+/** `label` is a translation key. */
 export const PROFESSIONS = [
-  { value: "PSYCHOLOGIST", label: "Psychologist" },
-  { value: "THERAPIST", label: "Therapist / Counsellor" },
-  { value: "PSYCHIATRIST", label: "Psychiatrist" },
-  { value: "COACH", label: "Coach" },
+  { value: "PSYCHOLOGIST", label: "site.profession.PSYCHOLOGIST" },
+  { value: "THERAPIST", label: "site.careers.therapistCounsellor" },
+  { value: "PSYCHIATRIST", label: "site.profession.PSYCHIATRIST" },
+  { value: "COACH", label: "site.profession.COACH" },
 ] as const;
 
 export type ProfessionValue = (typeof PROFESSIONS)[number]["value"];
@@ -58,7 +59,8 @@ export const requestResumeUpload = (file: Pick<File, "name" | "type" | "size">, 
 
 export const submitCareerApplication = (payload: CareerApplicationPayload, idempotencyKey: string) =>
   apiFetch<{ received: boolean }>("/public/careers/applications", {
-    ...json(payload),
+    // locale: the API writes this visitor's WhatsApp replies / emails in the language they used here.
+    ...json({ ...payload, locale: getLocale() }),
     headers: { "Idempotency-Key": idempotencyKey },
     anonymous: true,
   });

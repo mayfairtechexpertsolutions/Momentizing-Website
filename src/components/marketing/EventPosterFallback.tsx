@@ -1,6 +1,5 @@
-import type { EventFormat } from "@/lib/events";
-
-const FORMAT_EYEBROW: Record<EventFormat, string> = { IN_PERSON: "In person", ONLINE: "Online", HYBRID: "In person & online" };
+import { formatLabel, type EventFormat } from "@/lib/events";
+import { t } from "@/i18n";
 
 /** Three brand palettes; text colours are AA on their own background (the circles stay clear of the text). */
 const PALETTES = [
@@ -24,8 +23,8 @@ export function EventPosterFallback({ title, format }: { title: string; format: 
       <span className={`absolute -top-[18%] -right-[22%] aspect-square w-[78%] rounded-full opacity-90 ${p.big}`} />
       <span className={`absolute -right-[12%] -bottom-[14%] aspect-square w-[46%] rounded-full ${p.small}`} />
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-[3cqw] p-[8cqw] pr-[30cqw]">
-        <span className={`font-marketing-sans text-[max(12px,3.6cqw)] font-bold tracking-[0.18em] uppercase ${p.eyebrow}`}>{FORMAT_EYEBROW[format]}</span>
-        <span className={`line-clamp-4 font-marketing-serif text-[9.5cqw] leading-[1.08] font-semibold ${p.title}`}>{title || "Momentizing event"}</span>
+        <span className={`font-marketing-sans text-[max(12px,3.6cqw)] font-bold tracking-[0.18em] uppercase ${p.eyebrow}`}>{formatLabel(format)}</span>
+        <span className={`line-clamp-4 font-marketing-serif text-[9.5cqw] leading-[1.08] font-semibold ${p.title}`}>{title || t("site.events.fallbackTitle")}</span>
         <span className="mt-[4cqw] font-marketing-sans text-[max(12px,3.4cqw)] font-bold tracking-[0.3em] text-momentizing-muted uppercase">Momentizing</span>
       </div>
     </div>

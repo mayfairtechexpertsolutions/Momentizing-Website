@@ -7,7 +7,7 @@ import { initials } from "@/components/marketing/booking/SpecialistParts";
 import { useWhatsAppLink } from "@/lib/whatsapp";
 import { StarRating } from "@/components/marketing/StarRating";
 import {
-  PRACTICE_MODE_LABEL,
+  practiceModeLabel,
   formatSessionFee,
   languageList,
   professionLabel,
@@ -15,6 +15,7 @@ import {
   type MarketingSpecialist,
 } from "@/lib/marketing-directory";
 import { useFavorites } from "@/lib/favorites";
+import { t } from "@/i18n";
 
 interface Fact {
   icon: string;
@@ -28,10 +29,10 @@ function quickFacts(p: MarketingSpecialist): Fact[] {
   const langs = languageList(p.languages);
   const facts: Fact[] = [];
   // Experience already sits beside the profession above the name; only repeat it here when that line can't show it.
-  if (p.yearsExperience === 0) facts.push({ icon: "fa-award", label: "Experience", value: "Under a year" });
-  facts.push({ icon: "fa-video", label: "Sessions", value: PRACTICE_MODE_LABEL[p.practiceMode] ?? p.practiceMode });
-  if (fee) facts.push({ icon: "fa-tag", label: "Per session", value: fee, note: p.freeFirstSession ? "First session free" : undefined });
-  if (langs.length > 0) facts.push({ icon: "fa-language", label: "Languages", value: langs.join(" · ") });
+  if (p.yearsExperience === 0) facts.push({ icon: "fa-award", label: t("site.spec.experience"), value: t("site.spec.underYear") });
+  facts.push({ icon: "fa-video", label: t("site.spec.sessions"), value: practiceModeLabel(p.practiceMode) ?? p.practiceMode });
+  if (fee) facts.push({ icon: "fa-tag", label: t("site.spec.perSessionLabel"), value: fee, note: p.freeFirstSession ? t("site.spec.firstFree") : undefined });
+  if (langs.length > 0) facts.push({ icon: "fa-language", label: t("site.spec.languages"), value: langs.join(" · ") });
   return facts;
 }
 
@@ -77,11 +78,11 @@ function ShareButton({ name }: { name: string }) {
 
   return (
     <span className="relative">
-      <button type="button" onClick={share} aria-label={`Share ${name}'s profile`} className={iconButtonClass}>
+      <button type="button" onClick={share} aria-label={t("site.spec.shareProfile", { name })} className={iconButtonClass}>
         <i aria-hidden="true" className={copied ? "fas fa-check text-momentizing-teal" : "fas fa-share-alt"} />
       </button>
       <span role="status" className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap">
-        {copied && <span className="rounded-full bg-momentizing-slate px-3 py-1 text-xs font-bold text-white shadow-md">Link copied</span>}
+        {copied && <span className="rounded-full bg-momentizing-slate px-3 py-1 text-xs font-bold text-white shadow-md">{t("site.events.linkCopied")}</span>}
       </span>
     </span>
   );
@@ -107,7 +108,7 @@ export function ProfileHero({ specialist: p }: { specialist: MarketingSpecialist
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-momentizing-mint-deep/70 blur-3xl" />
 
       <div className="relative mx-auto max-w-6xl">
-        <nav aria-label="Breadcrumb" className="mb-6 md:mb-8">
+        <nav aria-label={t("site.spec.breadcrumb")} className="mb-6 md:mb-8">
           <Link
             href="/associates"
             onClick={(e) => {
@@ -127,7 +128,7 @@ export function ProfileHero({ specialist: p }: { specialist: MarketingSpecialist
             className="group inline-flex min-h-11 items-center gap-2 rounded-full bg-white/80 px-4 text-sm font-bold text-momentizing-teal shadow-sm ring-1 ring-momentizing-teal/15 transition hover:bg-white hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal motion-reduce:transition-none"
           >
             <i aria-hidden="true" className="fas fa-arrow-left text-xs transition-transform group-hover:-translate-x-0.5 motion-reduce:transition-none" />
-            Back to all associates
+            {t("site.spec.backToAll")}
           </Link>
         </nav>
 
@@ -138,7 +139,7 @@ export function ProfileHero({ specialist: p }: { specialist: MarketingSpecialist
             <div className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] border-[6px] border-white bg-momentizing-cream shadow-2xl shadow-momentizing-teal/20 md:rounded-[3rem]">
               {p.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.avatarUrl} alt={`Portrait of ${p.name}`} className="h-full w-full object-cover object-top" />
+                <img src={p.avatarUrl} alt={t("site.spec.portrait", { name: p.name })} className="h-full w-full object-cover object-top" />
               ) : (
                 <div
                   aria-hidden="true"
@@ -155,18 +156,18 @@ export function ProfileHero({ specialist: p }: { specialist: MarketingSpecialist
                 )}
                 <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${p.acceptingNewClients ? "bg-momentizing-teal" : "bg-momentizing-muted"}`} />
               </span>
-              {p.acceptingNewClients ? "Accepting new clients" : "Fully booked"}
+              {p.acceptingNewClients ? t("site.spec.accepting") : t("site.spec.fullyBooked")}
             </span>
           </div>
 
           <div className="min-w-0 text-center md:text-left">
             <p className="inline-flex flex-wrap items-center justify-center gap-x-2 rounded-full bg-white/80 px-4 py-1.5 text-xs font-bold tracking-[0.1em] text-momentizing-teal uppercase sm:tracking-[0.18em]">
-              {profession ?? "Specialist"}
+              {profession ?? t("site.spec.specialist")}
               {p.yearsExperience != null && p.yearsExperience > 0 && (
                 <>
                   <span aria-hidden="true" className="text-momentizing-teal/40">•</span>
                   <span className="whitespace-nowrap">
-                    {p.yearsExperience} {p.yearsExperience === 1 ? "year" : "years"} experience
+                    {t(p.yearsExperience === 1 ? "site.spec.yearExp" : "site.spec.yearsExp", { n: p.yearsExperience })}
                   </span>
                 </>
               )}
@@ -181,34 +182,34 @@ export function ProfileHero({ specialist: p }: { specialist: MarketingSpecialist
               </blockquote>
             )}
 
-            <ul aria-label="Highlights" className="mt-5 flex flex-wrap items-center justify-center gap-2 md:justify-start">
+            <ul aria-label={t("site.spec.highlights")} className="mt-5 flex flex-wrap items-center justify-center gap-2 md:justify-start">
               <li className="inline-flex min-h-8 items-center rounded-full bg-white/80 px-3 ring-1 ring-momentizing-slate/10">
                 <StarRating rating={p.averageRating} reviewCount={p.reviewCount} size="sm" />
               </li>
               {p.licenceNumber && (
                 <li className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-white/80 px-3 text-xs font-bold text-momentizing-teal ring-1 ring-momentizing-slate/10">
-                  <i aria-hidden="true" className="fas fa-shield-alt" /> Licensed practitioner
+                  <i aria-hidden="true" className="fas fa-shield-alt" /> {t("site.spec.licensed")}
                 </li>
               )}
               {p.freeFirstSession && (
                 <li className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-momentizing-teal px-3 text-xs font-bold text-white">
-                  <i aria-hidden="true" className="fas fa-gift" /> Free first session
+                  <i aria-hidden="true" className="fas fa-gift" /> {t("site.spec.freeFirst")}
                 </li>
               )}
               {p.proBonoAvailable && (
                 <li className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-momentizing-peach px-3 text-xs font-bold text-momentizing-gold-deep">
-                  <i aria-hidden="true" className="fas fa-hand-holding-heart" /> Pro-bono slots open
+                  <i aria-hidden="true" className="fas fa-hand-holding-heart" /> {t("site.spec.proBono")}
                 </li>
               )}
             </ul>
 
             {tags.length > 0 && (
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2 md:justify-start">
-                <span className="text-xs font-bold tracking-wider text-momentizing-muted uppercase">Helps with</span>
-                <ul aria-label="Specialties" className="contents">
-                  {tags.map((t) => (
-                    <li key={t} className="rounded-full border border-momentizing-teal/25 px-3 py-1 text-xs font-bold text-momentizing-teal">
-                      {t}
+                <span className="text-xs font-bold tracking-wider text-momentizing-muted uppercase">{t("site.spec.helpsWith")}</span>
+                <ul aria-label={t("site.spec.specialties")} className="contents">
+                  {tags.map((tag) => (
+                    <li key={tag} className="rounded-full border border-momentizing-teal/25 px-3 py-1 text-xs font-bold text-momentizing-teal">
+                      {tag}
                     </li>
                   ))}
                 </ul>
@@ -221,35 +222,35 @@ export function ProfileHero({ specialist: p }: { specialist: MarketingSpecialist
                   href={`/book?specialist=${p.id}`}
                   className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-momentizing-teal px-7 text-base font-bold text-white shadow-lg shadow-momentizing-teal/25 transition hover:-translate-y-0.5 hover:bg-momentizing-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                 >
-                  <i aria-hidden="true" className="far fa-calendar-check" /> Book with {first}
+                  <i aria-hidden="true" className="far fa-calendar-check" /> {t("site.spec.bookWith", { name: first })}
                 </Link>
               ) : (
                 <Link
                   href="/associates"
                   className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-momentizing-teal px-7 text-base font-bold text-white shadow-lg shadow-momentizing-teal/25 transition hover:bg-momentizing-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal motion-reduce:transition-none"
                 >
-                  <i aria-hidden="true" className="fas fa-users" /> Meet other associates
+                  <i aria-hidden="true" className="fas fa-users" /> {t("site.spec.meetOthers")}
                 </Link>
               )}
               <div className="flex items-center justify-center gap-3">
                 <a
                   href={whatsAppLink(
                     p.acceptingNewClients
-                      ? `Hi Momentizing, I'd like to ask about booking a session with ${p.name}.`
-                      : `Hi Momentizing, I'd like to know when ${p.name} has availability again.`,
+                      ? t("site.whatsapp.askBooking", { name: p.name })
+                      : t("site.whatsapp.askAvailability", { name: p.name }),
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-white/80 px-6 text-sm font-bold text-momentizing-gold-deep ring-1 ring-momentizing-gold-deep/30 transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal motion-reduce:transition-none sm:flex-none"
                 >
-                  <i aria-hidden="true" className="fab fa-whatsapp text-lg" /> {p.acceptingNewClients ? "Ask a question" : "Ask about availability"}
-                  <span className="sr-only"> (opens in a new tab)</span>
+                  <i aria-hidden="true" className="fab fa-whatsapp text-lg" /> {p.acceptingNewClients ? t("site.spec.askQuestion") : t("site.spec.askAvailability")}
+                  <span className="sr-only"> {t("site.common.newTab")}</span>
                 </a>
                 <button
                   type="button"
                   onClick={() => toggleFavorite(p.id)}
                   aria-pressed={favorited}
-                  aria-label={favorited ? `Remove ${p.name} from favorites` : `Save ${p.name} to favorites`}
+                  aria-label={favorited ? t("site.spec.unfavorite", { name: p.name }) : t("site.spec.favorite", { name: p.name })}
                   className={iconButtonClass}
                 >
                   <i aria-hidden="true" className={favorited ? "fas fa-heart text-momentizing-gold-deep" : "far fa-heart"} />
@@ -261,13 +262,13 @@ export function ProfileHero({ specialist: p }: { specialist: MarketingSpecialist
             {p.acceptingNewClients && (
               <p className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm font-semibold text-momentizing-muted md:justify-start">
                 <span className="inline-flex items-center gap-1.5">
-                  <i aria-hidden="true" className="fas fa-check text-xs text-momentizing-teal" /> No account needed
+                  <i aria-hidden="true" className="fas fa-check text-xs text-momentizing-teal" /> {t("site.spec.noAccount")}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <i aria-hidden="true" className="fas fa-check text-xs text-momentizing-teal" /> Real open times
+                  <i aria-hidden="true" className="fas fa-check text-xs text-momentizing-teal" /> {t("site.spec.realTimes")}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <i aria-hidden="true" className="fas fa-check text-xs text-momentizing-teal" /> Confirmed on WhatsApp
+                  <i aria-hidden="true" className="fas fa-check text-xs text-momentizing-teal" /> {t("site.spec.confirmedWa")}
                 </span>
               </p>
             )}
@@ -276,7 +277,7 @@ export function ProfileHero({ specialist: p }: { specialist: MarketingSpecialist
 
         {facts.length > 0 && (
           <ul
-            aria-label="At a glance"
+            aria-label={t("site.spec.atAGlance")}
             className={`mt-12 grid grid-cols-2 overflow-hidden rounded-3xl bg-white/85 shadow-[0_8px_30px_rgba(47,62,70,0.08)] ring-1 ring-momentizing-slate/5 backdrop-blur ${
               facts.length >= 4 ? "md:grid-cols-4" : facts.length === 3 ? "md:grid-cols-3" : ""
             }`}

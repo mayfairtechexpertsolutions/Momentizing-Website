@@ -1,4 +1,5 @@
 import { useApiQuery } from "./use-api-query";
+import { intlLocale, t } from "@/i18n";
 
 /** Mirrors SessionPackageResponse on the backend — was previously hardcoded twice on the frontend
  * (BookingModal's PACKAGES array and the pricing cards on the marketing homepage). */
@@ -21,10 +22,10 @@ export function usePackages() {
 }
 
 export function formatPackagePrice(pkg: SessionPackage): string {
-  const amount = (pkg.priceCents / 100).toLocaleString(undefined, {
+  const amount = (pkg.priceCents / 100).toLocaleString(intlLocale(), {
     minimumFractionDigits: pkg.priceCents % 100 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   });
-  const unit = pkg.sessionCount === 1 ? "/hr" : `/${pkg.sessionCount} Sessions`;
+  const unit = pkg.sessionCount === 1 ? t("site.pkg.perHour") : t("site.pkg.perSessions", { n: pkg.sessionCount });
   return `${pkg.currency === "USD" ? "$" : pkg.currency + " "}${amount} ${unit}`;
 }

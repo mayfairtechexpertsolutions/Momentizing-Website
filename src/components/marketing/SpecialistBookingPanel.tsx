@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import { useWhatsAppLink } from "@/lib/whatsapp";
+import { t } from "@/i18n";
 
 interface SpecialistBookingPanelProps {
   specialistId: number;
@@ -19,18 +20,10 @@ const primaryClass =
 const secondaryClass =
   "flex min-h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-momentizing-gold-deep px-6 py-3 text-center text-sm font-bold text-momentizing-gold-deep transition hover:bg-momentizing-gold-deep hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal";
 
-const REASSURANCES = [
-  "No account needed",
-  "See real open times",
-  "Confirmed on WhatsApp",
-];
+const REASSURANCES = ["site.spec.noAccount", "site.panel.seeTimes", "site.spec.confirmedWa"];
 
 /** Built-in profiles have no live calendar: the visitor requests a time and the team confirms on WhatsApp. */
-const REQUEST_REASSURANCES = [
-  "No account needed",
-  "Choose the time you'd like",
-  "We confirm on WhatsApp",
-];
+const REQUEST_REASSURANCES = ["site.spec.noAccount", "site.fallback.chooseYourTime", "site.fallback.weConfirm"];
 
 /**
  * The "book with this specialist" card on a public profile. It sends the visitor into the real booking flow, which shows
@@ -48,12 +41,12 @@ export function SpecialistBookingPanel({ specialistId, specialistName, accepting
         <span aria-hidden="true" className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-momentizing-peach text-momentizing-gold-deep">
           <i aria-hidden="true" className="fas fa-hourglass-half" />
         </span>
-        <h2 className="mb-2 font-marketing-serif text-xl font-bold text-momentizing-slate">{first} is fully booked right now</h2>
+        <h2 className="mb-2 font-marketing-serif text-xl font-bold text-momentizing-slate">{t("site.panel.fullyBooked", { name: first })}</h2>
         <p className="mb-6 text-sm leading-relaxed text-momentizing-muted">
-          There are no open spots at the moment. Other associates are happy to welcome you today.
+          {t("site.panel.noSpots")}
         </p>
         <Link href="/associates" className={primaryClass}>
-          Meet other associates
+          {t("site.spec.meetOthers")}
         </Link>
       </div>
     );
@@ -64,17 +57,15 @@ export function SpecialistBookingPanel({ specialistId, specialistName, accepting
       {fee && (
         <div className="mb-5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <span className="font-marketing-serif text-4xl font-bold text-momentizing-slate">{fee}</span>
-          <span className="text-sm text-momentizing-muted">per session</span>
+          <span className="text-sm text-momentizing-muted">{t("site.spec.perSession")}</span>
           {freeFirstSession && (
-            <span className="ml-auto rounded-full bg-momentizing-mint px-3 py-1 text-xs font-bold text-momentizing-teal">First session free</span>
+            <span className="ml-auto rounded-full bg-momentizing-mint px-3 py-1 text-xs font-bold text-momentizing-teal">{t("site.spec.firstFree")}</span>
           )}
         </div>
       )}
-      <h2 className="mb-2 font-marketing-serif text-xl font-bold text-momentizing-gold-deep">{requestOnly ? `Request a session with ${first}` : `Book with ${first}`}</h2>
+      <h2 className="mb-2 font-marketing-serif text-xl font-bold text-momentizing-gold-deep">{requestOnly ? t("site.fallback.requestTitle", { name: first }) : t("site.spec.bookWith", { name: first })}</h2>
       <p className="mb-5 text-sm leading-relaxed text-momentizing-muted">
-        {requestOnly
-          ? "Live availability isn't showing right now. Tell us when suits you and we'll confirm it on WhatsApp."
-          : "Pick a time that suits you and reserve it in a few gentle steps."}
+        {requestOnly ? t("site.fallback.requestBlurb") : t("site.panel.pickTime")}
       </p>
 
       <ul className="mb-6 space-y-2.5">
@@ -83,29 +74,29 @@ export function SpecialistBookingPanel({ specialistId, specialistName, accepting
             <span aria-hidden="true" className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-momentizing-mint text-xs text-momentizing-teal">
               <i aria-hidden="true" className="fas fa-check" />
             </span>
-            {r}
+            {t(r)}
           </li>
         ))}
       </ul>
 
       <Link href={`/book?specialist=${specialistId}`} className={primaryClass}>
-        <i aria-hidden="true" className="far fa-calendar-check" /> {requestOnly ? "Request a time" : "Choose a time"}
+        <i aria-hidden="true" className="far fa-calendar-check" /> {requestOnly ? t("site.fallback.requestTime") : t("site.spec.chooseTime")}
       </Link>
 
       <div className="my-5 flex items-center gap-3 text-xs font-bold tracking-wider text-momentizing-muted uppercase" aria-hidden="true">
         <span className="h-px flex-1 bg-momentizing-mint-deep" />
-        or
+        {t("site.common.or")}
         <span className="h-px flex-1 bg-momentizing-mint-deep" />
       </div>
 
       <a
-        href={whatsAppLink(`Hi Momentizing, I'd like to book a session with ${specialistName}.`)}
+        href={whatsAppLink(t("site.whatsapp.bookWith", { name: specialistName }))}
         target="_blank"
         rel="noopener noreferrer"
         className={secondaryClass}
       >
-        <i aria-hidden="true" className="fab fa-whatsapp text-lg" /> Chat first on WhatsApp
-        <span className="sr-only"> (opens in a new tab)</span>
+        <i aria-hidden="true" className="fab fa-whatsapp text-lg" /> {t("site.panel.chatFirst")}
+        <span className="sr-only"> {t("site.common.newTab")}</span>
       </a>
     </div>
   );
@@ -120,17 +111,17 @@ export function MobileBookBar({ specialistId, fee }: { specialistId: number; fee
         {fee ? (
           <>
             <p className="font-marketing-serif text-xl font-bold text-momentizing-slate">{fee}</p>
-            <p className="text-xs text-momentizing-muted">per session</p>
+            <p className="text-xs text-momentizing-muted">{t("site.spec.perSession")}</p>
           </>
         ) : (
-          <p className="text-sm font-bold text-momentizing-slate">Book a session</p>
+          <p className="text-sm font-bold text-momentizing-slate">{t("site.notFound.book")}</p>
         )}
       </div>
       <Link
         href={`/book?specialist=${specialistId}`}
         className="ml-auto flex min-h-12 items-center justify-center rounded-full bg-momentizing-teal px-6 text-sm font-bold whitespace-nowrap text-white transition hover:bg-momentizing-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal"
       >
-        {isFallbackSpecialistId(specialistId) ? "Request a time" : "Choose a time"}
+        {isFallbackSpecialistId(specialistId) ? t("site.fallback.requestTime") : t("site.spec.chooseTime")}
       </Link>
     </div>
   );

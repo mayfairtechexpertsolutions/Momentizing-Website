@@ -2,11 +2,12 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
-import { formatSessionFee, PRACTICE_MODE_LABEL } from "@/lib/marketing-directory";
+import { formatSessionFee, practiceModeLabel } from "@/lib/marketing-directory";
 import { formatDateShort } from "@/lib/local-date";
 import { friendlyError, searchSpecialists, type PublicSpecialistCard } from "@/lib/guest-booking";
 import { BookButton, inputClass } from "./ui";
 import { Sheet } from "./Sheet";
+import { t } from "@/i18n";
 
 export function initials(name: string): string {
   return name
@@ -49,7 +50,7 @@ function Fact({ children }: { children: React.ReactNode }) {
 }
 
 function IndividualOnlyChip() {
-  return <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">Individual sessions only</span>;
+  return <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-900">{t("site.book.individualOnly")}</span>;
 }
 
 function ratingText(s: PublicSpecialistCard): string | null {
@@ -58,11 +59,11 @@ function ratingText(s: PublicSpecialistCard): string | null {
 
 function availabilityText(s: PublicSpecialistCard, requestedDate: string | null): { text: string; good: boolean } | null {
   if (requestedDate && s.slotsOnRequestedDate != null) {
-    if (s.slotsOnRequestedDate > 0) return { text: `Open on ${formatDateShort(requestedDate)}`, good: true };
-    if (s.nextAvailableDate) return { text: `Next open: ${formatDateShort(s.nextAvailableDate)}`, good: false };
-    return { text: "No open times in the next 30 days", good: false };
+    if (s.slotsOnRequestedDate > 0) return { text: t("site.book.openOn", { date: formatDateShort(requestedDate) }), good: true };
+    if (s.nextAvailableDate) return { text: t("site.book.nextOpen", { date: formatDateShort(s.nextAvailableDate) }), good: false };
+    return { text: t("site.book.noTimes30"), good: false };
   }
-  if (s.nextAvailableDate) return { text: `Next open: ${formatDateShort(s.nextAvailableDate)}`, good: true };
+  if (s.nextAvailableDate) return { text: t("site.book.nextOpen", { date: formatDateShort(s.nextAvailableDate) }), good: true };
   return null;
 }
 
@@ -102,7 +103,7 @@ export function SpecialistSuggestionCard({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {forCouple && (specialist.acceptsCouple ? <Fact>Couples welcome</Fact> : <IndividualOnlyChip />)}
+        {forCouple && (specialist.acceptsCouple ? <Fact>{t("site.book.couplesWelcome")}</Fact> : <IndividualOnlyChip />)}
         {availability && (
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -114,16 +115,16 @@ export function SpecialistSuggestionCard({
         )}
         {rating && <Fact>{rating}</Fact>}
         {specialist.languages && <Fact>{specialist.languages}</Fact>}
-        {PRACTICE_MODE_LABEL[specialist.practiceMode] && <Fact>{PRACTICE_MODE_LABEL[specialist.practiceMode]}</Fact>}
-        {specialist.freeFirstSession ? <Fact>Free first session</Fact> : fee && <Fact>{fee} / session</Fact>}
+        {practiceModeLabel(specialist.practiceMode) && <Fact>{practiceModeLabel(specialist.practiceMode)}</Fact>}
+        {specialist.freeFirstSession ? <Fact>{t("site.spec.freeFirst")}</Fact> : fee && <Fact>{t("site.book.feePerSession", { fee })}</Fact>}
       </div>
 
       <div className="mt-auto flex flex-col gap-2 sm:flex-row">
-        <BookButton variant="secondary" onClick={onViewProfile} className="sm:flex-1" aria-label={`View ${specialist.name}'s profile`}>
-          View profile
+        <BookButton variant="secondary" onClick={onViewProfile} className="sm:flex-1" aria-label={t("site.spec.viewProfileOf", { name: specialist.name })}>
+          {t("site.spec.viewProfile")}
         </BookButton>
-        <BookButton onClick={onChoose} disabled={noCouples} className="sm:flex-1" aria-label={noCouples ? `${specialist.name} doesn't see couples` : `Choose ${specialist.name}`}>
-          {noCouples ? "Not available for couples" : selected ? "Selected ✓" : `Choose ${firstName}`}
+        <BookButton onClick={onChoose} disabled={noCouples} className="sm:flex-1" aria-label={noCouples ? t("site.book.noCouplesName", { name: specialist.name }) : t("site.book.choose", { name: specialist.name })}>
+          {noCouples ? t("site.book.notForCouples") : selected ? t("site.book.selected") : t("site.book.choose", { name: firstName })}
         </BookButton>
       </div>
     </article>
@@ -144,7 +145,7 @@ export function SpecialistProfileSheet({
   const noCouples = forCouple && specialist != null && !specialist.acceptsCouple;
   const fee = specialist ? formatSessionFee(specialist.sessionFeeCents, specialist.sessionFeeCurrency ?? "IDR") : null;
   return (
-    <Sheet open={specialist !== null} onClose={onClose} title={specialist?.name ?? "Specialist"}>
+    <Sheet open={specialist !== null} onClose={onClose} title={specialist?.name ?? t("site.spec.specialist")}>
       {specialist && (
         <div className="flex flex-col gap-5">
           <div className="flex items-center gap-4">
@@ -158,23 +159,23 @@ export function SpecialistProfileSheet({
           {specialist.bio && <p className="text-base leading-relaxed text-momentizing-muted">{specialist.bio}</p>}
 
           <dl className="grid gap-3 text-sm sm:grid-cols-2">
-            {specialist.yearsExperience != null && <Detail label="Experience" value={`${specialist.yearsExperience} years`} />}
-            {specialist.languages && <Detail label="Languages" value={specialist.languages} />}
-            {PRACTICE_MODE_LABEL[specialist.practiceMode] && <Detail label="Sessions" value={PRACTICE_MODE_LABEL[specialist.practiceMode]} />}
-            {specialist.locationLabel && <Detail label="Location" value={specialist.locationLabel} />}
-            <Detail label="Fee" value={specialist.freeFirstSession ? "Free first session" : (fee ? `${fee} / session` : "Shared when you're contacted")} />
-            {specialist.credentialsSummary && <Detail label="Credentials" value={specialist.credentialsSummary} wide />}
+            {specialist.yearsExperience != null && <Detail label={t("site.spec.experience")} value={t("site.book.years", { n: specialist.yearsExperience })} />}
+            {specialist.languages && <Detail label={t("site.spec.languages")} value={specialist.languages} />}
+            {practiceModeLabel(specialist.practiceMode) && <Detail label={t("site.spec.sessions")} value={practiceModeLabel(specialist.practiceMode)!} />}
+            {specialist.locationLabel && <Detail label={t("site.spec.location")} value={specialist.locationLabel} />}
+            <Detail label={t("site.book.fee")} value={specialist.freeFirstSession ? t("site.spec.freeFirst") : (fee ? t("site.book.feePerSession", { fee }) : t("site.book.feeShared"))} />
+            {specialist.credentialsSummary && <Detail label={t("site.spec.credentials")} value={specialist.credentialsSummary} wide />}
           </dl>
 
           {noCouples && (
             <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              {firstNameOf(specialist.name)} sees individuals only, so can&apos;t take a couple session. Go back to pick someone who sees couples.
+              {t("site.book.individualsOnlyBody", { name: firstNameOf(specialist.name) })}
             </p>
           )}
 
           <div className="flex flex-col gap-2 sm:flex-row">
             <BookButton onClick={() => onChoose(specialist)} disabled={noCouples} className="sm:flex-1">
-              {noCouples ? "Not available for couples" : `Choose ${firstNameOf(specialist.name)}`}
+              {noCouples ? t("site.book.notForCouples") : t("site.book.choose", { name: firstNameOf(specialist.name) })}
             </BookButton>
             <Link
               href={`/associates/view?id=${specialist.id}`}
@@ -182,7 +183,7 @@ export function SpecialistProfileSheet({
               rel="noopener noreferrer"
               className="inline-flex min-h-12 items-center justify-center rounded-full border border-momentizing-slate/30 px-6 py-3 text-sm font-semibold text-momentizing-slate hover:bg-momentizing-slate/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal sm:flex-1"
             >
-              Full profile &amp; reviews ↗
+              {t("site.book.fullProfile")} ↗
             </Link>
           </div>
         </div>
@@ -235,7 +236,7 @@ export function SpecialistNameSearch({
     }
     const mine = ++seq.current;
     setStatus("loading");
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       try {
         const found = await searchSpecialists(q);
         if (mine !== seq.current) return; // a newer keystroke superseded this response
@@ -250,7 +251,7 @@ export function SpecialistNameSearch({
         setError(friendlyError(e));
       }
     }, 250);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [query, forCouple]);
 
   const blocked = (s: PublicSpecialistCard) => forCouple && !s.acceptsCouple;
@@ -273,7 +274,7 @@ export function SpecialistNameSearch({
   return (
     <div className="relative">
       <label htmlFor={inputId} className="mb-1.5 block text-sm font-semibold">
-        Specialist&apos;s full name
+        {t("site.book.fullName")}
       </label>
       <input
         id={inputId}
@@ -306,15 +307,15 @@ export function SpecialistNameSearch({
             setOpen(false);
           }
         }}
-        placeholder="e.g. Dr. Anna Wijaya"
+        placeholder={t("site.book.namePlaceholder")}
         // Focus only when the visitor just asked for this field, so they can type straight away (not on page load).
         autoFocus={autoFocus}
         className={inputClass}
       />
-      {forCouple && <p className="mt-1.5 text-sm text-momentizing-muted">Booking for a couple, so specialists who see couples are listed first.</p>}
+      {forCouple && <p className="mt-1.5 text-sm text-momentizing-muted">{t("site.book.coupleFirst")}</p>}
       <div aria-live="polite" className="mt-2 min-h-5 text-sm text-momentizing-muted">
-        {status === "loading" && "Searching…"}
-        {status === "idle" && showList && results.length === 0 && "No specialist with that name is taking new clients online. Check the spelling, or ask us for help below."}
+        {status === "loading" && t("site.book.searching")}
+        {status === "idle" && showList && results.length === 0 && t("site.book.noNameMatch")}
       </div>
       {status === "error" && (
         <p role="alert" className="text-sm font-medium text-red-700">
@@ -325,7 +326,7 @@ export function SpecialistNameSearch({
         <ul
           id={listId}
           role="listbox"
-          aria-label="Matching specialists"
+          aria-label={t("site.book.matching")}
           className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-2xl border border-momentizing-slate/15 bg-white p-1 shadow-xl"
         >
           {results.map((s, i) => (
@@ -345,7 +346,7 @@ export function SpecialistNameSearch({
               <span className="min-w-0">
                 <span className="block truncate font-semibold">{s.name}</span>
                 {s.specialisation && <span className="block truncate text-sm text-momentizing-muted">{s.specialisation}</span>}
-                {blocked(s) && <span className="block text-sm font-semibold text-amber-900">Individual sessions only</span>}
+                {blocked(s) && <span className="block text-sm font-semibold text-amber-900">{t("site.book.individualOnly")}</span>}
               </span>
             </li>
           ))}

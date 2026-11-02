@@ -87,22 +87,22 @@ export function HelpSheet({
   }
 
   return (
-    <Sheet open={open} onClose={onClose} title={done ? "We've got your request" : "Let us help you find a time"} labelledBy="help-title">
+    <Sheet open={open} onClose={onClose} title={done ? t("site.help2.doneTitle") : t("site.help2.title")} labelledBy="help-title">
       {done ? (
         <div className="flex flex-col gap-4" role="status">
           <InlineNotice tone="success">
-            Thank you, {fullName.trim().split(" ")[0]}. One of our team will message you on WhatsApp at <strong>{whatsapp}</strong> to find a time that works for you.
+            {t("site.help2.thanksA", { name: fullName.trim().split(" ")[0] })} <strong>{whatsapp}</strong> {t("site.help2.thanksB")}
           </InlineNotice>
-          <p className="text-sm text-momentizing-muted">There&apos;s nothing else you need to do. If you&apos;d rather not wait, you can also message us directly on WhatsApp.</p>
-          <BookButton onClick={onClose}>Close</BookButton>
+          <p className="text-sm text-momentizing-muted">{t("site.help2.nothingElse")}</p>
+          <BookButton onClick={onClose}>{t("site.common.close")}</BookButton>
         </div>
       ) : (
         <form onSubmit={submit} className="flex flex-col gap-5" noValidate={false}>
-          <p className="text-momentizing-muted">Tell us roughly what suits you and we&apos;ll come back to you on WhatsApp. It only takes a moment.</p>
-          <Field id="help-name" label="Your name">
+          <p className="text-momentizing-muted">{t("site.help2.intro")}</p>
+          <Field id="help-name" label={t("site.form.yourName")}>
             <input name="fullName" id="help-name" required autoComplete="name" autoCapitalize="words" autoCorrect="off" spellCheck={false} value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
           </Field>
-          <Field id="help-wa" label="WhatsApp number" hint="We'll only use this to arrange your session.">
+          <Field id="help-wa" label={t("site.form.waNumber")} hint={t("site.help2.waHint")}>
             <input
               name="whatsapp" id="help-wa"
               required
@@ -116,18 +116,18 @@ export function HelpSheet({
               aria-describedby="help-wa-hint"
             />
           </Field>
-          <Field id="help-times" label="When would suit you? (optional)">
-            <input name="preferredTimes" id="help-times" value={times} onChange={(e) => setTimes(e.target.value)} placeholder="e.g. weekday evenings, Saturday mornings" maxLength={300} className={inputClass} />
+          <Field id="help-times" label={t("site.help2.whenLabel")}>
+            <input name="preferredTimes" id="help-times" value={times} onChange={(e) => setTimes(e.target.value)} placeholder={t("site.help2.whenPlaceholder")} maxLength={300} className={inputClass} />
           </Field>
-          <Field id="help-note" label="Anything else we should know? (optional)">
+          <Field id="help-note" label={t("site.help2.noteLabel")}>
             <textarea name="note" id="help-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} maxLength={1000} className={`${inputClass} resize-y`} />
           </Field>
           <label className="flex cursor-pointer items-start gap-3 text-sm text-momentizing-muted">
             <input name="consentAccepted" type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 h-5 w-5 flex-shrink-0 accent-[var(--momentizing-teal)]" />
             <span>
-              I agree to be contacted on WhatsApp about this request, and to the{" "}
+              {t("site.help2.consent")}{" "}
               <a href={withBase("/legal/")} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
-                Terms &amp; Privacy
+                {t("site.form.termsPrivacy")}
               </a>
               .
             </span>
@@ -139,7 +139,7 @@ export function HelpSheet({
             </InlineNotice>
           )}
           <BookButton type="submit" loading={submitting} disabled={!consent}>
-            {submitting ? "Sending…" : "Ask the team to help me"}
+            {submitting ? t("site.common.sending") : t("site.help2.submit")}
           </BookButton>
         </form>
       )}

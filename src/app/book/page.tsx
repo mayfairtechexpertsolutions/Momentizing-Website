@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { T } from "@/i18n/LocaleBoundary";
 import { BookingWizard } from "@/components/marketing/booking/BookingWizard";
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export default function BookPage() {
         <Suspense
           fallback={
             <div className="flex min-h-[50dvh] items-center justify-center" aria-busy="true">
-              <p className="text-momentizing-muted">Getting things ready…</p>
+              <p className="text-momentizing-muted"><T k="site.book.loading" /></p>
             </div>
           }
         >

@@ -1,5 +1,6 @@
 "use client";
 
+import { t } from "@/i18n";
 import { useEffect, useState, type RefObject } from "react";
 import { buildManualBookingMessage, formatManualWhen } from "@/lib/manual-booking";
 import { useWhatsAppLink } from "@/lib/whatsapp";
@@ -38,9 +39,9 @@ export function ManualReview({
   if (!specialist || !draft.date || !draft.time) {
     return (
       <BookCard>
-        <StepHeading headingRef={headingRef} title="Almost there" />
-        <InlineNotice tone="warn">Some details are missing. Please go back and complete the earlier steps.</InlineNotice>
-        <ActionBar onBack={onBack} onNext={onBack} nextLabel="Go back" />
+        <StepHeading headingRef={headingRef} title={t("site.book.almost")} />
+        <InlineNotice tone="warn">{t("site.book.missing")}</InlineNotice>
+        <ActionBar onBack={onBack} onNext={onBack} nextLabel={t("site.common.back")} />
       </BookCard>
     );
   }
@@ -68,14 +69,10 @@ export function ManualReview({
   if (sentLink) {
     return (
       <BookCard>
-        <StepHeading headingRef={headingRef} title="Almost done — press Send in WhatsApp" />
+        <StepHeading headingRef={headingRef} title={t("site.fallback.sentTitle")} />
         <InlineNotice tone="info" role="status">
-          <p>
-            We&apos;ve opened WhatsApp with your request for <strong>{specialist.name}</strong> on <strong>{when}</strong>. Press <strong>Send</strong> to pass it to our team.
-          </p>
-          <p className="mt-2">
-            <strong>Your session isn&apos;t confirmed yet.</strong> Our team will reply on WhatsApp to agree a time with you.
-          </p>
+          <p>{t("site.fallback.sentBody", { name: specialist.name, when })}</p>
+          <p className="mt-2 font-semibold">{t("site.fallback.notConfirmed")}</p>
         </InlineNotice>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">
           <a
@@ -84,11 +81,11 @@ export function ManualReview({
             rel="noopener noreferrer"
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-momentizing-teal px-6 py-3 text-sm font-semibold text-white transition hover:bg-momentizing-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal"
           >
-            <i aria-hidden="true" className="fab fa-whatsapp text-lg" /> Open WhatsApp again
-            <span className="sr-only"> (opens in a new tab)</span>
+            <i aria-hidden="true" className="fab fa-whatsapp text-lg" /> {t("site.fallback.openAgain")}
+            <span className="sr-only"> {t("site.common.newTab")}</span>
           </a>
           <BookButton variant="secondary" onClick={onStartOver}>
-            Start over
+            {t("site.fallback.startOver")}
           </BookButton>
         </div>
       </BookCard>
@@ -98,20 +95,20 @@ export function ManualReview({
   return (
     <>
       <BookCard>
-        <StepHeading headingRef={headingRef} title="Check and send your request" sub="Have a look that everything is right. We'll open WhatsApp with this message ready for you to send." />
+        <StepHeading headingRef={headingRef} title={t("site.fallback.reviewTitle")} sub={t("site.fallback.reviewSub")} />
         <dl className="grid gap-3">
-          <ReviewRow label="Specialist" value={specialist.name} onEdit={() => onEdit("specialist")} />
-          <ReviewRow label="When" value={when} onEdit={() => onEdit("time")} />
-          <ReviewRow label="Your name" value={draft.fullName} onEdit={() => onEdit("about")} />
+          <ReviewRow label={t("site.spec.specialist")} value={specialist.name} onEdit={() => onEdit("specialist")} />
+          <ReviewRow label={t("site.events.when")} value={when} onEdit={() => onEdit("time")} />
+          <ReviewRow label={t("site.form.yourName")} value={draft.fullName} onEdit={() => onEdit("about")} />
           <ReviewRow label="WhatsApp" value={draft.whatsapp} onEdit={() => onEdit("about")} />
         </dl>
         <div className="mt-5">
           <InlineNotice>
-            <strong>This is a request, not a booking.</strong> Our team will reply on WhatsApp to confirm the time and arrange payment — there&apos;s nothing to pay now.
+            <strong>{t("site.fallback.notBooking")}</strong> {t("site.fallback.notBookingBody")}
           </InlineNotice>
         </div>
       </BookCard>
-      <ActionBar onBack={onBack} onNext={send} nextLabel="Send request on WhatsApp" />
+      <ActionBar onBack={onBack} onNext={send} nextLabel={t("site.fallback.sendButton")} />
     </>
   );
 }

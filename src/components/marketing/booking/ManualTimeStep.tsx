@@ -1,5 +1,6 @@
 "use client";
 
+import { t } from "@/i18n";
 import type { RefObject } from "react";
 import {
   FALLBACK_TIME_ZONE_LABEL,
@@ -43,14 +44,14 @@ export function ManualTimeStep({
       <BookCard>
         <StepHeading
           headingRef={headingRef}
-          title="Pick a day and time"
-          sub={`Live availability isn't showing right now, so choose the time you'd like with ${first || "your specialist"} and we'll confirm it with you on WhatsApp.`}
+          title={t("site.fallback.timeTitle")}
+          sub={t("site.fallback.timeSub", { name: first || t("site.fallback.yourSpecialist") })}
         />
 
         {windows.length > 0 && (
           <div className="mb-5">
             <InlineNotice>
-              <p className="font-semibold">{first}&apos;s usual hours ({FALLBACK_TIME_ZONE_LABEL})</p>
+              <p className="font-semibold">{t("site.fallback.usualHours", { name: first, zone: FALLBACK_TIME_ZONE_LABEL })}</p>
               <ul className="mt-1">
                 {windows.map((w) => (
                   <li key={formatWorkingWindow(w)}>{formatWorkingWindow(w)}</li>
@@ -61,10 +62,10 @@ export function ManualTimeStep({
         )}
 
         <div className="mb-5">
-          <DateStrip value={date} onChange={(iso) => patch({ date: iso })} label="Choose a day" />
+          <DateStrip value={date} onChange={(iso) => patch({ date: iso })} label={t("site.fallback.chooseDay")} />
         </div>
 
-        <Field id="manualTime" label={`Start time (${FALLBACK_TIME_ZONE_LABEL})`} hint="Times are in Western Indonesia Time (WIB, UTC+7).">
+        <Field id="manualTime" label={t("site.fallback.startTime", { zone: FALLBACK_TIME_ZONE_LABEL })} hint={t("site.fallback.tzHint")}>
           <select
             id="manualTime"
             name="manualTime"
@@ -72,7 +73,7 @@ export function ManualTimeStep({
             onChange={(e) => patch({ time: e.target.value || null, date })}
             className={inputClass}
           >
-            <option value="">Choose a time</option>
+            <option value="">{t("site.fallback.chooseTimeOption")}</option>
             {MANUAL_TIME_OPTIONS.map((time) => (
               <option key={time} value={time}>
                 {formatClock(time)}
@@ -84,12 +85,12 @@ export function ManualTimeStep({
         {outsideUsualHours && (
           <div className="mt-4">
             <InlineNotice tone="warn" role="status">
-              That&apos;s outside {first}&apos;s usual hours. You can still send the request, and our team will suggest the closest time that works.
+              {t("site.fallback.outsideHours", { name: first })}
             </InlineNotice>
           </div>
         )}
       </BookCard>
-      <ActionBar onBack={onBack} onNext={onNext} nextDisabled={!draft.time} hint={!draft.time ? "Choose a time to continue" : undefined} />
+      <ActionBar onBack={onBack} onNext={onNext} nextDisabled={!draft.time} hint={!draft.time ? t("site.fallback.chooseTimeHint") : undefined} />
     </>
   );
 }

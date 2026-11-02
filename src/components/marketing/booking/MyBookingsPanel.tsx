@@ -131,21 +131,21 @@ export function MyBookingsPanel() {
   if (restoring) {
     return (
       <div className="flex min-h-[40dvh] items-center justify-center" aria-busy="true">
-        <p className="text-momentizing-muted">Getting things ready…</p>
+        <p className="text-momentizing-muted">{t("site.book.loading")}</p>
       </div>
     );
   }
 
   return (
     <BookCard>
-      <h1 className="font-marketing-serif text-3xl leading-tight">My upcoming sessions</h1>
+      <h1 className="font-marketing-serif text-3xl leading-tight">{t("site.my.title")}</h1>
 
       {stage === "phone" && (
         <form onSubmit={sendCode} className="mt-4 flex flex-col gap-5" noValidate>
           <p className="text-momentizing-muted">
-            Enter the WhatsApp number you booked with. We&apos;ll send a short code to it so only you can see your sessions. No account needed.
+            {t("site.my.intro")}
           </p>
-          <Field id="mb-whatsapp" label="Your WhatsApp number" hint="For example 0812 3456 7890">
+          <Field id="mb-whatsapp" label={t("site.my.waLabel")} hint={t("site.my.waHint")}>
             <input
               name="whatsapp" id="mb-whatsapp"
               type="tel"
@@ -160,7 +160,7 @@ export function MyBookingsPanel() {
           {TURNSTILE_ENABLED && <TurnstileWidget onToken={setTurnstileToken} onError={(m) => setError(m)} resetSignal={resetSignal} />}
           {error && <InlineNotice tone="error" role="alert">{error}</InlineNotice>}
           <BookButton type="submit" loading={busy} disabled={whatsapp.trim().length < 6}>
-            Send me a code
+            {t("site.my.sendCode")}
           </BookButton>
         </form>
       )}
@@ -168,9 +168,9 @@ export function MyBookingsPanel() {
       {stage === "code" && (
         <form onSubmit={check} className="mt-4 flex flex-col gap-5" noValidate>
           <InlineNotice tone="info" role="status">
-            If this number has upcoming sessions, we&apos;ve sent a 6-digit code to its WhatsApp. It&apos;s valid for 10 minutes.
+            {t("site.my.codeSent")}
           </InlineNotice>
-          <Field id="mb-code" label="The 6-digit code" hint="Nothing arrived? Check you used the number you booked with.">
+          <Field id="mb-code" label={t("site.my.codeLabel")} hint={t("site.my.codeHint")}>
             <input
               name="code" id="mb-code"
               inputMode="numeric"
@@ -185,10 +185,10 @@ export function MyBookingsPanel() {
           {error && <InlineNotice tone="error" role="alert">{error}</InlineNotice>}
           <div className="flex flex-wrap gap-3">
             <BookButton type="submit" loading={busy} disabled={code.trim().length < 6}>
-              Show my sessions
+              {t("site.my.show")}
             </BookButton>
             <BookButton variant="ghost" onClick={startOver}>
-              Use a different number
+              {t("site.my.otherNumber")}
             </BookButton>
           </div>
         </form>
@@ -198,46 +198,46 @@ export function MyBookingsPanel() {
         <div className="mt-4 flex flex-col gap-5">
           {data.bookings.length === 0 ? (
             <InlineNotice tone="info" role="status">
-              You have no upcoming sessions right now.
+              {t("site.my.none")}
             </InlineNotice>
           ) : (
-            <ul className="flex flex-col gap-3" aria-label="Your upcoming sessions">
+            <ul className="flex flex-col gap-3" aria-label={t("site.my.listLabel")}>
               {data.bookings.map((b) => (
                 <li key={b.referenceCode} className="rounded-2xl bg-momentizing-mint/60 p-4">
                   <p className="text-lg font-semibold">{formatSessionWhen(b.sessionDate, b.startTime)}</p>
                   <p className="text-momentizing-muted">
-                    with {b.specialistName} · {b.durationMinutes} minutes · {b.sessionType === "ONLINE" ? "Online" : "In person"}
+                    {t("site.my.with", { name: b.specialistName, minutes: b.durationMinutes })} · {b.sessionType === "ONLINE" ? t("site.events.format.ONLINE") : t("site.events.format.IN_PERSON")}
                   </p>
-                  <p className="mt-1 text-xs text-momentizing-muted">Reference {b.referenceCode}</p>
+                  <p className="mt-1 text-xs text-momentizing-muted">{t("site.my.reference", { code: b.referenceCode })}</p>
                 </li>
               ))}
             </ul>
           )}
           <p className="text-sm text-momentizing-muted">
-            Need to change a session? Message us on WhatsApp and our team will sort it out with you and your specialist.
+            {t("site.my.change")}
           </p>
 
           {data.hasAccount ? (
             <InlineNotice tone="info">
-              To see your past sessions too, <a className="font-semibold underline" href={appLink("/login")}>log in to your account</a>.
+              {t("site.my.pastLoginA")} <a className="font-semibold underline" href={appLink("/login")}>{t("site.my.pastLoginLink")}</a>.
             </InlineNotice>
           ) : (
             data.claimToken && (
               <InlineNotice tone="info">
-                Want to see your past sessions too?{" "}
+                {t("site.my.pastJoinA")}{" "}
                 <a
                   className="font-semibold underline"
                   href={appLink(`/register?from=booking#${new URLSearchParams({ claim: data.claimToken, name: data.name ?? "" })}`)}
                 >
-                  Create a free account
+                  {t("site.my.pastJoinLink")}
                 </a>{" "}
-                — your sessions are linked to it automatically.
+                {t("site.my.pastJoinB")}
               </InlineNotice>
             )
           )}
           <div>
             <BookButton variant="ghost" onClick={startOver}>
-              Not you? Start over
+              {t("site.my.startOver")}
             </BookButton>
           </div>
         </div>

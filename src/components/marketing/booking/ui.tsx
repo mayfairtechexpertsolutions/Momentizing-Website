@@ -1,5 +1,6 @@
 "use client";
 
+import { t } from "@/i18n";
 import type { ButtonHTMLAttributes, ReactNode, RefObject } from "react";
 
 /**
@@ -122,7 +123,7 @@ export function StepHeading({ headingRef, title, sub }: { headingRef: RefObject<
 export function ActionBar({
   onBack,
   onNext,
-  nextLabel = "Continue",
+  nextLabel,
   nextDisabled,
   loading,
   hint,
@@ -145,11 +146,11 @@ export function ActionBar({
         <div className="flex gap-3">
           {onBack && (
             <BookButton variant="secondary" onClick={onBack} className="flex-shrink-0">
-              Back
+              {t("site.common.back")}
             </BookButton>
           )}
           <BookButton onClick={onNext} disabled={nextDisabled} loading={loading} className="flex-1">
-            {nextLabel}
+            {nextLabel ?? t("site.common.continue")}
           </BookButton>
         </div>
       </div>
@@ -165,7 +166,7 @@ export function ReviewRow({ label, value, onEdit }: { label: string; value: stri
         <dd className="mt-0.5 break-words text-base font-semibold">{value}</dd>
       </div>
       <button type="button" onClick={onEdit} className="min-h-11 flex-shrink-0 px-2 text-sm font-semibold underline focus-visible:outline-2 focus-visible:outline-momentizing-teal">
-        Change<span className="sr-only"> {label}</span>
+        {t("site.book.change")}<span className="sr-only"> {label}</span>
       </button>
     </div>
   );

@@ -34,6 +34,7 @@ import { WhyJoinCard } from "./WhyJoinCard";
 import { YesNoField } from "./YesNoField";
 import {
   CONCERNS,
+  concernLabel,
   COUPLE_MISMATCH_CODES,
   SLOT_GONE_CODES,
   EMPTY_DRAFT,
@@ -167,7 +168,7 @@ export function BookingWizard() {
   if (!hydrated) {
     return (
       <div className="flex min-h-[50dvh] items-center justify-center" aria-busy="true">
-        <p className="text-momentizing-muted">Getting things ready…</p>
+        <p className="text-momentizing-muted">{t("site.book.loading")}</p>
       </div>
     );
   }
@@ -222,7 +223,7 @@ export function BookingWizard() {
 
   return (
     <>
-      <Stepper step={stepIndex + 1} total={steps.length} label={steps[stepIndex].label} />
+      <Stepper step={stepIndex + 1} total={steps.length} label={t(steps[stepIndex].label)} />
 
       {/* The form token only matters for a real hold; a WhatsApp request (built-in profile) needs no backend. */}
       {formTokenError && !(draft.specialist && isFallbackSpecialistId(draft.specialist.id)) && (
@@ -230,7 +231,7 @@ export function BookingWizard() {
           <InlineNotice tone="error" role="alert">
             {formTokenError}{" "}
             <button type="button" onClick={loadFormToken} className="relative font-semibold underline underline-offset-2 after:absolute after:-inset-x-2 after:-inset-y-3 after:content-['']">
-              Try again
+              {t("site.common.tryAgain")}
             </button>
           </InlineNotice>
         </div>
@@ -314,9 +315,9 @@ export function BookingWizard() {
       )}
 
       <p className="mt-10 text-center text-sm text-momentizing-muted">
-        Feeling unsafe or in crisis right now? Please contact your local emergency number, or see our{" "}
+        {t("site.book.crisisA")}{" "}
         <Link href="/help" className="font-semibold underline">
-          support resources
+          {t("site.book.crisisLink")}
         </Link>
         .
       </p>
@@ -331,9 +332,9 @@ export function BookingWizard() {
 function HelpMeFind({ onHelp }: { onHelp: () => void }) {
   return (
     <div className="mt-8 rounded-3xl border border-dashed border-momentizing-slate/30 bg-momentizing-mint/60 p-5 text-center">
-      <p className="text-sm text-momentizing-muted">Nothing quite right? We&apos;re happy to sort it out for you.</p>
+      <p className="text-sm text-momentizing-muted">{t("site.book.nothingRight")}</p>
       <BookButton variant="secondary" onClick={onHelp} className="mt-3 w-full sm:w-auto">
-        I can&apos;t find my schedule — please help me find one
+        {t("site.book.cantFind")}
       </BookButton>
     </div>
   );
@@ -347,14 +348,14 @@ type HeadingRef = React.RefObject<HTMLHeadingElement | null>;
 function StepDate({ draft, patch, headingRef, onNext }: { draft: Draft; patch: Patch; headingRef: HeadingRef; onNext: () => void }) {
   return (
     <BookCard>
-      <StepHeading headingRef={headingRef} title="When would you like to come in?" sub="Pick the day that suits you best. Next we'll show you who's free." />
+      <StepHeading headingRef={headingRef} title={t("site.book.dateTitle")} sub={t("site.book.dateSub")} />
       <DateStrip value={draft.date} onChange={(iso) => patch({ date: iso, time: null })} />
       {draft.date && (
         <p className="mt-2 text-base" role="status">
-          You chose <strong>{formatDateLong(draft.date)}</strong>.
+          {t("site.book.youChose")} <strong>{formatDateLong(draft.date)}</strong>.
         </p>
       )}
-      <ActionBar onNext={onNext} nextDisabled={!draft.date} hint={!draft.date ? "Choose a day to continue" : undefined} />
+      <ActionBar onNext={onNext} nextDisabled={!draft.date} hint={!draft.date ? t("site.book.chooseDayHint") : undefined} />
     </BookCard>
   );
 }
@@ -379,8 +380,8 @@ function StepAbout({
   const setAnswer = (k: keyof Draft["answers"], v: boolean) => patch({ answers: { ...a, [k]: v } });
 
   const errors = {
-    name: draft.fullName.trim().length < 2 ? "Please tell us your name." : null,
-    phone: !looksLikePhone(draft.whatsapp) ? "Please enter a WhatsApp number we can reach you on, e.g. +62 812 3456 7890." : null,
+    name: draft.fullName.trim().length < 2 ? t("site.book.nameRequired") : null,
+    phone: !looksLikePhone(draft.whatsapp) ? t("site.book.phoneRequired") : null,
     unanswered: Object.values(a).some((v) => v === null),
     minor: a.adult === false,
     mismatch: couplesMismatch(a, draft.specialist),
@@ -403,10 +404,10 @@ function StepAbout({
 
   return (
     <BookCard>
-      <StepHeading headingRef={headingRef} title="A little about you" sub="A few quick questions so we can suggest the right person. There are no wrong answers." />
+      <StepHeading headingRef={headingRef} title={t("site.book.aboutTitle")} sub={t("site.book.aboutSub")} />
 
       <div className="flex flex-col gap-6">
-        <Field id="fullName" label="Your name" error={tried ? errors.name : null}>
+        <Field id="fullName" label={t("site.form.yourName")} error={tried ? errors.name : null}>
           <input
             name="fullName" id="fullName"
             autoComplete="name"
@@ -422,7 +423,7 @@ function StepAbout({
           />
         </Field>
 
-        <Field id="whatsapp" label="WhatsApp number" hint="We'll ask you to confirm it on WhatsApp, and use it only for your booking." error={tried ? errors.phone : null}>
+        <Field id="whatsapp" label={t("site.form.waNumber")} hint={t("site.book.waHint")} error={tried ? errors.phone : null}>
           <input
             name="whatsapp" id="whatsapp"
             type="tel"
@@ -440,9 +441,9 @@ function StepAbout({
           />
         </Field>
 
-        <YesNoField name="firstTime" legend="Is this your first time seeing a therapist or counsellor?" value={a.firstTime} onChange={(v) => setAnswer("firstTime", v)} error={tried && a.firstTime === null ? "Please choose yes or no." : null} />
-        <YesNoField name="online" legend="Would you prefer online sessions?" value={a.online} onChange={(v) => setAnswer("online", v)} error={tried && a.online === null ? "Please choose yes or no." : null} />
-        <YesNoField name="couple" legend="Is this session for a couple?" value={a.couple} onChange={(v) => setAnswer("couple", v)} error={tried && a.couple === null ? "Please choose yes or no." : null} />
+        <YesNoField name="firstTime" legend={t("site.book.q.firstTime")} value={a.firstTime} onChange={(v) => setAnswer("firstTime", v)} error={tried && a.firstTime === null ? t("site.book.yesNoRequired") : null} />
+        <YesNoField name="online" legend={t("site.book.q.online")} value={a.online} onChange={(v) => setAnswer("online", v)} error={tried && a.online === null ? t("site.book.yesNoRequired") : null} />
+        <YesNoField name="couple" legend={t("site.book.q.couple")} value={a.couple} onChange={(v) => setAnswer("couple", v)} error={tried && a.couple === null ? t("site.book.yesNoRequired") : null} />
         {errors.mismatch && draft.specialist && (
           <CoupleMismatchNotice
             name={draft.specialist.name}
@@ -450,33 +451,32 @@ function StepAbout({
             onIndividual={() => setAnswer("couple", false)}
           />
         )}
-        <YesNoField name="adult" legend="Are you 18 or older?" value={a.adult} onChange={(v) => setAnswer("adult", v)} error={tried && a.adult === null ? "Please choose yes or no." : null} />
+        <YesNoField name="adult" legend={t("site.book.q.adult")} value={a.adult} onChange={(v) => setAnswer("adult", v)} error={tried && a.adult === null ? t("site.book.yesNoRequired") : null} />
         {a.adult === false && (
           <InlineNotice tone="warn" role="alert">
-            Momentizing sessions are for adults. If you&apos;re under 18, please ask a parent or guardian to contact us on WhatsApp.
+            {t("site.book.minor")}
           </InlineNotice>
         )}
         <YesNoField
           name="urgent"
-          legend="Is there anything urgent or unsafe happening right now?"
-          hint="It's okay to answer honestly. Your answer helps us look after you."
+          legend={t("site.book.q.urgent")}
+          hint={t("site.book.q.urgentHint")}
           value={a.urgent}
           onChange={(v) => setAnswer("urgent", v)}
-          error={tried && a.urgent === null ? "Please choose yes or no." : null}
+          error={tried && a.urgent === null ? t("site.book.yesNoRequired") : null}
         />
         {a.urgent === true && (
           <InlineNotice tone="warn" role="alert">
-            <strong>Your safety comes first.</strong> If you or someone else is in immediate danger, please call your local emergency number now. You can also
-            find support at{" "}
+            <strong>{t("site.book.safetyStrong")}</strong> {t("site.book.safetyA")}{" "}
             <Link href="/help" className="font-semibold underline">
-              our help page
+              {t("site.book.safetyLink")}
             </Link>
-            . You&apos;re welcome to continue booking — we&apos;ll take extra care.
+            . {t("site.book.safetyB")}
           </InlineNotice>
         )}
 
         <fieldset>
-          <legend className="text-sm font-semibold">What would you like support with? (optional)</legend>
+          <legend className="text-sm font-semibold">{t("site.book.concernsLegend")}</legend>
           <div className="mt-2 flex flex-wrap gap-2">
             {CONCERNS.map((c) => {
               const on = draft.concerns.includes(c);
@@ -491,14 +491,14 @@ function StepAbout({
                   }`}
                 >
                   {on && <span aria-hidden="true">✓ </span>}
-                  {c}
+                  {concernLabel(c)}
                 </button>
               );
             })}
           </div>
         </fieldset>
 
-        <Field id="note" label="Anything you'd like us to know? (optional)">
+        <Field id="note" label={t("site.book.noteLabel")}>
           <textarea name="note" id="note" rows={3} maxLength={500} value={draft.note} onChange={(e) => patch({ note: e.target.value })} className={`${inputClass} resize-y`} />
         </Field>
 
@@ -513,23 +513,22 @@ function StepAbout({
               aria-describedby={tried && errors.consent ? "consent-error" : undefined}
             />
             <span>
-              I agree to the{" "}
+              {t("site.book.consentA")}{" "}
               <a href={withBase("/legal/")} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
-                Terms &amp; Privacy
+                {t("site.form.termsPrivacy")}
               </a>
-              , to being contacted on WhatsApp about this booking, and that a session running past its booked time may be charged
-              at the overtime rate.
+              {t("site.book.consentB")}
             </span>
           </label>
           {tried && errors.consent && (
             <p id="consent-error" role="alert" className="mt-1 text-sm font-medium text-red-700">
-              Please tick the box to continue.
+              {t("site.book.consentRequired")}
             </p>
           )}
         </div>
       </div>
 
-      <ActionBar onBack={onBack} onNext={next} hint={tried && !valid ? "A few things above still need your attention." : undefined} />
+      <ActionBar onBack={onBack} onNext={next} hint={tried && !valid ? t("site.book.needsAttention") : undefined} />
     </BookCard>
   );
 }
@@ -599,14 +598,14 @@ function StepSpecialist({
         <BookCard>
           <StepHeading
             headingRef={headingRef}
-            title="Who would you like to see?"
-            sub={`Here are people who may suit you${draft.date ? ` and are free around ${formatDateLong(draft.date)}` : ""}. Take your time — you can read about each one.`}
+            title={t("site.book.whoTitle")}
+            sub={draft.date ? t("site.book.whoSubDate", { date: formatDateLong(draft.date) }) : t("site.book.whoSub")}
           />
 
           {offline ? (
             <div className="grid gap-4">
               <InlineNotice tone="warn" role="status">
-                Live availability isn&apos;t showing right now. Choose who you&apos;d like to see, pick a time, and we&apos;ll confirm it with you on WhatsApp.
+                {t("site.fallback.offlineNotice")}
               </InlineNotice>
               {FALLBACK_SPECIALISTS.map((s) => (
                 <SpecialistSuggestionCard
@@ -622,20 +621,20 @@ function StepSpecialist({
             </div>
           ) : error ? (
             <div role="alert" className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-900">
-              <p className="font-semibold">We couldn&apos;t load suggestions right now.</p>
+              <p className="font-semibold">{t("site.book.suggestError")}</p>
               <p className="mt-1">{error}</p>
               <BookButton variant="secondary" onClick={() => setAttempt((n) => n + 1)} className="mt-3">
-                Try again
+                {t("site.common.tryAgain")}
               </BookButton>
             </div>
           ) : suggestions === null ? (
-            <div aria-busy="true" aria-label="Finding specialists" className="grid gap-4">
+            <div aria-busy="true" aria-label={t("site.book.finding")} className="grid gap-4">
               {[0, 1, 2].map((i) => (
                 <div key={i} className="h-44 animate-pulse rounded-3xl bg-momentizing-slate/10 motion-reduce:animate-none" />
               ))}
             </div>
           ) : suggestions.length === 0 ? (
-            <InlineNotice>We couldn&apos;t find a match automatically. You can search for a specialist by name below, or ask our team to help.</InlineNotice>
+            <InlineNotice>{t("site.book.noMatch")}</InlineNotice>
           ) : (
             <div className="grid gap-4">
               {suggestions.map((s) => (
@@ -664,7 +663,7 @@ function StepSpecialist({
                 }}
                 className="w-full sm:w-auto"
               >
-                I already have a specialist in mind
+                {t("site.book.haveSpecialist")}
               </BookButton>
             )}
           </div>
@@ -672,7 +671,7 @@ function StepSpecialist({
       </div>
 
       <HelpMeFind onHelp={onHelp} />
-      <ActionBar onBack={onBack} onNext={onNext} nextDisabled={!draft.specialist} nextLabel="Continue" hint={!draft.specialist ? "Choose a specialist to continue" : undefined} />
+      <ActionBar onBack={onBack} onNext={onNext} nextDisabled={!draft.specialist} hint={!draft.specialist ? t("site.book.chooseSpecialistHint") : undefined} />
       <SpecialistProfileSheet specialist={profile} onClose={() => setProfile(null)} onChoose={(s) => choose(s, "SUGGESTED")} forCouple={draft.answers.couple === true} />
     </>
   );
@@ -707,9 +706,9 @@ function StepTime({
   if (!specialist) {
     return (
       <BookCard>
-        <StepHeading headingRef={headingRef} title="Choose a time" />
-        <InlineNotice tone="warn">Please choose a specialist first.</InlineNotice>
-        <ActionBar onBack={onBack} onNext={onBack ?? onNext} nextLabel="Choose a specialist" />
+        <StepHeading headingRef={headingRef} title={t("site.spec.chooseTime")} />
+        <InlineNotice tone="warn">{t("site.book.specialistFirst")}</InlineNotice>
+        <ActionBar onBack={onBack} onNext={onBack ?? onNext} nextLabel={t("site.book.chooseSpecialist")} />
       </BookCard>
     );
   }
@@ -717,7 +716,7 @@ function StepTime({
   return (
     <>
       <BookCard>
-        <StepHeading headingRef={headingRef} title={linked ? "Pick a day and time" : "Choose a time"} sub={`Real open times with ${specialist.name}.`} />
+        <StepHeading headingRef={headingRef} title={linked ? t("site.book.step.dayTime") : t("site.spec.chooseTime")} sub={t("site.book.realTimesWith", { name: specialist.name })} />
         {notice && (
           <div className="mb-5">
             <InlineNotice tone="warn" role="alert">
@@ -726,21 +725,21 @@ function StepTime({
           </div>
         )}
         <div className="mb-5">
-          <DateStrip value={date} onChange={(iso) => patch({ date: iso, time: null })} label="Change the day" />
+          <DateStrip value={date} onChange={(iso) => patch({ date: iso, time: null })} label={t("site.book.changeDay")} />
         </div>
         <SlotPicker
           specialistId={specialist.id}
           date={date}
           onDateChange={(iso) => patch({ date: iso, time: null })}
           value={draft.time}
-          onChange={(t) => {
+          onChange={(time) => {
             onDismissNotice();
-            patch({ time: t });
+            patch({ time });
           }}
         />
       </BookCard>
       <HelpMeFind onHelp={onHelp} />
-      <ActionBar onBack={onBack} onNext={onNext} nextDisabled={!draft.time} hint={!draft.time ? "Choose a time to continue" : undefined} />
+      <ActionBar onBack={onBack} onNext={onNext} nextDisabled={!draft.time} hint={!draft.time ? t("site.book.chooseTimeHint") : undefined} />
     </>
   );
 }
@@ -803,16 +802,16 @@ function StepReview({
   if (!specialist || !draft.date || !draft.time) {
     return (
       <BookCard>
-        <StepHeading headingRef={headingRef} title="Almost there" />
-        <InlineNotice tone="warn">Some details are missing. Please go back and complete the earlier steps.</InlineNotice>
-        <ActionBar onBack={onBack} onNext={onBack} nextLabel="Go back" />
+        <StepHeading headingRef={headingRef} title={t("site.book.almost")} />
+        <InlineNotice tone="warn">{t("site.book.missing")}</InlineNotice>
+        <ActionBar onBack={onBack} onNext={onBack} nextLabel={t("site.book.goBack")} />
       </BookCard>
     );
   }
 
   const sessionType = draft.answers.online !== false && (sessionTypes.length === 0 || sessionTypes.includes("ONLINE"))
     ? "ONLINE"
-    : (sessionTypes.find((t) => t !== "ONLINE") ?? "ONLINE");
+    : (sessionTypes.find((type) => type !== "ONLINE") ?? "ONLINE");
 
   const mismatch = couplesMismatch(draft.answers, specialist) || error?.couple === true;
 
@@ -820,7 +819,7 @@ function StepReview({
     if (mismatch || submitting || !specialist || !draft.date || !draft.time) return;
     setError(null);
     if (!formToken) {
-      setError({ text: "The form isn't ready yet. Please wait a moment and try again." });
+      setError({ text: t("booking.pageNotReady") });
       refreshFormToken();
       return;
     }
@@ -879,16 +878,16 @@ function StepReview({
   return (
     <>
       <BookCard>
-        <StepHeading headingRef={headingRef} title="Check and hold your time" sub="Have a look that everything is right. We'll hold this time for you while you confirm on WhatsApp." />
+        <StepHeading headingRef={headingRef} title={t("site.book.reviewTitle")} sub={t("site.book.reviewSub")} />
         <dl className="grid gap-3">
-          <ReviewRow label="Specialist" value={specialist.name} onEdit={() => onEdit("specialist")} />
-          <ReviewRow label="When" value={`${formatDateLong(draft.date)} at ${formatTime(draft.time)} (${zoneLabel(parseIsoLocal(draft.date))})`} onEdit={() => onEdit("time")} />
-          <ReviewRow label="Your name" value={draft.fullName} onEdit={() => onEdit("about")} />
+          <ReviewRow label={t("site.spec.specialist")} value={specialist.name} onEdit={() => onEdit("specialist")} />
+          <ReviewRow label={t("site.events.when")} value={t("site.book.whenValue", { date: formatDateLong(draft.date), time: formatTime(draft.time), zone: zoneLabel(parseIsoLocal(draft.date)) })} onEdit={() => onEdit("time")} />
+          <ReviewRow label={t("site.form.yourName")} value={draft.fullName} onEdit={() => onEdit("about")} />
           <ReviewRow label="WhatsApp" value={draft.whatsapp} onEdit={() => onEdit("about")} />
         </dl>
         <div className="mt-5">
           <InlineNotice>
-            <strong>How payment works:</strong> there&apos;s nothing to pay now. Our team will arrange payment with you on WhatsApp.
+            <strong>{t("site.book.paymentStrong")}</strong> {t("site.book.payment")}
           </InlineNotice>
         </div>
 
@@ -915,7 +914,7 @@ function StepReview({
               <p>{error.text}</p>
               {error.help && (
                 <BookButton variant="secondary" onClick={onHelp} className="mt-3">
-                  Ask the team to help me
+                  {t("site.help2.submit")}
                 </BookButton>
               )}
             </InlineNotice>
@@ -923,7 +922,7 @@ function StepReview({
         )}
       </BookCard>
       <HelpMeFind onHelp={onHelp} />
-      <ActionBar onBack={onBack} onNext={hold} nextDisabled={mismatch} loading={submitting} nextLabel={submitting ? "Holding your time…" : "Hold my time"} />
+      <ActionBar onBack={onBack} onNext={hold} nextDisabled={mismatch} loading={submitting} nextLabel={submitting ? t("site.book.holding") : t("site.book.hold")} />
     </>
   );
 }
@@ -941,12 +940,12 @@ function CoupleMismatchNotice({
   return (
     <InlineNotice tone="warn" role="alert">
       <p>
-        <strong>{firstNameOf(name)} sees individuals only</strong>, so can&apos;t take a couple session. Your details are saved, so this only takes a moment.
+        <strong>{t("site.book.individualsOnlyStrong", { name: firstNameOf(name) })}</strong>{t("site.book.individualsOnlyRest")}
       </p>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <BookButton onClick={onChangeSpecialist}>Choose a couple-friendly specialist</BookButton>
+        <BookButton onClick={onChangeSpecialist}>{t("site.book.coupleFriendly")}</BookButton>
         <BookButton variant="secondary" onClick={onIndividual}>
-          Book as an individual instead
+          {t("site.book.asIndividual")}
         </BookButton>
       </div>
     </InlineNotice>
@@ -958,8 +957,8 @@ function CoupleMismatchNotice({
 function useCountdown(expiresAt: string | null): number {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
   }, []);
   return expiresAt ? Math.max(0, Math.floor((new Date(expiresAt).getTime() - now) / 1000)) : 0;
 }
@@ -1041,14 +1040,14 @@ function StepVerify({
   if (expired) {
     return (
       <BookCard>
-        <StepHeading headingRef={headingRef} title="Your held time has ended" sub="No worries — nothing was booked and nothing was charged." />
-        <p className="text-momentizing-muted">We hold your time for a short while so you can confirm on WhatsApp. That window has passed, so the time has been released for others.</p>
+        <StepHeading headingRef={headingRef} title={t("site.book.expiredTitle")} sub={t("site.book.expiredSub")} />
+        <p className="text-momentizing-muted">{t("site.book.expiredBody")}</p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <BookButton onClick={onChooseAnother} className="sm:flex-1">
-            Choose a time again
+            {t("site.book.chooseAgain")}
           </BookButton>
           <BookButton variant="secondary" onClick={onHelp} className="sm:flex-1">
-            Ask the team to help me
+            {t("site.help2.submit")}
           </BookButton>
         </div>
       </BookCard>
@@ -1057,16 +1056,16 @@ function StepVerify({
 
   return (
     <BookCard>
-      <StepHeading headingRef={headingRef} title="One last step: confirm it's you" sub="This keeps your booking safe and stops anyone else from using your number." />
+      <StepHeading headingRef={headingRef} title={t("site.book.verifyTitle")} sub={t("site.book.verifySub")} />
 
       <div className="rounded-2xl bg-momentizing-mint/60 p-4">
-        <p className="text-sm font-semibold text-momentizing-muted">Your held time</p>
+        <p className="text-sm font-semibold text-momentizing-muted">{t("site.book.heldTime")}</p>
         <p className="mt-1 text-lg font-semibold">
           {formatSessionWhen(b.sessionDate, b.startTime)}
         </p>
-        <p className="text-momentizing-muted">with {b.specialistName}</p>
+        <p className="text-momentizing-muted">{t("site.book.withName", { name: b.specialistName })}</p>
         <p className="mt-2 text-sm text-momentizing-muted" role="timer" aria-live="off">
-          Held for you for <strong className="tabular-nums">{mm}:{ss}</strong>
+          {t("site.book.heldFor")} <strong className="tabular-nums">{mm}:{ss}</strong>
         </p>
       </div>
 
@@ -1074,18 +1073,18 @@ function StepVerify({
         <li className="flex gap-3">
           <span aria-hidden="true" className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-momentizing-teal text-sm font-bold text-white">1</span>
           <span>
-            Tap the button below. WhatsApp opens with your code already typed in.
+            {t("site.book.verify1")}
           </span>
         </li>
         <li className="flex gap-3">
           <span aria-hidden="true" className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-momentizing-teal text-sm font-bold text-white">2</span>
           <span>
-            Press <strong>Send</strong>. Use the WhatsApp account of the number you gave us.
+            {t("site.book.verify2A")} <strong>{t("site.book.verify2Send")}</strong>. {t("site.book.verify2B")}
           </span>
         </li>
         <li className="flex gap-3">
           <span aria-hidden="true" className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-momentizing-teal text-sm font-bold text-white">3</span>
-          <span>Come back here — this page updates by itself.</span>
+          <span>{t("site.book.verify3")}</span>
         </li>
       </ol>
 
@@ -1095,30 +1094,30 @@ function StepVerify({
         rel="noopener noreferrer"
         className="mt-6 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-[#128C4A] px-6 py-3 text-base font-semibold text-white hover:bg-[#0f7a40] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal"
       >
-        Confirm on WhatsApp
+        {t("site.spec.confirmOnWa")}
       </a>
 
       <div className="mt-5 rounded-2xl border border-momentizing-slate/15 p-4 text-sm">
         <p className="text-momentizing-muted">
-          Prefer to send it yourself? Message <strong>+{b.verificationWhatsapp.replace(/^\+/, "")}</strong> with this text:
+          {t("site.book.selfSendA")} <strong>+{b.verificationWhatsapp.replace(/^\+/, "")}</strong> {t("site.book.selfSendB")}
         </p>
         <p className="mt-2 rounded-xl bg-momentizing-mint/60 p-3 font-mono text-sm break-words select-all">{b.verificationMessage}</p>
         <BookButton variant="secondary" onClick={copy} className="mt-3 w-full sm:w-auto">
-          {copied ? "Copied ✓" : "Copy the message"}
+          {copied ? t("site.book.copied") : t("site.book.copy")}
         </BookButton>
       </div>
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center" aria-live="polite">
         <BookButton variant="ghost" onClick={check} loading={checking} className="sm:mr-auto">
-          I&apos;ve sent it — check now
+          {t("site.book.checkNow")}
         </BookButton>
-        {pollError && <span className="text-sm text-amber-900">Can&apos;t reach the server just now. We&apos;ll keep trying.</span>}
+        {pollError && <span className="text-sm text-amber-900">{t("site.book.pollError")}</span>}
       </div>
 
       <p className="mt-6 border-t border-momentizing-slate/10 pt-4 text-sm text-momentizing-muted">
-        Reference: <strong className="font-mono">{b.referenceCode}</strong>. Trouble with WhatsApp?{" "}
+        {t("site.book.referenceLabel")} <strong className="font-mono">{b.referenceCode}</strong>. {t("site.book.troubleWa")}{" "}
         <button type="button" onClick={onHelp} className="font-semibold underline focus-visible:outline-2 focus-visible:outline-momentizing-teal">
-          Ask the team to help you
+          {t("site.book.askTeamYou")}
         </button>
         .
       </p>
@@ -1141,8 +1140,8 @@ function StepDone({ active, headingRef, onAnother }: { active: ActiveBooking; he
       `DTSTAMP:${icsStamp(todayIso(), "00:00")}`,
       `DTSTART:${icsStamp(b.sessionDate, b.startTime)}`,
       `DTEND:${icsStamp(b.sessionDate, b.startTime, b.durationMinutes)}`,
-      `SUMMARY:Momentizing session with ${b.specialistName}`,
-      `DESCRIPTION:Booking ${b.referenceCode}. We will WhatsApp you the details.`,
+      `SUMMARY:${t("site.book.icsSummary", { name: b.specialistName })}`,
+      `DESCRIPTION:${t("site.book.icsDescription", { code: b.referenceCode })}`,
       "END:VEVENT",
       "END:VCALENDAR",
     ];
@@ -1157,29 +1156,29 @@ function StepDone({ active, headingRef, onAnother }: { active: ActiveBooking; he
   return (
     <div className="flex flex-col gap-6">
       <BookCard>
-        <StepHeading headingRef={headingRef} title="You're all set" sub="Your session is confirmed. We're looking forward to seeing you." />
+        <StepHeading headingRef={headingRef} title={t("site.book.doneTitle")} sub={t("site.book.doneSub")} />
         <InlineNotice tone="success" role="status">
           <p className="text-lg font-semibold">
             {formatSessionWhen(b.sessionDate, b.startTime)}
           </p>
           <p>
-            with {b.specialistName} · {b.durationMinutes} minutes
+            {t("site.my.with", { name: b.specialistName, minutes: b.durationMinutes })}
           </p>
           <p className="mt-2 text-sm">
-            Reference <strong className="font-mono">{b.referenceCode}</strong>
+            {t("site.book.reference")} <strong className="font-mono">{b.referenceCode}</strong>
           </p>
         </InlineNotice>
         <ul className="mt-5 flex list-disc flex-col gap-2 pl-5 text-momentizing-muted">
-          <li>We&apos;ll message you on WhatsApp to arrange payment and share the session details.</li>
-          <li>You&apos;ll get reminders before your session.</li>
+          <li>{t("site.book.done1")}</li>
+          <li>{t("site.book.done2")}</li>
         </ul>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <BookButton variant="secondary" onClick={downloadIcs} className="sm:flex-1">
-            Add to my calendar
+            {t("site.book.addCalendar")}
           </BookButton>
           <Link href="/" className="sm:flex-1" onClick={onAnother}>
             <span className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-momentizing-slate/30 bg-white px-6 py-3 text-sm font-semibold text-momentizing-slate hover:bg-momentizing-slate/5">
-              Back to home
+              {t("site.book.backHome")}
             </span>
           </Link>
         </div>

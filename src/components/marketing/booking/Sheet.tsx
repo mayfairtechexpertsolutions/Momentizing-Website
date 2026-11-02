@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { t } from "@/i18n";
 
 /**
  * Accessible modal built on the native <dialog>: showModal() gives a real focus trap, makes the page behind inert,
@@ -57,7 +58,7 @@ export function Sheet({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t("site.common.close")}
           className="flex h-11 w-11 items-center justify-center rounded-full text-momentizing-slate hover:bg-momentizing-slate/5 focus-visible:outline-2 focus-visible:outline-momentizing-teal"
         >
           <span aria-hidden="true" className="text-2xl leading-none">

@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { MarketingFonts } from "@/components/marketing/MarketingFonts";
 import { WhatsAppFloatingButton } from "@/components/marketing/WhatsAppFloatingButton";
 import { withBase } from "@/lib/base-path";
+import { t } from "@/i18n";
 
 interface CrisisResource {
   name: string;
@@ -34,31 +35,30 @@ export default function HelpPage() {
             onClick={() => (window.history.length > 1 ? router.back() : router.push("/"))}
             className="inline-flex min-h-11 items-center text-sm text-momentizing-muted hover:text-momentizing-slate"
           >
-            ← Back
+            ← {t("site.common.back")}
           </button>
         </div>
 
         <div>
-          <h1 className="font-marketing-serif text-2xl text-momentizing-slate">You&apos;re not alone</h1>
+          <h1 className="font-marketing-serif text-2xl text-momentizing-slate">{t("site.help.title")}</h1>
           <p className="mt-2 text-sm text-momentizing-muted">
-            Momentizing is not a crisis service. If you&apos;re in immediate danger or need urgent support,
-            please reach out to one of the resources below or contact local emergency services.
+            {t("site.help.body")}
           </p>
         </div>
 
-        {isLoading && <p className="text-sm text-momentizing-muted">Loading resources…</p>}
+        {isLoading && <p className="text-sm text-momentizing-muted">{t("site.help.loading")}</p>}
 
         {error && !isLoading && (
           <Card className="border border-red-200 bg-red-50" role="alert">
             <p className="text-sm text-momentizing-slate">
-              We couldn&apos;t load the list of helplines. If you or someone near you is in immediate danger,{" "}
-              <strong>call your local emergency number now</strong>.
+              {t("site.help.loadErrorA")}{" "}
+              <strong>{t("site.help.loadErrorStrong")}</strong>.
             </p>
             <button
               onClick={refetch}
               className="mt-3 inline-flex min-h-11 items-center rounded-full border border-momentizing-slate/40 px-5 text-xs font-bold tracking-widest text-momentizing-slate uppercase"
             >
-              Try again
+              {t("site.common.tryAgain")}
             </button>
           </Card>
         )}
@@ -76,7 +76,7 @@ export default function HelpPage() {
 
         {data && data.resources.length === 0 && !isLoading && (
           <Card className="text-center text-sm text-momentizing-muted">
-            No regional resources on file — please contact your local emergency number.
+            {t("site.help.none")}
           </Card>
         )}
         <WhatsAppFloatingButton />

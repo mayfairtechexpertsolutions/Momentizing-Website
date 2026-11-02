@@ -1,6 +1,7 @@
 import { fallbackDirectoryPage, getFallbackSpecialist, isFallbackSpecialistId } from "./fallback-specialists";
 import { useApiQuery } from "./use-api-query";
 import type { PageResponse } from "./types";
+import { intlLocale, t } from "@/i18n";
 
 /** Mirrors SpecialistLocationDto on the backend. activeDays: 0=Monday..6=Sunday; null/empty = every day. */
 export interface MarketingSpecialistLocation {
@@ -48,34 +49,38 @@ export interface SpecialistReview {
   updatedAt: string;
 }
 
-export const PRACTICE_MODE_LABEL: Record<string, string> = {
-  ONLINE: "Online",
-  IN_PERSON: "In-person",
-  HYBRID: "Online & in-person",
-};
+const PRACTICE_MODES = ["ONLINE", "IN_PERSON", "HYBRID"];
+
+/** "Online", "In-person"… in the chosen language; undefined for a mode the site doesn't know. */
+export function practiceModeLabel(mode: string): string | undefined {
+  return PRACTICE_MODES.includes(mode) ? t(`site.mode.${mode}`) : undefined;
+}
+
+const PROFESSIONS = ["PSYCHOLOGIST", "THERAPIST", "PSYCHIATRIST", "COACH"];
 
 /** "PSYCHOLOGIST" -> "Psychologist", "SOCIAL_WORKER" -> "Social worker"; null when there is nothing to show. */
 export function professionLabel(professionType: string | null | undefined): string | null {
   if (!professionType) return null;
+  const code = professionType.trim().toUpperCase();
+  if (PROFESSIONS.includes(code)) return t(`site.profession.${code}`);
   const words = professionType.trim().toLowerCase().replace(/_/g, " ");
   return words ? words.charAt(0).toUpperCase() + words.slice(1) : null;
 }
 
 export function formatSessionFee(cents: number | null, currency: string): string | null {
   if (cents == null) return null;
-  return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 0 }).format(
+  return new Intl.NumberFormat(intlLocale(), { style: "currency", currency, maximumFractionDigits: 0 }).format(
     cents / 100
   );
 }
 
-export const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 /** "" when the location has no day restriction (active every day). */
 export function formatActiveDays(days: number[] | null): string {
   if (!days || days.length === 0) return "";
   return [...days]
     .sort((a, b) => a - b)
-    .map((d) => DAY_LABELS[d])
+    .map((d) => t(`site.day.${d}`))
     .join(", ");
 }
 

@@ -14,95 +14,29 @@ import { UpcomingEventsBand } from "@/components/marketing/UpcomingEventsBand";
 import { FallbackNotice } from "@/components/marketing/FallbackNotice";
 import { useMarketingDirectory } from "@/lib/marketing-directory";
 import { usePackages, formatPackagePrice } from "@/lib/session-packages";
+import { t } from "@/i18n";
 
 // Mirrors the "Our service" row on the brand's Instagram artwork.
 const OFFERINGS = [
-  { label: "Counseling", icon: "fas fa-comments", tone: "bg-momentizing-mint-deep text-momentizing-teal" },
-  { label: "Coaching", icon: "fas fa-clipboard-list", tone: "bg-momentizing-peach text-momentizing-gold-deep" },
-  { label: "Psychological Assessment", icon: "fas fa-spa", tone: "bg-momentizing-mint-deep text-momentizing-teal" },
-  { label: "Support Group Facilitation", icon: "fas fa-users", tone: "bg-momentizing-peach text-momentizing-gold-deep" },
+  { labelKey: "site.home.offer.counseling", icon: "fas fa-comments", tone: "bg-momentizing-mint-deep text-momentizing-teal" },
+  { labelKey: "site.home.offer.coaching", icon: "fas fa-clipboard-list", tone: "bg-momentizing-peach text-momentizing-gold-deep" },
+  { labelKey: "site.home.offer.assessment", icon: "fas fa-spa", tone: "bg-momentizing-mint-deep text-momentizing-teal" },
+  { labelKey: "site.home.offer.supportGroup", icon: "fas fa-users", tone: "bg-momentizing-peach text-momentizing-gold-deep" },
 ];
 
-const FAQ_ITEMS = [
-  {
-    question: "How do I choose the right package?",
-    answer:
-      "Most clients begin with a single session for an intake assessment. If you're planning on long-term support, the 5 or 10 session packages offer significant cost reductions and priority scheduling.",
-  },
-  {
-    question: "What happens if I don't use all the sessions in my package?",
-    answer:
-      "Package sessions don't expire on a rigid schedule — you and your specialist set the cadence together. If your circumstances change, reach out via your account or WhatsApp and our team will help you adjust.",
-  },
-  {
-    question: "Are these services global?",
-    answer:
-      "Yes. We specialize in the diaspora. All sessions are conducted via secure, HIPAA-compliant video conferencing accessible from anywhere in the world.",
-  },
-  {
-    question: "What timezone are sessions scheduled in?",
-    answer:
-      "You pick a time in your own local timezone when booking — the system handles the conversion with your specialist automatically. We have associates across multiple time zones so early-morning and late-evening slots are usually available.",
-  },
-  {
-    question: "How are Momentizing specialists vetted?",
-    answer:
-      "Every associate submits their licence number and credentials during registration, and our team verifies them before the profile is approved and made visible in the directory. Unapproved or rejected applicants are never shown to clients.",
-  },
-  {
-    question: "Is my information confidential?",
-    answer:
-      "Yes. Sessions, journal entries, and messages are private between you and your specialist. We never share your personal health information with third parties without your consent, except where required by law.",
-  },
-  {
-    question: "What if I need to cancel or reschedule a session?",
-    answer:
-      "You can cancel or reschedule directly from your bookings page. We ask for as much notice as possible so your specialist's time can be offered to someone else — check your confirmation for the specific notice window.",
-  },
-  {
-    question: "Do you accept insurance, or provide receipts?",
-    answer:
-      "We don't bill insurance directly today, but every completed session generates a receipt you can submit to your insurer or employer for reimbursement, available from your account.",
-  },
-  {
-    question: "Can I switch specialists if it's not the right fit?",
-    answer:
-      "Absolutely — fit matters more than momentum. Message our support team or use \"Match me instead\" from your account and we'll connect you with someone new, no awkward conversation required.",
-  },
-  {
-    question: "What do I need for a video session?",
-    answer:
-      "Just a stable internet connection and a device with a camera and microphone — laptop, tablet, or phone all work. We'll send a secure video link ahead of your appointment; no extra software to install.",
-  },
-  {
-    question: "Do you offer support for organizations and teams?",
-    answer:
-      "Yes — we provide Mental Health First Aid training, EAP frameworks, and burnout-prevention workshops for distributed teams. Use \"Inquire for Corporate\" below or reach out via WhatsApp to start the conversation.",
-  },
-  {
-    question: "Is Momentizing a crisis or emergency service?",
-    answer:
-      "No — Momentizing is not equipped for emergencies or immediate crisis intervention. If you're in danger or need urgent support, please contact local emergency services or visit our Crisis Resources page, available anytime without an account.",
-  },
-  {
-    question: "Can I book a session via WhatsApp instead of the website?",
-    answer:
-      `Yes. Tap the WhatsApp icon in the navigation or footer to chat directly with our team on ${MOMENTIZING_WHATSAPP_DISPLAY}. When you book on the website you'll also confirm your booking on WhatsApp, so both routes end up in the same place.`,
-  },
-  {
-    question: "How quickly will I be confirmed?",
-    answer:
-      "Straight away. Choose a real open time on the website, then confirm it with one WhatsApp message — no account and no waiting. If you can't find a time that suits you, tell us and our team will contact you on WhatsApp, typically within one business day.",
-  },
-  {
-    question: "How do I get in touch with support?",
-    answer:
-      `Message us on WhatsApp at ${MOMENTIZING_WHATSAPP_DISPLAY}, use the "Ask our team" form, or, once you have an account, use in-app messaging — our support team monitors all three.`,
-  },
-];
+const FAQ_KEYS = ["choosePackage", "unusedSessions", "global", "timezone", "vetted", "confidential", "cancel", "insurance", "switch", "video", "teams", "crisis", "whatsapp", "quick", "support"];
+
+/** Read at render time so the answers follow the chosen language. */
+function faqItems() {
+  return FAQ_KEYS.map((k) => ({
+    question: t(`site.home.faq.${k}.q`),
+    answer: t(`site.home.faq.${k}.a`, { number: MOMENTIZING_WHATSAPP_DISPLAY }),
+  }));
+}
 
 export default function MarketingHomePage() {
   const router = useRouter();
+  const FAQ_ITEMS = faqItems();
 
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingPackageId, setBookingPackageId] = useState<number | undefined>(undefined);
@@ -134,32 +68,31 @@ export default function MarketingHomePage() {
         <div className="grid items-center gap-16 md:grid-cols-2">
           <div>
             <span className="inline-block rounded-full bg-momentizing-mint px-4 py-1.5 text-xs font-bold tracking-[0.18em] text-momentizing-teal uppercase">
-              Empowering the Global Diaspora
+              {t("site.home.eyebrow")}
             </span>
             <h1 className="mt-6 mb-8 font-marketing-serif text-5xl leading-[1.08] font-bold text-momentizing-gold-deep md:text-7xl">
-              Healing Without <span className="text-momentizing-teal">Borders.</span>
+              {t("site.home.heroTitleA")} <span className="text-momentizing-teal">{t("site.home.heroTitleB")}</span>
             </h1>
             <p className="mb-10 max-w-lg text-lg leading-relaxed text-momentizing-muted">
-              Culturally-attuned psychological support for individuals and organizations navigating life across
-              cultures.
+              {t("site.home.heroBody")}
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
               <Link
                 href="/book"
                 className="inline-flex min-h-12 items-center justify-center rounded-full bg-momentizing-teal px-8 py-4 font-bold text-white shadow-md shadow-momentizing-teal/25 transition hover:bg-momentizing-slate"
               >
-                Book a Session
+                {t("site.nav.bookSession")}
               </Link>
               <a
                 href="#packages"
                 className="inline-flex min-h-12 items-center justify-center rounded-full border-2 border-momentizing-gold-deep px-8 py-4 font-bold text-momentizing-gold-deep transition hover:bg-momentizing-gold-deep hover:text-white"
               >
-                View Packages
+                {t("site.home.viewPackages")}
               </a>
             </div>
           </div>
           <div className="relative overflow-hidden rounded-[3rem] border-8 border-white shadow-2xl shadow-momentizing-teal/15">
-            <div className="aspect-[12/11] w-full" role="img" aria-label="Illustration of a heart held in caring hands, surrounded by leaves">
+            <div className="aspect-[12/11] w-full" role="img" aria-label={t("site.home.heroArt")}>
               <BrandIllustration variant="care" />
             </div>
           </div>
@@ -169,15 +102,15 @@ export default function MarketingHomePage() {
       <section aria-labelledby="what-we-offer" className="bg-momentizing-mint px-6 py-14">
         <div className="mx-auto max-w-7xl">
           <h2 id="what-we-offer" className="mb-8 text-center font-marketing-sans text-xs font-bold tracking-[0.25em] text-momentizing-teal uppercase">
-            How we can support you
+            {t("site.home.supportHeading")}
           </h2>
           <ul className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {OFFERINGS.map((o) => (
-              <li key={o.label} className="flex flex-col items-center gap-3 rounded-3xl bg-white/70 px-4 py-6 text-center">
+              <li key={o.labelKey} className="flex flex-col items-center gap-3 rounded-3xl bg-white/70 px-4 py-6 text-center">
                 <span className={`flex h-14 w-14 items-center justify-center rounded-full text-xl ${o.tone}`}>
                   <i className={o.icon} aria-hidden="true" />
                 </span>
-                <span className="text-sm font-bold text-momentizing-slate">{o.label}</span>
+                <span className="text-sm font-bold text-momentizing-slate">{t(o.labelKey)}</span>
               </li>
             ))}
           </ul>
@@ -187,9 +120,9 @@ export default function MarketingHomePage() {
       <section id="services" className="px-6 py-24">
         <div data-reveal className="mx-auto max-w-7xl">
           <div className="mb-20 text-center">
-            <h2 className="font-marketing-serif text-4xl text-momentizing-gold-deep">Clinical Excellence</h2>
+            <h2 className="font-marketing-serif text-4xl text-momentizing-gold-deep">{t("site.home.clinicalTitle")}</h2>
             <p className="mt-2 text-xs font-bold tracking-[0.2em] text-momentizing-muted uppercase">
-              Specialized Individual &amp; Family Care
+              {t("site.home.clinicalSub")}
             </p>
           </div>
           <div className="grid items-center gap-12 md:grid-cols-2">
@@ -200,11 +133,10 @@ export default function MarketingHomePage() {
                 </div>
                 <div>
                   <h3 className="mb-2 font-marketing-sans text-sm font-bold tracking-wider text-momentizing-slate uppercase">
-                    Psychological Assessment
+                    {t("site.home.offer.assessment")}
                   </h3>
                   <p className="text-sm leading-relaxed text-momentizing-muted">
-                    In-depth clinical evaluation for ADHD, anxiety, depression, and cross-cultural adjustment
-                    issues.
+                    {t("site.home.assessmentBody")}
                   </p>
                 </div>
               </div>
@@ -214,30 +146,29 @@ export default function MarketingHomePage() {
                 </div>
                 <div>
                   <h3 className="mb-2 font-marketing-sans text-sm font-bold tracking-wider text-momentizing-slate uppercase">
-                    Intercultural Relationship Therapy
+                    {t("site.home.relationshipTitle")}
                   </h3>
                   <p className="text-sm leading-relaxed text-momentizing-muted">
-                    Helping couples navigate communication barriers and cultural value differences using the
-                    Gottman Method.
+                    {t("site.home.relationshipBody")}
                   </p>
                 </div>
               </div>
             </div>
             <div className="rounded-[2.5rem] border border-momentizing-gold/10 bg-white p-10 shadow-xl shadow-momentizing-gold/5">
-              <h3 className="mb-6 font-marketing-serif text-2xl">Our Individual Approach</h3>
+              <h3 className="mb-6 font-marketing-serif text-2xl">{t("site.home.approachTitle")}</h3>
               <p className="mb-6 text-sm leading-relaxed text-momentizing-muted">
-                We don&apos;t believe in &quot;one size fits all.&quot; Every journey begins with a{" "}
-                <strong>60-minute intake session</strong> to map your history, triggers, and goals.
+                {t("site.home.approachA")}{" "}
+                <strong>{t("site.home.approachStrong")}</strong> {t("site.home.approachB")}
               </p>
               <ul className="space-y-3 text-sm font-bold text-momentizing-teal">
                 <li>
-                  <i aria-hidden="true" className="fas fa-check mr-2" /> Evidence-Based CBT &amp; DBT
+                  <i aria-hidden="true" className="fas fa-check mr-2" /> {t("site.home.check1")}
                 </li>
                 <li>
-                  <i aria-hidden="true" className="fas fa-check mr-2" /> Multi-Lingual Support
+                  <i aria-hidden="true" className="fas fa-check mr-2" /> {t("site.home.check2")}
                 </li>
                 <li>
-                  <i aria-hidden="true" className="fas fa-check mr-2" /> Trauma-Informed Framework
+                  <i aria-hidden="true" className="fas fa-check mr-2" /> {t("site.home.check3")}
                 </li>
               </ul>
             </div>
@@ -249,28 +180,27 @@ export default function MarketingHomePage() {
         <div data-reveal className="mx-auto flex max-w-5xl flex-col items-start gap-8 md:flex-row md:items-center md:justify-between">
           <div className="max-w-2xl">
             <h2 id="our-story" className="font-marketing-serif text-3xl leading-snug font-semibold text-momentizing-gold-deep md:text-4xl">
-              Born between two cultures, built for many.
+              {t("site.home.storyTitle")}
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-momentizing-muted">
-              Momentizing grew from one person&apos;s life as an expat in Taiwan into a team supporting people who live between
-              cultures. Read how it began.
+              {t("site.home.storyBody")}
             </p>
           </div>
           <Link
             href="/about"
             className="inline-flex min-h-12 flex-shrink-0 items-center rounded-full border-2 border-momentizing-gold-deep px-8 py-3 font-bold text-momentizing-gold-deep transition hover:bg-momentizing-gold-deep hover:text-white"
           >
-            Our story
+            {t("site.home.storyCta")}
           </Link>
         </div>
       </section>
 
       <section id="packages" className="on-dark bg-momentizing-slate px-6 py-24 text-white">
         <div data-reveal className="mx-auto max-w-7xl text-center">
-          <h2 className="mb-12 font-marketing-serif text-4xl text-momentizing-gold">Care Packages</h2>
+          <h2 className="mb-12 font-marketing-serif text-4xl text-momentizing-gold">{t("site.home.packagesTitle")}</h2>
           {packagesLoading ? (
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3" aria-busy="true">
-              <span className="sr-only" role="status">Loading packages…</span>
+              <span className="sr-only" role="status">{t("site.home.loadingPackages")}</span>
               {[0, 1, 2].map((i) => (
                 <div key={i} aria-hidden="true" className="h-72 animate-pulse rounded-[2.5rem] bg-white/10 motion-reduce:animate-none" />
               ))}
@@ -278,7 +208,7 @@ export default function MarketingHomePage() {
           ) : packagesError ? (
             <div role="alert" className="mx-auto max-w-md">
               <p className="mb-8 text-white/85">
-                We couldn&apos;t load our packages just now. Try again, or talk to our team and we&apos;ll share the options.
+                {t("site.home.packagesError")}
               </p>
               <div className="flex flex-col justify-center gap-3 sm:flex-row">
                 <button
@@ -286,29 +216,28 @@ export default function MarketingHomePage() {
                   onClick={refetchPackages}
                   className="min-h-12 rounded-full border border-white/40 px-8 py-3 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-white hover:text-momentizing-slate"
                 >
-                  Try again
+                  {t("site.common.tryAgain")}
                 </button>
                 <button
                   type="button"
                   onClick={() => openBooking()}
                   className="min-h-12 rounded-full bg-momentizing-gold-deep px-8 py-3 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-white hover:text-momentizing-gold-deep"
                 >
-                  Talk to Our Team
+                  {t("site.home.talkToTeam")}
                 </button>
               </div>
             </div>
           ) : (packages ?? []).length === 0 ? (
             <div className="mx-auto max-w-md">
               <p className="mb-8 text-sm text-white/85">
-                Our package catalog is being finalized — reach out and our team will put together the right plan
-                for you.
+                {t("site.home.packagesEmpty")}
               </p>
               <button
                 type="button"
                 onClick={() => openBooking()}
                 className="min-h-12 rounded-full bg-momentizing-gold-deep px-10 py-4 text-xs font-bold tracking-widest text-white uppercase shadow-lg shadow-momentizing-gold/20 transition hover:bg-white hover:text-momentizing-gold-deep"
               >
-                Talk to Our Team
+                {t("site.home.talkToTeam")}
               </button>
             </div>
           ) : (
@@ -347,7 +276,7 @@ export default function MarketingHomePage() {
                         : "w-full rounded-full bg-white/15 py-4 text-xs font-bold tracking-widest uppercase transition hover:bg-white hover:text-momentizing-slate"
                     }
                   >
-                    {pkg.sessionCount === 1 ? "Book a Session" : "Ask About This Package"}
+                    {pkg.sessionCount === 1 ? t("site.nav.bookSession") : t("site.home.askPackage")}
                   </button>
                 </div>
               );
@@ -360,30 +289,28 @@ export default function MarketingHomePage() {
       <section id="corporate" className="px-6 py-24">
         <div data-reveal className="mx-auto grid max-w-7xl items-center gap-16 md:grid-cols-2">
           <div className="overflow-hidden rounded-[3rem]">
-            <div className="aspect-[12/11] w-full" role="img" aria-label="Illustration of a connected team supported by care">
+            <div className="aspect-[12/11] w-full" role="img" aria-label={t("site.home.teamArt")}>
               <BrandIllustration variant="team" />
             </div>
           </div>
           <div>
             <span className="text-xs font-bold tracking-[0.3em] text-momentizing-teal uppercase">
-              For Organizations
+              {t("site.home.forOrgs")}
             </span>
             <h2 className="mt-4 mb-6 font-marketing-serif text-4xl text-momentizing-gold-deep">
-              Strategic Wellbeing
+              {t("site.home.strategicTitle")}
             </h2>
             <p className="mb-8 text-sm leading-relaxed text-momentizing-muted">
-              Momentizing provides corporate entities with <strong>Mental Health First Aid</strong> training, EAP
-              frameworks, and proactive burnout prevention workshops. We help distributed teams maintain high
-              empathy and performance across time zones.
+              {t("site.home.corporateA")} <strong>{t("site.home.corporateStrong")}</strong> {t("site.home.corporateB")}
             </p>
             <div className="mb-10 grid grid-cols-2 gap-4">
               <div className="rounded-2xl bg-momentizing-peach/60 p-4 text-center">
-                <span className="block font-marketing-serif text-xl text-momentizing-gold-deep">By appointment</span>
-                <span className="text-xs tracking-widest uppercase">Scheduled sessions</span>
+                <span className="block font-marketing-serif text-xl text-momentizing-gold-deep">{t("site.home.byAppointment")}</span>
+                <span className="text-xs tracking-widest uppercase">{t("site.home.scheduledSessions")}</span>
               </div>
               <div className="rounded-2xl bg-momentizing-peach/60 p-4 text-center">
-                <span className="block font-marketing-serif text-xl text-momentizing-gold-deep">Custom</span>
-                <span className="text-xs tracking-widest uppercase">EAP Dashboards</span>
+                <span className="block font-marketing-serif text-xl text-momentizing-gold-deep">{t("site.home.custom")}</span>
+                <span className="text-xs tracking-widest uppercase">{t("site.home.eapDashboards")}</span>
               </div>
             </div>
             <button
@@ -391,7 +318,7 @@ export default function MarketingHomePage() {
               onClick={() => openBooking()}
               className="min-h-12 w-full rounded-full bg-momentizing-teal px-10 py-4 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-slate sm:w-auto"
             >
-              Inquire for Corporate
+              {t("site.home.inquireCorporate")}
             </button>
           </div>
         </div>
@@ -399,30 +326,29 @@ export default function MarketingHomePage() {
 
       <section id="associates-preview" className="bg-momentizing-peach/60 px-6 py-24">
         <div data-reveal className="mx-auto max-w-7xl text-center">
-          <h2 className="mb-3 font-marketing-serif text-3xl text-momentizing-gold-deep">Our Top-Rated Specialists</h2>
+          <h2 className="mb-3 font-marketing-serif text-3xl text-momentizing-gold-deep">{t("site.home.topRatedTitle")}</h2>
           <p className="mx-auto mb-8 max-w-lg text-sm text-momentizing-muted">
-            Our highest-rated associates, based on real client reviews — see their experience and fees, then
-            request a preferred date and time. No account needed to get started.
+            {t("site.home.topRatedBody")}
           </p>
 
           {directoryIsFallback && <FallbackNotice className="mb-8" />}
           {directoryLoading ? (
             <div className="mb-16 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4" aria-busy="true">
-              <span className="sr-only" role="status">Loading specialists…</span>
+              <span className="sr-only" role="status">{t("site.home.loadingSpecialists")}</span>
               {[0, 1, 2, 3].map((i) => (
                 <div key={i} aria-hidden="true" className={`aspect-[3/5] animate-pulse rounded-3xl bg-white/70 motion-reduce:animate-none ${i === 3 ? "hidden lg:block" : i === 2 ? "hidden sm:block" : ""}`} />
               ))}
             </div>
           ) : directoryError ? (
             <div role="alert" className="mx-auto mb-16 max-w-md rounded-3xl bg-white/70 p-8">
-              <p className="font-marketing-serif text-xl text-momentizing-slate">We couldn&apos;t load our specialists just now.</p>
-              <p className="mt-2 text-sm text-momentizing-muted">Please check your connection and try again.</p>
+              <p className="font-marketing-serif text-xl text-momentizing-slate">{t("site.home.specialistsError")}</p>
+              <p className="mt-2 text-sm text-momentizing-muted">{t("site.common.checkConnection")}</p>
               <button
                 type="button"
                 onClick={refetchDirectory}
                 className="mt-6 min-h-12 rounded-full border-2 border-momentizing-gold-deep px-8 py-3 text-xs font-bold tracking-widest text-momentizing-gold-deep uppercase transition hover:bg-momentizing-gold-deep hover:text-white"
               >
-                Try again
+                {t("site.common.tryAgain")}
               </button>
             </div>
           ) : topRatedAssociates.length > 0 ? (
@@ -433,14 +359,14 @@ export default function MarketingHomePage() {
             </div>
           ) : (
             <p className="mx-auto mb-12 max-w-md text-momentizing-muted">
-              Our specialists&apos; profiles are being finalised. Book a session and we&apos;ll match you with someone who fits.
+              {t("site.home.specialistsEmpty")}
             </p>
           )}
           <Link
             href="/associates"
             className="inline-flex min-h-12 items-center rounded-full bg-momentizing-teal px-10 py-4 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-slate"
           >
-            View All Associates <i aria-hidden="true" className="fas fa-arrow-right ml-3" />
+            {t("site.home.viewAllAssociates")} <i aria-hidden="true" className="fas fa-arrow-right ml-3" />
           </Link>
         </div>
       </section>
@@ -450,7 +376,7 @@ export default function MarketingHomePage() {
       <section id="faq" className="px-6 py-24">
         <div data-reveal className="mx-auto max-w-3xl">
           <h2 className="mb-12 text-center font-marketing-serif text-3xl text-momentizing-gold-deep">
-            Common Inquiries
+            {t("site.home.faqTitle")}
           </h2>
           <div className="space-y-4">
             {FAQ_ITEMS.map((item, index) => (
@@ -489,28 +415,27 @@ export default function MarketingHomePage() {
       <section className="border-t border-momentizing-gold/10 bg-white px-6 py-20 text-center">
         <div className="mx-auto flex max-w-xl flex-col items-center gap-4">
           <h2 className="font-marketing-serif text-2xl text-momentizing-slate">
-            Already working with an associate?
+            {t("site.home.alreadyTitle")}
           </h2>
           <p className="text-sm text-momentizing-muted">
-            Log in to your Momentizing account to message your specialist, track your mood, and use your ADHD
-            tools.
+            {t("site.home.alreadyBody")}
           </p>
           <div className="mt-2 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
             <a
               href={appLink("/register")}
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-momentizing-gold-deep px-8 py-4 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-slate"
             >
-              Create an Account
+              {t("site.home.createAccount")}
             </a>
             <a
               href={appLink("/login")}
               className="inline-flex min-h-12 items-center justify-center rounded-full border border-momentizing-slate px-8 py-4 text-xs font-bold tracking-widest text-momentizing-slate uppercase transition hover:bg-momentizing-slate hover:text-white"
             >
-              Login
+              {t("site.home.login")}
             </a>
           </div>
           <a href={appLink("/register/specialist")} className="mt-2 inline-flex min-h-11 items-center text-sm text-momentizing-muted underline">
-            I&apos;m a specialist — register my practice
+            {t("site.home.registerPractice")}
           </a>
         </div>
       </section>

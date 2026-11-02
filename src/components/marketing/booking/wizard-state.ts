@@ -1,19 +1,21 @@
 import type { GuestBooking, PublicSpecialistCard } from "@/lib/guest-booking";
+import { t } from "@/i18n";
 
 export type StepId = "date" | "about" | "specialist" | "time" | "review";
+/** `label` is a translation key (see site.*.json). */
 export const STEPS: { id: StepId; label: string }[] = [
-  { id: "date", label: "Pick a day" },
-  { id: "about", label: "About you" },
-  { id: "specialist", label: "Your specialist" },
-  { id: "time", label: "Choose a time" },
-  { id: "review", label: "Review" },
+  { id: "date", label: "site.book.step.date" },
+  { id: "about", label: "site.book.step.about" },
+  { id: "specialist", label: "site.book.step.specialist" },
+  { id: "time", label: "site.spec.chooseTime" },
+  { id: "review", label: "site.book.step.review" },
 ];
 
 /** Arriving from a specialist's profile: the specialist is known, so day and time are chosen together, once. */
 export const LINKED_STEPS: { id: StepId; label: string }[] = [
-  { id: "time", label: "Pick a day and time" },
-  { id: "about", label: "About you" },
-  { id: "review", label: "Review" },
+  { id: "time", label: "site.book.step.dayTime" },
+  { id: "about", label: "site.book.step.about" },
+  { id: "review", label: "site.book.step.review" },
 ];
 
 export interface Answers {
@@ -52,7 +54,10 @@ export const EMPTY_DRAFT: Draft = {
   time: null,
 };
 
+/** Sent to the backend (and read by the specialist) in English; `concernLabel` shows them in the chosen language. */
 export const CONCERNS = ["Anxiety", "Stress & burnout", "Relationships", "Grief & loss", "Low mood", "Self-esteem", "Trauma", "Sleep", "Something else"];
+const CONCERN_KEYS: Record<string, string> = { "Anxiety": "anxiety", "Stress & burnout": "stress", "Relationships": "relationships", "Grief & loss": "grief", "Low mood": "lowMood", "Self-esteem": "selfEsteem", "Trauma": "trauma", "Sleep": "sleep", "Something else": "other" };
+export const concernLabel = (c: string): string => (CONCERN_KEYS[c] ? t(`site.book.concern.${CONCERN_KEYS[c]}`) : c);
 
 const DRAFT_KEY = "momentizing.book.draft";
 const BOOKING_KEY = "momentizing.book.active";

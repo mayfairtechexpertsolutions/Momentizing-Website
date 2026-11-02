@@ -1,6 +1,7 @@
 "use client";
 
 import { useWhatsAppLink } from "@/lib/whatsapp";
+import { t } from "@/i18n";
 
 /** Free, official WhatsApp "click to chat" widget (wa.me) — no third-party script, account, or API key
  * needed. Fixed bottom-right on every public page it's rendered on. Uses an inline SVG glyph (not the
@@ -10,10 +11,10 @@ export function WhatsAppFloatingButton() {
   const whatsAppLink = useWhatsAppLink();
   return (
     <a
-      href={whatsAppLink("Hi Momentizing, I'd like to book a session.")}
+      href={whatsAppLink(t("site.whatsapp.bookGreeting"))}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Chat on WhatsApp"
+      aria-label={t("site.common.chatWa")}
       className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[90] flex h-14 w-14 sm:right-6 sm:bottom-6 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:scale-105 hover:shadow-xl"
     >
       <svg viewBox="0 0 32 32" width="28" height="28" fill="currentColor" aria-hidden="true">

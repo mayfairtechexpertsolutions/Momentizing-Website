@@ -7,6 +7,7 @@ import { MarketingNav } from "./MarketingNav";
 import { MarketingFooter } from "./MarketingFooter";
 import { ScrollReveal } from "./ScrollReveal";
 import { WhatsAppFloatingButton } from "./WhatsAppFloatingButton";
+import { t } from "@/i18n";
 
 /** Nav, footer and WhatsApp button live in the root layout so they persist across client-side navigation
  * (no remount flash, menu and scroll state survive). `/book` is a focused flow and `/help` is a standalone
@@ -22,7 +23,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       {!isHelp && (
         <>
           <a href="#main" className="skip-link">
-            Skip to main content
+            {t("site.common.skip")}
           </a>
           <MarketingNav variant={isBook ? "simple" : "full"} />
           <ScrollReveal />

@@ -1,4 +1,5 @@
 "use client";
+import { t } from "@/i18n";
 
 /** A yes/no question as a real radio group (keyboard + screen-reader friendly), styled as two big calm buttons. */
 export function YesNoField({
@@ -46,8 +47,8 @@ export function YesNoField({
       <legend className="mb-1 text-sm font-semibold text-momentizing-slate">{legend}</legend>
       {hint && <p className="-mt-1 mb-1 text-sm text-momentizing-muted">{hint}</p>}
       <div className="flex gap-3">
-        {option("Yes", true)}
-        {option("No", false)}
+        {option(t("site.common.yes"), true)}
+        {option(t("site.common.no"), false)}
       </div>
       {error && (
         <p id={`${name}-error`} role="alert" className="text-sm font-medium text-red-700">
