@@ -20,7 +20,7 @@ import {
   type PublicSlots,
   type PublicSpecialistCard,
 } from "@/lib/guest-booking";
-import { formatDateLong, formatSessionWhen, formatTime, icsStamp, localToUtc, todayIso, zoneLabel } from "@/lib/local-date";
+import { formatDateLong, formatSessionWhen, formatTime, icsStamp, localToUtc, parseIsoLocal, todayIso, zoneLabel } from "@/lib/local-date";
 import { ActionBar, BookButton, BookCard, Field, InlineNotice, ReviewRow, StepHeading, inputClass } from "./ui";
 import { DateStrip } from "./DateStrip";
 import { HelpSheet } from "./HelpSheet";
@@ -882,7 +882,7 @@ function StepReview({
         <StepHeading headingRef={headingRef} title="Check and hold your time" sub="Have a look that everything is right. We'll hold this time for you while you confirm on WhatsApp." />
         <dl className="grid gap-3">
           <ReviewRow label="Specialist" value={specialist.name} onEdit={() => onEdit("specialist")} />
-          <ReviewRow label="When" value={`${formatDateLong(draft.date)} at ${formatTime(draft.time)} (${zoneLabel()})`} onEdit={() => onEdit("time")} />
+          <ReviewRow label="When" value={`${formatDateLong(draft.date)} at ${formatTime(draft.time)} (${zoneLabel(parseIsoLocal(draft.date))})`} onEdit={() => onEdit("time")} />
           <ReviewRow label="Your name" value={draft.fullName} onEdit={() => onEdit("about")} />
           <ReviewRow label="WhatsApp" value={draft.whatsapp} onEdit={() => onEdit("about")} />
         </dl>

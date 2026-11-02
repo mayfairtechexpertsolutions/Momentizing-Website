@@ -96,5 +96,6 @@ export function zoneLabel(at: Date = new Date()): string {
 /** "Friday, 3 October at 9:00 AM (WIB)" for a UTC wall-clock session, shown on the visitor's clock. */
 export function formatSessionWhen(dateIso: string, time: string): string {
   const local = utcToLocal(dateIso, time);
-  return `${formatDateLong(local.date)} at ${formatTime(local.time)} (${zoneLabel()})`;
+  // Label the zone as it is ON the session date (daylight saving), not as it is today.
+  return `${formatDateLong(local.date)} at ${formatTime(local.time)} (${zoneLabel(parseIsoLocal(local.date))})`;
 }

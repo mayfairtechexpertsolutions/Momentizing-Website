@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { fetchSlots, friendlyError, toViewerSlots, type PublicSlots } from "@/lib/guest-booking";
-import { addDaysIso, formatDateLong, formatDateShort, formatTime, zoneLabel } from "@/lib/local-date";
+import { addDaysIso, formatDateLong, formatDateShort, formatTime, parseIsoLocal, zoneLabel } from "@/lib/local-date";
 import { BookButton } from "./ui";
 
 const WINDOW_DAYS = 14;
@@ -99,7 +99,7 @@ export function SlotPicker({
   return (
     <div className="flex flex-col gap-5">
       <p className="text-sm text-momentizing-muted">
-        Open times on <strong className="text-momentizing-slate">{formatDateLong(date)}</strong> · {data.durationMinutes}-minute session · times in your time zone ({zoneLabel()})
+        Open times on <strong className="text-momentizing-slate">{formatDateLong(date)}</strong> · {data.durationMinutes}-minute session · times in your time zone ({zoneLabel(parseIsoLocal(date))})
       </p>
 
       {times.length > 0 ? (
