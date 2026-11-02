@@ -3,12 +3,13 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
-  PRACTICE_MODE_LABEL,
+  practiceModeLabel,
   formatActiveDays,
   languageList,
   specialisationTags,
   type MarketingSpecialist,
 } from "@/lib/marketing-directory";
+import { t } from "@/i18n";
 
 /** White card with a serif heading and a mint icon badge — the one container every profile section shares. */
 export function SectionCard({ id, icon, title, children }: { id: string; icon: string; title: string; children: ReactNode }) {
@@ -54,22 +55,22 @@ export function ClosingCta({ specialist: p, fee }: { specialist: MarketingSpecia
       <div aria-hidden="true" className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-white/10" />
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-white/5" />
       <h2 id="closing-title" className="relative font-marketing-serif text-2xl font-bold sm:text-3xl">
-        Ready to meet {first}?
+        {t("site.spec.readyToMeet", { name: first })}
       </h2>
       <p className="relative mx-auto mt-3 max-w-md text-base leading-relaxed text-white/85">
-        Taking the first step is often the hardest part. Pick a time that suits you{p.freeFirstSession ? " — your first session is free" : fee ? ` — sessions are ${fee}` : ""}.
+        {p.freeFirstSession ? t("site.spec.closingFree") : fee ? t("site.spec.closingFee", { fee }) : t("site.spec.closing")}
       </p>
       <a
         href={`#book`}
         className="relative mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-8 text-sm font-bold text-momentizing-teal transition hover:bg-momentizing-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none lg:hidden"
       >
-        <i aria-hidden="true" className="far fa-calendar-check" /> See booking options
+        <i aria-hidden="true" className="far fa-calendar-check" /> {t("site.spec.seeBooking")}
       </a>
       <Link
         href={`/book?specialist=${p.id}`}
         className="relative mt-6 hidden min-h-12 items-center justify-center gap-2 rounded-full bg-white px-8 text-sm font-bold text-momentizing-teal transition hover:bg-momentizing-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none lg:inline-flex"
       >
-        <i aria-hidden="true" className="far fa-calendar-check" /> Choose a time
+        <i aria-hidden="true" className="far fa-calendar-check" /> {t("site.spec.chooseTime")}
       </Link>
     </section>
   );
@@ -87,7 +88,7 @@ export function AboutSection({ specialist: p }: { specialist: MarketingSpecialis
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <SectionCard id="about" icon="fa-leaf" title={`About ${first}`}>
+    <SectionCard id="about" icon="fa-leaf" title={t("site.spec.aboutName", { name: first })}>
       {bio ? (
         <>
           <div className="relative">
@@ -111,26 +112,26 @@ export function AboutSection({ specialist: p }: { specialist: MarketingSpecialis
               onClick={() => setExpanded((v) => !v)}
               className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-momentizing-teal underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-momentizing-teal"
             >
-              {expanded ? "Show less" : `Read more about ${first}`}
+              {expanded ? t("site.spec.showLess") : t("site.spec.readMore", { name: first })}
               <i aria-hidden="true" className={`fas fa-chevron-${expanded ? "up" : "down"} text-xs`} />
             </button>
           )}
         </>
       ) : (
         <p className="rounded-2xl bg-momentizing-peach/60 p-4 text-base leading-relaxed text-momentizing-muted">
-          {first} hasn&apos;t written an introduction yet. You can still book a first session to get to know each other, or ask us anything on WhatsApp.
+          {t("site.spec.noBio", { name: first })}
         </p>
       )}
 
       {(p.acceptsIndividual || p.acceptsCouple || langs.length > 0) && (
         <div className="mt-6 border-t border-momentizing-slate/10 pt-6">
-          <SubHeading>A good fit if you are</SubHeading>
+          <SubHeading>{t("site.spec.goodFit")}</SubHeading>
           <ul className="flex flex-wrap gap-2">
-            {p.acceptsIndividual && <FitChip icon="fa-user">Looking for one-to-one support</FitChip>}
-            {p.acceptsCouple && <FitChip icon="fa-user-friends">Seeking support as a couple</FitChip>}
+            {p.acceptsIndividual && <FitChip icon="fa-user">{t("site.spec.fitIndividual")}</FitChip>}
+            {p.acceptsCouple && <FitChip icon="fa-user-friends">{t("site.spec.fitCouple")}</FitChip>}
             {langs.map((l) => (
               <FitChip key={l} icon="fa-comment-dots">
-                Most comfortable in {l}
+                {t("site.spec.fitLanguage", { language: l })}
               </FitChip>
             ))}
           </ul>
@@ -139,11 +140,11 @@ export function AboutSection({ specialist: p }: { specialist: MarketingSpecialis
 
       {tags.length > 0 && (
         <div className="mt-6">
-          <SubHeading>Specialties</SubHeading>
+          <SubHeading>{t("site.spec.specialties")}</SubHeading>
           <ul className="flex flex-wrap gap-2">
-            {tags.map((t) => (
-              <li key={t} className="rounded-full bg-momentizing-mint px-3.5 py-1.5 text-sm font-bold text-momentizing-teal">
-                {t}
+            {tags.map((tag) => (
+              <li key={tag} className="rounded-full bg-momentizing-mint px-3.5 py-1.5 text-sm font-bold text-momentizing-teal">
+                {tag}
               </li>
             ))}
           </ul>
@@ -155,15 +156,15 @@ export function AboutSection({ specialist: p }: { specialist: MarketingSpecialis
 
 export function ExpectSection({ specialist: p }: { specialist: MarketingSpecialist }) {
   const first = p.name.split(" ")[0];
-  const format = p.sessionFormats?.trim() || (PRACTICE_MODE_LABEL[p.practiceMode] ?? p.practiceMode);
+  const format = p.sessionFormats?.trim() || (practiceModeLabel(p.practiceMode) ?? p.practiceMode);
   const steps = [
-    { icon: "far fa-calendar-check", title: "Choose a time", body: `See ${first}'s real open times and hold one. No account needed.` },
-    { icon: "fab fa-whatsapp", title: "Confirm on WhatsApp", body: "A quick message from your number tells us it's really you." },
-    { icon: "fas fa-seedling", title: `Meet ${first}`, body: `${format.replace(/\.$/, "")}. Go at your own pace and share only what feels right.` },
+    { icon: "far fa-calendar-check", title: t("site.spec.chooseTime"), body: t("site.spec.step1", { name: first }) },
+    { icon: "fab fa-whatsapp", title: t("site.spec.confirmOnWa"), body: t("site.spec.step2") },
+    { icon: "fas fa-seedling", title: t("site.spec.meetName", { name: first }), body: t("site.spec.step3", { format: format.replace(/\.$/, "") }) },
   ];
 
   return (
-    <SectionCard id="expect" icon="fa-hands-helping" title="What to expect">
+    <SectionCard id="expect" icon="fa-hands-helping" title={t("site.spec.expect")}>
       <ol className="relative grid gap-4 md:grid-cols-3">
         {steps.map((s, i) => (
           <li key={s.title} className="relative rounded-2xl bg-momentizing-peach/60 p-5">
@@ -192,8 +193,8 @@ export function ExpectSection({ specialist: p }: { specialist: MarketingSpeciali
       <p className="mt-5 flex items-start gap-3 rounded-2xl bg-momentizing-mint/60 p-4 text-sm leading-relaxed text-momentizing-slate">
         <i aria-hidden="true" className="fas fa-comments mt-0.5 text-momentizing-teal" />
         {p.preferredContact === "VIA_ASSISTANT"
-          ? `${first} coordinates through the Momentizing assistant rather than direct messaging, so you'll always have someone on hand.`
-          : `You'll be able to message ${first} directly once you're connected.`}
+          ? t("site.spec.viaAssistant", { name: first })
+          : t("site.spec.direct", { name: first })}
       </p>
     </SectionCard>
   );
@@ -204,7 +205,7 @@ export function LocationSection({ specialist: p }: { specialist: MarketingSpecia
   // Primary location first, so the place they're most often at leads.
   const locations = [...p.locations].sort((a, b) => Number(b.primary) - Number(a.primary));
   return (
-    <SectionCard id="where" icon="fa-map-marker-alt" title={p.locations.length > 1 ? "Locations" : "Location"}>
+    <SectionCard id="where" icon="fa-map-marker-alt" title={p.locations.length > 1 ? t("site.spec.locationsTitle") : t("site.spec.location")}>
       <ul className="grid gap-3 sm:grid-cols-2">
         {locations.map((l) => {
           const days = formatActiveDays(l.activeDays);
@@ -217,7 +218,7 @@ export function LocationSection({ specialist: p }: { specialist: MarketingSpecia
                 <p className="flex flex-wrap items-center gap-2">
                   {l.label && <span className="font-bold text-momentizing-slate">{l.label}</span>}
                   {l.primary && p.locations.length > 1 && (
-                    <span className="rounded-full bg-momentizing-mint px-2 py-0.5 text-xs font-bold text-momentizing-teal">Main</span>
+                    <span className="rounded-full bg-momentizing-mint px-2 py-0.5 text-xs font-bold text-momentizing-teal">{t("site.spec.main")}</span>
                   )}
                 </p>
                 <p className="text-momentizing-muted">{l.address}</p>
@@ -232,8 +233,8 @@ export function LocationSection({ specialist: p }: { specialist: MarketingSpecia
                   rel="noopener noreferrer"
                   className="mt-1 flex min-h-11 items-center gap-1.5 text-sm font-bold text-momentizing-teal underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-momentizing-teal"
                 >
-                  <i aria-hidden="true" className="fas fa-directions" /> Get directions
-                  <span className="sr-only"> to {l.label ?? l.address} (opens in a new tab)</span>
+                  <i aria-hidden="true" className="fas fa-directions" /> {t("site.spec.directions")}
+                  <span className="sr-only"> {t("site.spec.directionsTo", { place: l.label ?? l.address })}</span>
                 </a>
               </div>
             </li>
@@ -243,7 +244,7 @@ export function LocationSection({ specialist: p }: { specialist: MarketingSpecia
       {p.practiceMode === "HYBRID" && (
         <p className="mt-4 flex items-center gap-2 text-sm text-momentizing-muted">
           <i aria-hidden="true" className="fas fa-video text-momentizing-teal" />
-          Can&apos;t make it in person? Sessions also run online.
+          {t("site.spec.alsoOnline")}
         </p>
       )}
     </SectionCard>
@@ -258,7 +259,7 @@ export function CredentialsSection({ specialist: p }: { specialist: MarketingSpe
     .filter(Boolean);
   if (!p.licenceNumber && lines.length === 0) return null;
   return (
-    <SectionCard id="credentials" icon="fa-certificate" title="Credentials & training">
+    <SectionCard id="credentials" icon="fa-certificate" title={t("site.spec.credentialsTitle")}>
       <div className="space-y-5">
         {p.licenceNumber && (
           <div className="flex items-center gap-4 rounded-2xl bg-momentizing-mint p-4">
@@ -266,8 +267,8 @@ export function CredentialsSection({ specialist: p }: { specialist: MarketingSpe
               <i aria-hidden="true" className="fas fa-shield-alt" />
             </span>
             <p className="text-sm leading-relaxed text-momentizing-slate">
-              <span className="block font-bold">Licensed practitioner</span>
-              Licence on file with Momentizing · <span className="whitespace-nowrap">{p.licenceNumber}</span>
+              <span className="block font-bold">{t("site.spec.licensed")}</span>
+              {t("site.spec.licenceOnFile")} · <span className="whitespace-nowrap">{p.licenceNumber}</span>
             </p>
           </div>
         )}

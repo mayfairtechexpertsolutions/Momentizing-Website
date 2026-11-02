@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { EventCard } from "./EventCard";
 import { useEvents } from "@/lib/events";
+import { t } from "@/i18n";
 
 /**
  * Home-page teaser for the next few events. It is optional decoration, so it renders nothing while loading, on a
@@ -19,10 +20,10 @@ export function UpcomingEventsBand() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 text-center">
           <h2 id="events-heading" className="mb-3 font-marketing-serif text-3xl text-momentizing-gold-deep">
-            Upcoming Events
+            {t("site.events.bandTitle")}
           </h2>
           <p className="mx-auto max-w-lg text-sm text-momentizing-muted">
-            Workshops and circles to learn, connect and take a breath — join us in person or online.
+            {t("site.events.bandBody")}
           </p>
         </div>
         {/* Flex, not grid, so one or two events sit centred instead of hugging the left column. */}
@@ -38,7 +39,7 @@ export function UpcomingEventsBand() {
             href="/events"
             className="inline-flex items-center rounded-full bg-momentizing-teal px-10 py-4 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-slate"
           >
-            See All Events <i aria-hidden="true" className="fas fa-arrow-right ml-3" />
+            {t("site.events.seeAll")} <i aria-hidden="true" className="fas fa-arrow-right ml-3" />
           </Link>
         </div>
       </div>

@@ -7,7 +7,7 @@ export const LEGAL_EFFECTIVE_DATE = "22 October 2026";
 
 export const LEGAL_EMAIL = "legal@momentizing.com";
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section>
       <h3 className="mb-2 font-marketing-serif text-xl text-momentizing-slate">{title}</h3>
@@ -16,7 +16,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function List({ items }: { items: ReactNode[] }) {
+export function List({ items }: { items: ReactNode[] }) {
   return (
     <ul className="list-disc space-y-1.5 pl-5">
       {items.map((item, i) => (
@@ -26,7 +26,7 @@ function List({ items }: { items: ReactNode[] }) {
   );
 }
 
-const linkClass = "font-semibold underline hover:text-momentizing-gold-deep";
+export const linkClass = "font-semibold underline hover:text-momentizing-gold-deep";
 
 function Contact() {
   return (

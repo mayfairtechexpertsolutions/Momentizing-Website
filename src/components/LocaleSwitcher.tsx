@@ -3,8 +3,8 @@
 import { LOCALES, setLocale, t, useLocale, type Locale } from "@/i18n";
 
 /**
- * Picks the language used for error and validation messages (English / Bahasa Indonesia). The choice is remembered
- * on this device; with no choice the browser's language decides.
+ * Picks the language for the whole app (English / Bahasa Indonesia; the Admin panel stays English). The choice is remembered
+ * on this device; with no choice it is English.
  */
 export function LocaleSwitcher({ className = "", selectClassName = "" }: { className?: string; selectClassName?: string }) {
   const locale = useLocale();

@@ -1,10 +1,12 @@
 /**
- * Translations for everything a person can read as an error or validation message.
+ * Translations for everything a person can read in the web apps (screens, errors, validation, notifications).
  *
  * - `errors.*.json`: one entry per backend `ErrorCode` (generated from the Java enum; the API sends the code and its
  *   {placeholder} values, never a translated sentence).
  * - `ui.*.json`: messages the web apps raise themselves (client-side validation, offline notices, upload problems…),
  *   plus `field.<requestField>` labels and `value.<word>` translations for placeholder values such as "confirmed".
+ * - `site.*.json`: public website text; `app.*.json`: signed-in CRM screens (client, specialist, assistant).
+ *   The Admin panel is English-only and keeps its text inline.
  *
  * Source of truth: CRM/i18n. `scripts/sync-i18n.sh` copies this folder into CRM/Frontend/src/i18n and
  * Website/src/i18n. Mobile apps can read the same JSON files.
@@ -14,6 +16,10 @@ import errorsEn from "./errors.en.json";
 import errorsId from "./errors.id.json";
 import uiEn from "./ui.en.json";
 import uiId from "./ui.id.json";
+import siteEn from "./site.en.json";
+import siteId from "./site.id.json";
+import appEn from "./app.en.json";
+import appId from "./app.id.json";
 
 export type Locale = "en" | "id";
 export const LOCALES: { code: Locale; label: string }[] = [
@@ -25,24 +31,54 @@ const STORAGE_KEY = "momentizing_locale";
 const EVENT = "momentizing:locale";
 
 const errorCatalogs: Record<Locale, Record<string, string>> = { en: errorsEn, id: errorsId };
-const uiCatalogs: Record<Locale, Record<string, string>> = { en: uiEn, id: uiId };
+// site.*: public website pages (also the CRM's marketing copies); app.*: signed-in CRM screens; ui.*: shared messages.
+const uiCatalogs: Record<Locale, Record<string, string>> = {
+  en: { ...uiEn, ...siteEn, ...appEn },
+  id: { ...uiId, ...siteId, ...appId },
+};
 
 let current: Locale | null = null;
 /** False until the first hydration has finished: the server can only render English, so the first client render must too. */
 let ready = false;
 
+/** English unless the person picked a language on this device (owner decision 2026-10-31: no browser detection). */
 function detect(): Locale {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved === "en" || saved === "id") return saved;
   } catch {
-    // storage blocked: fall through to the browser language
+    // storage blocked: English
   }
-  return (navigator.language ?? "").toLowerCase().startsWith("id") ? "id" : "en";
+  return "en";
+}
+
+/** The staff Admin panel is English-only, errors included, whatever the person chose elsewhere. */
+export function isEnglishOnlySurface(): boolean {
+  if (typeof window === "undefined") return false;
+  const path = window.location.pathname;
+  return path === "/admin" || path.startsWith("/admin/");
 }
 
 export function getLocale(): Locale {
   if (typeof window === "undefined" || !ready) return "en";
+  if (isEnglishOnlySurface()) return "en";
+  if (!current) current = detect();
+  return current;
+}
+
+/** True when the person picked a language on this device (rather than getting the English default). */
+export function hasChosenLocale(): boolean {
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved === "en" || saved === "id";
+  } catch {
+    return false;
+  }
+}
+
+/** The person's own choice, ignoring the English-only Admin rule (for saving it to their account). */
+export function getChosenLocale(): Locale {
+  if (typeof window === "undefined") return "en";
   if (!current) current = detect();
   return current;
 }
@@ -99,6 +135,45 @@ export function translateError(code: string | null | undefined, params?: Params,
   if (!code) return fallback ?? uiCatalogs[locale]["error.generic"];
   const template = errorCatalogs[locale][code] ?? errorCatalogs.en[code];
   return template ? fill(template, params, locale) : fallback ?? code;
+}
+
+const INTL_LOCALE: Record<Locale, string> = { en: "en-US", id: "id-ID" };
+
+/** The BCP 47 tag for Intl formatting in the current language. */
+export function intlLocale(): string {
+  return INTL_LOCALE[getLocale()];
+}
+
+type DateInput = Date | string | number;
+const toDate = (v: DateInput) => (v instanceof Date ? v : new Date(v));
+
+/** Dates, times, numbers and money in the chosen language rather than the browser's own locale. */
+export function formatDate(value: DateInput, opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", year: "numeric" }): string {
+  return toDate(value).toLocaleDateString(intlLocale(), opts);
+}
+
+export function formatTime(value: DateInput, opts: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" }): string {
+  return toDate(value).toLocaleTimeString(intlLocale(), opts);
+}
+
+export function formatDateTime(value: DateInput, opts: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" }): string {
+  return toDate(value).toLocaleString(intlLocale(), opts);
+}
+
+export function formatNumber(value: number, opts?: Intl.NumberFormatOptions): string {
+  return new Intl.NumberFormat(intlLocale(), opts).format(value);
+}
+
+export function formatMoney(value: number, currency: string, opts: Intl.NumberFormatOptions = { maximumFractionDigits: 0 }): string {
+  return new Intl.NumberFormat(intlLocale(), { style: "currency", currency, ...opts }).format(value);
+}
+
+/** A status or enum word for display, "PENDING" -> "Pending" / "Menunggu" (value.* in ui.*.json; unknown words are humanised). */
+export function valueLabel(raw: string | null | undefined): string {
+  if (!raw) return "";
+  const text = translateValue(getLocale(), raw);
+  const words = text === raw ? raw.replace(/_/g, " ").toLowerCase() : text;
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 /** A message the web app raises itself (see ui.*.json). Unknown keys come back as the key so a typo is visible. */

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { TURNSTILE_SITE_KEY } from "@config";
+import { t } from "@/i18n";
 
 interface TurnstileApi {
   render: (el: HTMLElement, options: Record<string, unknown>) => string;
@@ -69,7 +70,7 @@ export function TurnstileWidget({
           "expired-callback": () => onTokenRef.current(""),
           "error-callback": () => {
             onTokenRef.current("");
-            onErrorRef.current?.("The security check couldn't run. Please refresh the page.");
+            onErrorRef.current?.(t("site.book.turnstileFailed"));
           },
         });
       })

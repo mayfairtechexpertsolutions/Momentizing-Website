@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 interface StarRatingProps {
   rating: number | null;
   reviewCount: number;
@@ -13,14 +14,14 @@ export function StarRating({ rating, reviewCount, size = "sm", showCount = true 
   if (rating == null || reviewCount === 0) {
     return (
       <span className={`inline-flex items-center gap-1.5 ${starSize} font-bold text-momentizing-teal`}>
-        <i aria-hidden="true" className="fas fa-seedling" /> New to Momentizing
+        <i aria-hidden="true" className="fas fa-seedling" /> {t("site.spec.newToMomentizing")}
       </span>
     );
   }
 
   return (
     <div className="flex items-center gap-1.5">
-      <span className="sr-only">Rated {rating.toFixed(1)} out of 5 from {reviewCount} {reviewCount === 1 ? "review" : "reviews"}</span>
+      <span className="sr-only">{t(reviewCount === 1 ? "site.reviews.ratedOne" : "site.reviews.rated", { rating: rating.toFixed(1), n: reviewCount })}</span>
       <div aria-hidden="true" className={`flex ${starSize} text-momentizing-gold/40`}>
         {Array.from({ length: 5 }).map((_, i) => {
           const fill = Math.max(0, Math.min(1, rating - i));

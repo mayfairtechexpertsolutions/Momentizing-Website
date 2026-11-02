@@ -129,9 +129,9 @@ export function CareerForm() {
     return (
       <BookCard>
         <div role="status">
-          <h3 className="font-marketing-serif text-2xl font-semibold">Thank you, we have your application</h3>
+          <h3 className="font-marketing-serif text-2xl font-semibold">{t("site.careers.doneTitle")}</h3>
           <p className="mt-2 leading-relaxed text-momentizing-muted">
-            We sent a confirmation to {email.trim()}. Our team will review it and get back to you.
+            {t("site.careers.doneBody", { email: email.trim() })}
           </p>
         </div>
       </BookCard>
@@ -140,48 +140,48 @@ export function CareerForm() {
 
   return (
     <BookCard>
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5" aria-label="Expert application">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5" aria-label={t("site.careers.formLabel")}>
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field id="career-name" label="Full name" error={errors.fullName}>
+          <Field id="career-name" label={t("site.careers.fullName")} error={errors.fullName}>
             <input name="fullName" id="career-name" className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" maxLength={150} aria-invalid={!!errors.fullName} />
           </Field>
-          <Field id="career-email" label="Email" error={errors.email}>
+          <Field id="career-email" label={t("app.common.email")} error={errors.email}>
             <input name="email" id="career-email" type="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" maxLength={255} aria-invalid={!!errors.email} />
           </Field>
-          <Field id="career-whatsapp" label="WhatsApp number" hint="We use this to reach you about your application." error={errors.whatsapp}>
+          <Field id="career-whatsapp" label={t("site.form.waNumber")} hint={t("site.careers.waHint")} error={errors.whatsapp}>
             <input name="whatsapp" id="career-whatsapp" type="tel" className={inputClass} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} autoComplete="tel" maxLength={40} aria-invalid={!!errors.whatsapp} />
           </Field>
-          <Field id="career-profession" label="Profession" error={errors.professionType}>
+          <Field id="career-profession" label={t("site.careers.profession")} error={errors.professionType}>
             <select name="professionType" id="career-profession" className={inputClass} value={professionType} onChange={(e) => setProfessionType(e.target.value as ProfessionValue)} aria-invalid={!!errors.professionType}>
-              <option value="">Choose one</option>
+              <option value="">{t("site.careers.chooseOne")}</option>
               {PROFESSIONS.map((p) => (
                 <option key={p.value} value={p.value}>
-                  {p.label}
+                  {t(p.label)}
                 </option>
               ))}
             </select>
           </Field>
-          <Field id="career-licence" label="Licence number (optional)">
+          <Field id="career-licence" label={t("site.careers.licence")}>
             <input name="licenceNumber" id="career-licence" className={inputClass} value={licenceNumber} onChange={(e) => setLicenceNumber(e.target.value)} maxLength={100} />
           </Field>
-          <Field id="career-years" label="Years of experience (optional)">
+          <Field id="career-years" label={t("site.careers.years")}>
             <input name="yearsExperience" id="career-years" type="number" inputMode="numeric" min={0} max={70} className={inputClass} value={yearsExperience} onChange={(e) => setYearsExperience(e.target.value)} />
           </Field>
         </div>
 
-        <Field id="career-languages" label="Languages you work in (optional)" hint="For example: Bahasa Indonesia, English">
+        <Field id="career-languages" label={t("site.careers.languages")} hint={t("site.careers.languagesHint")}>
           <input name="languages" id="career-languages" className={inputClass} value={languages} onChange={(e) => setLanguages(e.target.value)} maxLength={200} />
         </Field>
 
-        <Field id="career-bio" label="About your practice (optional)" hint="Who you help and how you work. Up to 2000 characters.">
+        <Field id="career-bio" label={t("site.careers.bio")} hint={t("site.careers.bioHint")}>
           <textarea name="bio" id="career-bio" rows={5} className={inputClass} value={bio} onChange={(e) => setBio(e.target.value)} maxLength={2000} />
         </Field>
 
-        <Field id="career-portfolio" label="Website or LinkedIn (optional)" error={errors.portfolioUrl}>
+        <Field id="career-portfolio" label={t("site.careers.portfolio")} error={errors.portfolioUrl}>
           <input name="portfolioUrl" id="career-portfolio" type="url" className={inputClass} value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} maxLength={500} aria-invalid={!!errors.portfolioUrl} />
         </Field>
 
-        <Field id="career-resume" label="Resume" hint="PDF or Word (.docx), up to 5 MB." error={errors.resume}>
+        <Field id="career-resume" label={t("site.careers.resume")} hint={t("site.careers.resumeHint")} error={errors.resume}>
           <input
             name="resume" id="career-resume"
             type="file"
@@ -194,14 +194,14 @@ export function CareerForm() {
 
         {/* Honeypot: hidden from people and assistive tech; bots tend to fill every input. */}
         <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
-          <label htmlFor="career-website">Website</label>
+          <label htmlFor="career-website">Website</label> {/* i18n-ignore: hidden honeypot */}
           <input id="career-website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label className="flex min-h-11 items-start gap-3 text-sm leading-relaxed">
             <input name="consentAccepted" type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-momentizing-teal" aria-invalid={!!errors.consent} />
-            <span>I agree that Momentizing may store my details and resume to assess my application, and keep them for up to 12 months.</span>
+            <span>{t("site.careers.consent")}</span>
           </label>
           {errors.consent && (
             <p role="alert" className="text-sm font-medium text-red-700">
@@ -219,7 +219,7 @@ export function CareerForm() {
         )}
 
         <BookButton type="submit" loading={submitting} className="self-start">
-          Send application
+          {t("site.careers.send")}
         </BookButton>
       </form>
     </BookCard>

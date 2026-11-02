@@ -1,5 +1,6 @@
 import { useApiQuery } from "./use-api-query";
 import type { PageResponse } from "./types";
+import { getLocale, t } from "@/i18n";
 
 /**
  * Public events from GET /public/events. Each session carries its wall-clock date/times on the event's own clock
@@ -57,22 +58,22 @@ export function useEvent(id: number | null) {
   return useApiQuery<PublicEvent>(id ? `/public/events/${id}` : null, { anonymous: true }, [id]);
 }
 
-export const FORMAT_LABEL: Record<EventFormat, string> = { IN_PERSON: "In person", ONLINE: "Online", HYBRID: "In person & online" };
+export const formatLabel = (format: EventFormat): string => t(`site.events.format.${format}`);
 
 export function priceText(e: Pick<PublicEvent, "priceType" | "priceLabel">): string {
-  return e.priceType === "FREE" ? "Free" : e.priceLabel || "Paid";
+  return e.priceType === "FREE" ? t("site.events.free") : e.priceLabel || t("site.events.paid");
 }
 
 export function placeText(e: Pick<PublicEvent, "format" | "venueName" | "city">): string {
-  if (e.format === "ONLINE") return "Online";
+  if (e.format === "ONLINE") return t("site.events.format.ONLINE");
   const place = [e.venueName, e.city].filter(Boolean).join(", ");
-  return e.format === "HYBRID" ? (place ? `${place} · or online` : "In person or online") : place || "Venue to be announced";
+  return e.format === "HYBRID" ? (place ? t("site.events.placeOrOnline", { place }) : t("site.events.inPersonOrOnline")) : place || t("site.events.venueTba");
 }
 
 /** "Thu, 12 Nov 2026" from a yyyy-MM-dd wall date, without letting the browser's zone move it. */
 export function formatEventDate(date: string, options: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short", year: "numeric" }): string {
   const [y, m, d] = date.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-GB", { ...options, timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, d)));
+  return new Intl.DateTimeFormat(getLocale() === "id" ? "id-ID" : "en-GB", { ...options, timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, d)));
 }
 
 export function timeRange(s: Pick<PublicEventSession, "startTime" | "endTime">, zoneLabel: string): string {

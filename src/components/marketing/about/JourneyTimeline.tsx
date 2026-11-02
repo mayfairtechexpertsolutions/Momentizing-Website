@@ -1,6 +1,9 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { CallArt, JakartaArt, JourneyPin, RoomArt, TaipeiArt, pinColors } from "./AboutArt";
 import { Reveal } from "./Reveal";
+import { t } from "@/i18n";
 
 interface Stop {
   when: string;
@@ -12,74 +15,52 @@ interface Stop {
   pin: string;
 }
 
-const STOPS: Stop[] = [
-  {
-    when: "2019",
-    place: "Taiwan",
-    title: "The beginning",
-    body: (
-      <p>
-        Our founder began this journey as an expat in Taiwan, living inside a new culture, a new language and a new way of
-        life. That experience sparked a deep interest in multicultural understanding and in the mental health needs of
-        people moving between cultures.
-      </p>
-    ),
-    art: <TaipeiArt />,
-    artLabel: "Illustration of a tall tiered tower in front of hills at sunset",
-    pin: pinColors.rust,
-  },
-  {
-    when: "2020 – 2022",
-    place: "Taiwan and Indonesia",
-    title: "Building through uncertain times",
-    body: (
-      <>
-        <p>
-          During the COVID-19 pandemic we launched the Fall Internship Program (FIP), connecting with interns and associates
-          across Taiwan and Indonesia.
-        </p>
-        <p>
-          We also opened spaces such as the Momentizing Discussion Forum and Support Group, where friends from diaspora,
-          expatriate, international student and cross-cultural communities share their stories and the experience of cultural
-          adjustment and life transitions.
-        </p>
-      </>
-    ),
-    art: <CallArt />,
-    artLabel: "Illustration of a video call with six friendly faces and a speech bubble",
-    pin: pinColors.teal,
-  },
-  {
-    when: "2022",
-    place: "Jakarta",
-    title: "Back to Indonesia",
-    body: (
-      <p>
-        Our founder returned to Indonesia to study professional psychology, specialising in adult clinical psychology in
-        Jakarta. The aim was to deepen clinical expertise and keep supporting Indonesians with a broader, more integrated
-        approach.
-      </p>
-    ),
-    art: <JakartaArt />,
-    artLabel: "Illustration of a tall monument and a city skyline",
-    pin: pinColors.gold,
-  },
-  {
-    when: "Now",
-    place: "Growing together",
-    title: "Momentizing Holistic Center",
-    body: (
-      <p>
-        Today we keep building Momentizing Holistic Center with a dedicated team, offering holistic mental health support for
-        individuals, couples and families. We aim to make safe, supportive and culturally inclusive spaces for healing, growth
-        and a better life.
-      </p>
-    ),
-    art: <RoomArt />,
-    artLabel: "Illustration of a calm room with an armchair, a plant and a cup of tea",
-    pin: pinColors.slate,
-  },
-];
+/** Built at render time so the text follows the chosen language. */
+function stops(): Stop[] {
+  return [
+    {
+      when: "2019",
+      place: t("site.about.stop1.place"),
+      title: t("site.about.stop1.title"),
+      body: <p>{t("site.about.stop1.body")}</p>,
+      art: <TaipeiArt />,
+      artLabel: t("site.about.stop1.art"),
+      pin: pinColors.rust,
+    },
+    {
+      when: "2020 – 2022",
+      place: t("site.about.stop2.place"),
+      title: t("site.about.stop2.title"),
+      body: (
+        <>
+          <p>{t("site.about.stop2.body1")}</p>
+          <p>{t("site.about.stop2.body2")}</p>
+        </>
+      ),
+      art: <CallArt />,
+      artLabel: t("site.about.stop2.art"),
+      pin: pinColors.teal,
+    },
+    {
+      when: "2022",
+      place: t("site.about.stop3.place"),
+      title: t("site.about.stop3.title"),
+      body: <p>{t("site.about.stop3.body")}</p>,
+      art: <JakartaArt />,
+      artLabel: t("site.about.stop3.art"),
+      pin: pinColors.gold,
+    },
+    {
+      when: t("site.about.stop4.when"),
+      place: t("site.about.stop4.place"),
+      title: "Momentizing Holistic Center",
+      body: <p>{t("site.about.stop4.body")}</p>,
+      art: <RoomArt />,
+      artLabel: t("site.about.stop4.art"),
+      pin: pinColors.slate,
+    },
+  ];
+}
 
 /** Desktop road segment for one stop. It enters and leaves at the centre line and bulges toward `side`, where the
  * stop's pin sits; stacked segments therefore join into one winding road. Stretched with preserveAspectRatio="none",
@@ -100,6 +81,7 @@ function RoadSegment({ side, first, last }: { side: "left" | "right"; first: boo
 }
 
 export function JourneyTimeline() {
+  const STOPS = stops();
   return (
     <ol className="mx-auto mt-16 max-w-6xl">
       {STOPS.map((stop, i) => {

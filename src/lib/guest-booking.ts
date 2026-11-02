@@ -1,4 +1,4 @@
-import { t } from "@/i18n";
+import { t, getLocale } from "@/i18n";
 import { ApiError, apiFetch, type ApiFetchOptions } from "./api";
 import { addDaysIso, utcToLocal } from "./local-date";
 import { MOMENTIZING_WHATSAPP_NUMBER } from "./whatsapp";
@@ -126,7 +126,8 @@ export const fetchSlots = (id: number, from: string, days: number) =>
 
 export const createGuestBooking = (payload: GuestBookingPayload, idempotencyKey: string) =>
   apiFetch<GuestBooking>("/public/guest-bookings", {
-    ...json(payload),
+    // locale: the API writes this visitor's WhatsApp replies / emails in the language they used here.
+    ...json({ ...payload, locale: getLocale() }),
     headers: { "Idempotency-Key": idempotencyKey },
     anonymous: true,
   });

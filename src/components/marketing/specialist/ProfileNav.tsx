@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
+import { t } from "@/i18n";
 
 /** Fixed site header (h-20) plus a little air; the nav's own height is measured so the two never drift apart. */
 const SITE_HEADER = 80;
@@ -85,7 +86,7 @@ export function ProfileNav({ items }: { items: NavItem[] }) {
   };
 
   return (
-    <nav ref={navRef} aria-label="Profile sections" className="sticky top-20 z-40 border-b border-momentizing-slate/10 bg-white/90 backdrop-blur-md">
+    <nav ref={navRef} aria-label={t("site.spec.profileSections")} className="sticky top-20 z-40 border-b border-momentizing-slate/10 bg-white/90 backdrop-blur-md">
       <ul ref={listRef} className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 sm:px-6 [scrollbar-width:none]">
         {items.map((i) => {
           const on = i.id === active;

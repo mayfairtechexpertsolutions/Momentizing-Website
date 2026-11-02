@@ -7,6 +7,7 @@ import { usePackages } from "@/lib/session-packages";
 import { useWhatsAppLink } from "@/lib/whatsapp";
 import { BookButton, Field, InlineNotice, inputClass } from "./booking/ui";
 import { Sheet } from "./booking/Sheet";
+import { t } from "@/i18n";
 
 interface BookingModalProps {
   open: boolean;
@@ -15,8 +16,8 @@ interface BookingModalProps {
 }
 
 function buildWhatsAppMessage(fullName: string, packageName: string | undefined, message: string): string {
-  const lines = [`Hi Momentizing, I have a question${packageName ? ` about the ${packageName}` : ""}.`];
-  if (fullName) lines.push(`My name is ${fullName}.`);
+  const lines = [packageName ? t("site.whatsapp.questionAbout", { name: packageName }) : t("site.whatsapp.question")];
+  if (fullName) lines.push(t("site.whatsapp.myName", { name: fullName }));
   if (message) lines.push(message);
   return lines.join(" ");
 }
@@ -100,33 +101,33 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
   }
 
   return (
-    <Sheet open={open} onClose={handleClose} title={submitted ? "Request received" : "Ask our team"} labelledBy="enquiry-title">
+    <Sheet open={open} onClose={handleClose} title={submitted ? t("site.enquiry.received") : t("site.enquiry.title")} labelledBy="enquiry-title">
       {submitted ? (
         <div className="flex flex-col gap-4" role="status">
           <InlineNotice tone="success">
-            Thanks{fullName ? `, ${fullName.split(" ")[0]}` : ""} — our team will reach out within one business day.
+            {fullName ? t("site.enquiry.thanksName", { name: fullName.split(" ")[0] }) : t("site.enquiry.thanks")}
           </InlineNotice>
-          <p className="text-momentizing-muted">Want to secure a time right now? You can book a session in a few minutes — no account needed.</p>
+          <p className="text-momentizing-muted">{t("site.enquiry.bookNow")}</p>
           <Link href="/book" onClick={handleClose}>
             <span className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-momentizing-teal px-6 py-3 text-sm font-semibold text-white hover:bg-momentizing-slate/90">
-              Book a session
+              {t("site.notFound.book")}
             </span>
           </Link>
         </div>
       ) : (
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-          <p className="text-momentizing-muted">Questions about a package or a corporate plan? Leave your details and we&apos;ll get back to you.</p>
-          <Field id="enq-name" label="Your name">
+          <p className="text-momentizing-muted">{t("site.enquiry.intro")}</p>
+          <Field id="enq-name" label={t("site.form.yourName")}>
             <input name="fullName" id="enq-name" required autoComplete="name" autoCapitalize="words" autoCorrect="off" spellCheck={false} value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
           </Field>
-          <Field id="enq-email" label="Email">
+          <Field id="enq-email" label={t("app.common.email")}>
             <input name="email" id="enq-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
           </Field>
-          <Field id="enq-phone" label="WhatsApp or phone (optional)">
+          <Field id="enq-phone" label={t("site.enquiry.phone")}>
             <input name="phone" id="enq-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
           </Field>
           {(packages ?? []).length > 0 && (
-            <Field id="enq-package" label="I'm interested in">
+            <Field id="enq-package" label={t("site.enquiry.interested")}>
               <select name="packageId" id="enq-package" value={packageId ?? ""} onChange={(e) => setPickedPackageId(Number(e.target.value))} className={inputClass}>
                 {(packages ?? []).map((pkg) => (
                   <option key={pkg.id} value={pkg.id}>
@@ -136,7 +137,7 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
               </select>
             </Field>
           )}
-          <Field id="enq-message" label="How can we help? (optional)">
+          <Field id="enq-message" label={t("site.enquiry.message")}>
             <textarea name="message" id="enq-message" rows={3} maxLength={2000} value={message} onChange={(e) => setMessage(e.target.value)} className={`${inputClass} resize-y`} />
           </Field>
           {error && (
@@ -145,10 +146,10 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
             </InlineNotice>
           )}
           <BookButton type="submit" loading={submitting}>
-            {submitting ? "Sending…" : "Send to our team"}
+            {submitting ? t("site.common.sending") : t("site.enquiry.send")}
           </BookButton>
           <BookButton variant="secondary" onClick={handleWhatsApp} disabled={!fullName.trim()}>
-            Or continue on WhatsApp
+            {t("site.enquiry.whatsapp")}
           </BookButton>
         </form>
       )}

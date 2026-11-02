@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EventPosterFallback } from "./EventPosterFallback";
-import { FORMAT_LABEL, formatEventDate, headlineSession, placeText, priceText, timeRange, type PublicEvent } from "@/lib/events";
+import { formatLabel, formatEventDate, headlineSession, placeText, priceText, timeRange, type PublicEvent } from "@/lib/events";
+import { t } from "@/i18n";
 
 /**
  * One event on /events and the home "Upcoming events" band. Posters are usually portrait, so the 4:5 frame letterboxes
@@ -26,7 +27,7 @@ export function EventCard({ event: e, featured = false, compact = false }: { eve
             </div>
           )}
           <div className="flex flex-wrap justify-end gap-2 text-xs font-bold">
-            <span className="rounded-full bg-momentizing-mint px-3 py-1 text-momentizing-teal">{FORMAT_LABEL[e.format]}</span>
+            <span className="rounded-full bg-momentizing-mint px-3 py-1 text-momentizing-teal">{formatLabel(e.format)}</span>
             <span className="rounded-full bg-momentizing-cream px-3 py-1 text-momentizing-gold-deep">{priceText(e)}</span>
           </div>
         </div>
@@ -40,7 +41,7 @@ export function EventCard({ event: e, featured = false, compact = false }: { eve
             <p className="font-semibold text-momentizing-slate">
               <i aria-hidden="true" className="far fa-clock mr-2 w-4 text-momentizing-teal" />
               {timeRange(s, e.timezoneLabel)}
-              {more > 0 && <span className="font-normal text-momentizing-muted"> · +{more} more</span>}
+              {more > 0 && <span className="font-normal text-momentizing-muted"> · {t("site.events.more", { n: more })}</span>}
             </p>
           )}
           <p className="truncate text-momentizing-muted">
@@ -49,7 +50,7 @@ export function EventCard({ event: e, featured = false, compact = false }: { eve
           </p>
         </div>
         <span className="inline-flex items-center text-xs font-bold tracking-widest text-momentizing-teal uppercase">
-          View details
+          {t("site.events.viewDetails")}
           <i aria-hidden="true" className="fas fa-arrow-right ml-2 transition group-hover:translate-x-1 motion-reduce:transition-none" />
         </span>
       </Link>
@@ -76,12 +77,12 @@ export function EventCard({ event: e, featured = false, compact = false }: { eve
           </span>
         )}
         {e.cancelled && (
-          <span className="absolute top-4 right-4 rounded-full bg-momentizing-slate px-3 py-1.5 text-xs font-bold text-white">Cancelled</span>
+          <span className="absolute top-4 right-4 rounded-full bg-momentizing-slate px-3 py-1.5 text-xs font-bold text-white">{t("site.events.cancelled")}</span>
         )}
       </div>
       <div className={`flex flex-1 flex-col gap-3 ${featured ? "p-6 md:p-10" : "p-5"}`}>
         <div className="flex flex-wrap gap-2 text-xs font-bold">
-          <span className="rounded-full bg-momentizing-mint px-3 py-1 text-momentizing-teal">{FORMAT_LABEL[e.format]}</span>
+          <span className="rounded-full bg-momentizing-mint px-3 py-1 text-momentizing-teal">{formatLabel(e.format)}</span>
           <span className="rounded-full bg-momentizing-cream px-3 py-1 text-momentizing-gold-deep">{priceText(e)}</span>
         </div>
         <h3
@@ -97,7 +98,7 @@ export function EventCard({ event: e, featured = false, compact = false }: { eve
             <p className="font-semibold text-momentizing-slate">
               <i aria-hidden="true" className="far fa-clock mr-2 text-momentizing-teal" />
               {timeRange(s, e.timezoneLabel)}
-              {more > 0 && <span className="font-normal text-momentizing-muted"> · +{more} more {more === 1 ? "date" : "dates"}</span>}
+              {more > 0 && <span className="font-normal text-momentizing-muted"> · {t(more === 1 ? "site.events.moreDate" : "site.events.moreDates", { n: more })}</span>}
             </p>
           )}
           <p className="text-momentizing-muted">
@@ -107,7 +108,7 @@ export function EventCard({ event: e, featured = false, compact = false }: { eve
         </div>
         {featured && (
           <span className="mt-2 inline-flex min-h-11 w-fit items-center rounded-full bg-momentizing-teal px-6 py-3 text-xs font-bold tracking-widest text-white uppercase">
-            See details
+            {t("site.events.seeDetails")}
           </span>
         )}
       </div>

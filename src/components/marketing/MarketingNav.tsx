@@ -7,6 +7,7 @@ import { appLink } from "@config";
 import { withBase } from "@/lib/base-path";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { NavMenu, type NavMenuItem } from "./NavMenu";
+import { t } from "@/i18n";
 
 // Every home section that follows the nav targets, so the highlight clears once you scroll past Corporate.
 const SECTION_IDS = ["services", "packages", "corporate", "associates-preview", "events", "faq"];
@@ -17,7 +18,7 @@ interface MarketingNavProps {
   simpleLabel?: string;
 }
 
-export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: MarketingNavProps) {
+export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProps) {
   // Remember which page opened the menu, so it closes by itself when the route changes (the nav now persists).
   const [openFor, setOpenFor] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -81,14 +82,14 @@ export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: Ma
   const close = () => setMenuOpen(false);
 
   const serviceItems: NavMenuItem[] = [
-    { href: anchor("services"), label: "1:1 services", description: "Counselling, coaching and assessment", icon: "fas fa-hand-holding-heart" },
-    { href: anchor("packages"), label: "Packages", description: "Session bundles that cost less per session", icon: "fas fa-layer-group" },
-    { href: anchor("corporate"), label: "Corporate wellbeing", description: "Programs for teams and workplaces", icon: "fas fa-building" },
+    { href: anchor("services"), label: t("site.nav.oneToOne"), description: t("site.nav.oneToOneDesc"), icon: "fas fa-hand-holding-heart" },
+    { href: anchor("packages"), label: t("site.nav.packages"), description: t("site.nav.packagesDesc"), icon: "fas fa-layer-group" },
+    { href: anchor("corporate"), label: t("site.nav.corporateWellbeing"), description: t("site.nav.corporateDesc"), icon: "fas fa-building" },
   ];
   const accountItems: NavMenuItem[] = [
-    { href: "/my-bookings", label: "My bookings", description: "Find and manage a booking", icon: "far fa-calendar-check" },
-    { href: appLink("/login"), label: "Log in", description: "Open the Momentizing app", icon: "fas fa-arrow-right-to-bracket", external: true },
-    { href: appLink("/download"), label: "Get the App", description: "Install on your phone", icon: "fas fa-mobile-screen", external: true },
+    { href: "/my-bookings", label: t("site.nav.myBookings"), description: t("site.nav.myBookingsDesc"), icon: "far fa-calendar-check" },
+    { href: appLink("/login"), label: t("site.nav.logIn"), description: t("site.nav.logInDesc"), icon: "fas fa-arrow-right-to-bracket", external: true },
+    { href: appLink("/download"), label: t("site.nav.getApp"), description: t("site.nav.getAppDesc"), icon: "fas fa-mobile-screen", external: true },
   ];
 
   return (
@@ -104,7 +105,7 @@ export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: Ma
             href="/"
             className="inline-flex min-h-11 items-center rounded-full border border-momentizing-slate/40 px-5 py-2 text-xs font-bold tracking-widest whitespace-nowrap text-momentizing-slate uppercase transition sm:px-6 hover:bg-momentizing-slate hover:text-white"
           >
-            {simpleLabel}
+            {simpleLabel ?? t("site.nav.backHome")}
           </Link>
         ) : (
           <>
@@ -112,33 +113,33 @@ export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: Ma
                 everything about "you" (bookings, login, app, language) shares another, so the bar fits from 1024px. */}
             <div className="hidden items-center gap-8 text-xs font-bold tracking-widest whitespace-nowrap uppercase lg:flex xl:gap-10">
               <div className="flex items-center gap-6 xl:gap-7">
-                <NavMenu label="Services" items={serviceItems} active={activeId !== null && SERVICE_IDS.includes(activeId)} />
+                <NavMenu label={t("site.nav.services")} items={serviceItems} active={activeId !== null && SERVICE_IDS.includes(activeId)} />
                 <Link href="/associates" className={pageClass("/associates")} aria-current={pageCurrent("/associates")}>
-                  Find an Associate
+                  {t("site.nav.findAssociate")}
                 </Link>
                 <Link href="/events" className={pageClass("/events")} aria-current={pageCurrent("/events")}>
-                  Events
+                  {t("site.nav.events")}
                 </Link>
                 <Link href="/about" className={pageClass("/about")} aria-current={pageCurrent("/about")}>
-                  About
+                  {t("site.nav.about")}
                 </Link>
               </div>
               <div className="flex items-center gap-4">
                 <NavMenu
-                  label="Account"
+                  label={t("site.nav.account")}
                   align="right"
                   items={accountItems}
                   active={path === "/my-bookings"}
                   triggerClassName="rounded-full border border-momentizing-slate/30 px-4 hover:border-momentizing-gold-deep"
                   triggerContent={
                     <>
-                      <i aria-hidden="true" className="far fa-user text-sm" /> Account
+                      <i aria-hidden="true" className="far fa-user text-sm" /> {t("site.nav.account")}
                     </>
                   }
                   footer={<LocaleSwitcher className="w-full justify-between text-momentizing-muted" selectClassName="bg-white text-momentizing-slate" />}
                 />
                 <Link href="/book" className={`rounded-full bg-momentizing-teal px-6 py-3 text-white transition hover:bg-momentizing-slate ${path === "/book" ? "bg-momentizing-slate" : ""}`}>
-                  Book a Session
+                  {t("site.nav.bookSession")}
                 </Link>
               </div>
             </div>
@@ -146,7 +147,7 @@ export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: Ma
             <button
               className="flex h-11 w-11 flex-shrink-0 items-center justify-center text-momentizing-slate lg:hidden"
               onClick={() => setMenuOpen(!menuOpen)}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-label={menuOpen ? t("site.nav.closeMenu") : t("site.nav.openMenu")}
               aria-expanded={menuOpen}
               aria-controls="marketing-mobile-menu"
             >
@@ -161,40 +162,40 @@ export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: Ma
           id="marketing-mobile-menu"
           className="flex max-h-[calc(100dvh-5rem)] flex-col overflow-y-auto border-t border-momentizing-gold/10 bg-white px-6 pt-4 pb-5 text-xs font-bold tracking-widest uppercase lg:hidden [&_a]:flex [&_a]:min-h-11 [&_a]:items-center"
         >
-          <MobileGroup title="Explore">
+          <MobileGroup title={t("site.nav.explore")}>
             <Link href={anchor("services")} onClick={close}>
-              Services
+              {t("site.nav.services")}
             </Link>
             <Link href={anchor("packages")} onClick={close}>
-              Packages
+              {t("site.nav.packages")}
             </Link>
             <Link href={anchor("corporate")} onClick={close}>
-              Corporate
+              {t("site.nav.corporate")}
             </Link>
             <Link href="/associates" aria-current={pageCurrent("/associates")} className={mobileCurrent("/associates")} onClick={close}>
-              Find an Associate
+              {t("site.nav.findAssociate")}
             </Link>
             <Link href="/events" aria-current={pageCurrent("/events")} className={mobileCurrent("/events")} onClick={close}>
-              Events
+              {t("site.nav.events")}
             </Link>
           </MobileGroup>
-          <MobileGroup title="Company">
+          <MobileGroup title={t("site.nav.company")}>
             <Link href="/about" aria-current={pageCurrent("/about")} className={mobileCurrent("/about")} onClick={close}>
-              About
+              {t("site.nav.about")}
             </Link>
             <Link href="/careers" aria-current={pageCurrent("/careers")} className={mobileCurrent("/careers")} onClick={close}>
-              Careers
+              {t("site.nav.careers")}
             </Link>
           </MobileGroup>
-          <MobileGroup title="Your account">
+          <MobileGroup title={t("site.nav.yourAccount")}>
             <Link href="/my-bookings" aria-current={pageCurrent("/my-bookings")} className={mobileCurrent("/my-bookings")} onClick={close}>
-              My bookings
+              {t("site.nav.myBookings")}
             </Link>
             <a href={appLink("/login")} onClick={close}>
-              Log in
+              {t("site.nav.logIn")}
             </a>
             <a href={appLink("/download")} onClick={close}>
-              Get the App
+              {t("site.nav.getApp")}
             </a>
             <LocaleSwitcher className="min-h-11 font-normal tracking-normal normal-case text-momentizing-muted" selectClassName="bg-white text-momentizing-slate" />
           </MobileGroup>
@@ -203,7 +204,7 @@ export function MarketingNav({ variant = "full", simpleLabel = "Back Home" }: Ma
             onClick={close}
             className="mt-4 min-h-12 justify-center rounded-full bg-momentizing-teal px-6 py-3 text-center text-white transition hover:bg-momentizing-slate"
           >
-            Book a Session
+            {t("site.nav.bookSession")}
           </Link>
         </div>
       )}

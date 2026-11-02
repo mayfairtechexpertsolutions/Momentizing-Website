@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { addDaysIso, dateParts, formatDateLong, todayIso } from "@/lib/local-date";
+import { t } from "@/i18n";
 
 /** A scrollable strip of the next `days` calendar days (visitor's local dates). Pills are real toggle buttons. */
 export function DateStrip({
   value,
   onChange,
   days = 30,
-  label = "Choose a date",
+  label = t("site.book.chooseDate"),
   marked,
 }: {
   value: string | null;

@@ -1,3 +1,4 @@
+import { intlLocale, t } from "@/i18n";
 /**
  * Calendar-date helpers that work in the visitor's LOCAL time zone.
  *
@@ -33,20 +34,20 @@ export function addDaysIso(iso: string, days: number): string {
 
 /** "Friday, 3 October" */
 export function formatDateLong(iso: string): string {
-  return parseIsoLocal(iso).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+  return parseIsoLocal(iso).toLocaleDateString(intlLocale(), { weekday: "long", day: "numeric", month: "long" });
 }
 
 /** "Fri 3 Oct" */
 export function formatDateShort(iso: string): string {
-  return parseIsoLocal(iso).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  return parseIsoLocal(iso).toLocaleDateString(intlLocale(), { weekday: "short", day: "numeric", month: "short" });
 }
 
 export function dateParts(iso: string): { weekday: string; day: string; month: string } {
   const d = parseIsoLocal(iso);
   return {
-    weekday: d.toLocaleDateString(undefined, { weekday: "short" }),
+    weekday: d.toLocaleDateString(intlLocale(), { weekday: "short" }),
     day: String(d.getDate()),
-    month: d.toLocaleDateString(undefined, { month: "short" }),
+    month: d.toLocaleDateString(intlLocale(), { month: "short" }),
   };
 }
 
@@ -54,7 +55,7 @@ export function dateParts(iso: string): { weekday: string; day: string; month: s
 export function formatTime(time: string): string {
   const [h, m] = time.split(":").map(Number);
   const d = new Date(2000, 0, 1, h, m ?? 0);
-  return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return d.toLocaleTimeString(intlLocale(), { hour: "numeric", minute: "2-digit" });
 }
 
 /** "YYYY-MM-DD" + "HH:mm" -> iCalendar UTC stamp "YYYYMMDDTHHmmssZ" (the platform stores session times as UTC wall-clock). */
@@ -87,14 +88,14 @@ export function localToUtc(dateIso: string, time: string): { date: string; time:
 /** Short name of the visitor's time zone for labels, e.g. "WIB", "GMT+7", "PDT". */
 export function zoneLabel(at: Date = new Date()): string {
   try {
-    return new Intl.DateTimeFormat(undefined, { timeZoneName: "short" }).formatToParts(at).find((p) => p.type === "timeZoneName")?.value ?? "your time";
+    return new Intl.DateTimeFormat(intlLocale(), { timeZoneName: "short" }).formatToParts(at).find((p) => p.type === "timeZoneName")?.value ?? t("site.date.yourTime");
   } catch {
-    return "your time";
+    return t("site.date.yourTime");
   }
 }
 
 /** "Friday, 3 October at 9:00 AM (WIB)" for a UTC wall-clock session, shown on the visitor's clock. */
 export function formatSessionWhen(dateIso: string, time: string): string {
   const local = utcToLocal(dateIso, time);
-  return `${formatDateLong(local.date)} at ${formatTime(local.time)} (${zoneLabel()})`;
+  return t("site.book.whenValue", { date: formatDateLong(local.date), time: formatTime(local.time), zone: zoneLabel() });
 }

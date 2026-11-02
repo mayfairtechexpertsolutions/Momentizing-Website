@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSpecialistReviews } from "@/lib/marketing-directory";
 import { StarRating } from "./StarRating";
+import { intlLocale, t } from "@/i18n";
 
 interface SpecialistReviewsProps {
   specialistId: number;
@@ -14,7 +15,7 @@ interface SpecialistReviewsProps {
 
 function ReviewStars({ value }: { value: number }) {
   return (
-    <div role="img" aria-label={`${value} out of 5 stars`} className="flex text-xs">
+    <div role="img" aria-label={t("site.reviews.stars", { n: value })} className="flex text-xs">
       {Array.from({ length: 5 }).map((_, i) => (
         <i key={i} aria-hidden="true" className={i < value ? "fas fa-star text-momentizing-gold-deep" : "far fa-star text-momentizing-gold-deep/40"} />
       ))}
@@ -49,17 +50,17 @@ export function SpecialistReviews({ specialistId, specialistName, averageRating,
           </span>
           <div>
             <p className="font-marketing-serif text-lg font-bold text-momentizing-slate">
-              {specialistName ? `${specialistName.split(" ")[0]} is new to Momentizing` : "No reviews yet"}
+              {specialistName ? t("site.reviews.isNew", { name: specialistName.split(" ")[0] }) : t("site.reviews.none")}
             </p>
             <p className="mt-1 text-base leading-relaxed text-momentizing-muted">
-              Reviews appear here after clients have completed sessions, so every one comes from a real visit. You could be among the first to share yours.
+              {t("site.reviews.emptyBody")}
             </p>
           </div>
         </div>
       )}
 
-      {isLoading && hasReviews && <p role="status" className="text-sm text-momentizing-muted">Loading reviews…</p>}
-      {error && <p role="alert" className="text-sm text-momentizing-muted">We couldn&apos;t load the reviews just now. Please try again in a moment.</p>}
+      {isLoading && hasReviews && <p role="status" className="text-sm text-momentizing-muted">{t("site.reviews.loading")}</p>}
+      {error && <p role="alert" className="text-sm text-momentizing-muted">{t("site.reviews.loadError")}</p>}
 
       {data && data.content.length > 0 && (
         <ul className="space-y-4">
@@ -71,7 +72,7 @@ export function SpecialistReviews({ specialistId, specialistName, averageRating,
               </div>
               {review.comment && <p className="mt-2 text-base leading-relaxed text-momentizing-slate/90">{review.comment}</p>}
               <p className="mt-2 text-xs text-momentizing-muted">
-                {new Date(review.createdAt).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}
+                {new Date(review.createdAt).toLocaleDateString(intlLocale(), { month: "long", day: "numeric", year: "numeric" })}
               </p>
             </li>
           ))}
@@ -79,15 +80,15 @@ export function SpecialistReviews({ specialistId, specialistName, averageRating,
       )}
 
       {data && data.totalPages > 1 && (
-        <nav aria-label="Review pages" className="flex items-center justify-center gap-4">
+        <nav aria-label={t("site.reviews.pages")} className="flex items-center justify-center gap-4">
           <button disabled={data.first} onClick={() => setPage((p) => p - 1)} className={pagerClass}>
-            Previous
+            {t("site.common.previous")}
           </button>
           <span className="text-sm text-momentizing-muted">
-            Page {data.number + 1} of {data.totalPages}
+            {t("site.common.pageOf", { page: data.number + 1, total: data.totalPages })}
           </span>
           <button disabled={data.last} onClick={() => setPage((p) => p + 1)} className={pagerClass}>
-            Next
+            {t("site.common.next")}
           </button>
         </nav>
       )}

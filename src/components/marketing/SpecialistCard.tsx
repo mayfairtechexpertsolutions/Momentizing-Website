@@ -4,7 +4,7 @@ import { initials } from "@/components/marketing/booking/SpecialistParts";
 import Link from "next/link";
 import { useFavorites } from "@/lib/favorites";
 import {
-  PRACTICE_MODE_LABEL,
+  practiceModeLabel,
   formatSessionFee,
   languageList,
   primaryLocation,
@@ -12,6 +12,7 @@ import {
   specialisationTags,
   type MarketingSpecialist,
 } from "@/lib/marketing-directory";
+import { t } from "@/i18n";
 
 interface SpecialistCardProps {
   specialist: MarketingSpecialist;
@@ -36,7 +37,7 @@ export function SpecialistCard({ specialist: p, size = "default" }: SpecialistCa
   const langs = languageList(p.languages);
   const fee = formatSessionFee(p.sessionFeeCents, p.sessionFeeCurrency);
   const hasReviews = p.averageRating != null && p.reviewCount > 0;
-  const mode = PRACTICE_MODE_LABEL[p.practiceMode] ?? p.practiceMode;
+  const mode = practiceModeLabel(p.practiceMode) ?? p.practiceMode;
 
   return (
     // The favourite button is a SIBLING of the profile link, not a child: a <button> nested inside an <a> is invalid
@@ -44,7 +45,7 @@ export function SpecialistCard({ specialist: p, size = "default" }: SpecialistCa
     <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-momentizing-slate/10 bg-white shadow-[0_8px_30px_rgba(47,62,70,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_14px_40px_rgba(47,62,70,0.12)] focus-within:border-momentizing-teal/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <button
         type="button"
-        aria-label={favorited ? `Remove ${p.name} from favorites` : `Save ${p.name} to favorites`}
+        aria-label={favorited ? t("site.spec.unfavorite", { name: p.name }) : t("site.spec.favorite", { name: p.name })}
         aria-pressed={favorited}
         onClick={() => toggleFavorite(p.id)}
         className="absolute top-3 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 shadow-sm backdrop-blur transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-momentizing-teal motion-reduce:transition-none"
@@ -83,23 +84,23 @@ export function SpecialistCard({ specialist: p, size = "default" }: SpecialistCa
 
           {p.freeFirstSession && (
             <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-momentizing-teal px-2.5 py-1 text-xs font-bold text-white shadow-sm">
-              <i aria-hidden="true" className="fas fa-gift" /> {compact ? "Free 1st" : "Free first session"}
+              <i aria-hidden="true" className="fas fa-gift" /> {compact ? t("site.spec.free1st") : t("site.spec.freeFirst")}
             </span>
           )}
 
           <span className="absolute bottom-3 left-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-momentizing-slate shadow-sm">
             <span aria-hidden="true" className={`h-2 w-2 flex-shrink-0 rounded-full ${p.acceptingNewClients ? "bg-momentizing-teal" : "bg-momentizing-muted"}`} />
-            <span className="truncate">{p.acceptingNewClients ? (compact ? "Taking clients" : "Accepting new clients") : "Fully booked"}</span>
+            <span className="truncate">{p.acceptingNewClients ? (compact ? t("site.spec.takingClients") : t("site.spec.accepting")) : t("site.spec.fullyBooked")}</span>
           </span>
         </div>
 
         <div className={`flex flex-1 flex-col ${compact ? "p-3.5 sm:p-4" : "p-5"}`}>
           <p className="text-xs font-bold tracking-[0.14em] text-momentizing-teal uppercase">
-            {profession ?? "Specialist"}
+            {profession ?? t("site.spec.specialist")}
             {!compact && p.yearsExperience != null && p.yearsExperience > 0 && (
               <span className="text-momentizing-muted">
                 {" "}
-                · {p.yearsExperience} {p.yearsExperience === 1 ? "yr" : "yrs"}
+                · {t(p.yearsExperience === 1 ? "site.spec.yr" : "site.spec.yrs", { n: p.yearsExperience })}
               </span>
             )}
           </p>
@@ -111,27 +112,27 @@ export function SpecialistCard({ specialist: p, size = "default" }: SpecialistCa
                 <i aria-hidden="true" className="fas fa-star text-momentizing-gold-deep" />
                 <span className="text-momentizing-slate">{p.averageRating?.toFixed(1)}</span>
                 <span className="font-semibold text-momentizing-muted">
-                  ({p.reviewCount} {p.reviewCount === 1 ? "review" : "reviews"})
+                  ({t(p.reviewCount === 1 ? "site.spec.review" : "site.spec.reviews", { n: p.reviewCount })})
                 </span>
               </>
             ) : (
               <span className="inline-flex items-center gap-1.5 text-momentizing-teal">
-                <i aria-hidden="true" className="fas fa-seedling" /> {compact ? "New here" : "New to Momentizing"}
+                <i aria-hidden="true" className="fas fa-seedling" /> {compact ? t("site.spec.newHere") : t("site.spec.newToMomentizing")}
               </span>
             )}
           </p>
 
           {shownTags.length > 0 && (
-            <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Specialisations">
-              {shownTags.map((t) => (
-                <li key={t} className="max-w-full truncate rounded-full bg-momentizing-mint px-2.5 py-1 text-xs font-bold text-momentizing-teal">
-                  {t}
+            <ul className="mt-3 flex flex-wrap gap-1.5" aria-label={t("site.spec.specialisations")}>
+              {shownTags.map((tag) => (
+                <li key={tag} className="max-w-full truncate rounded-full bg-momentizing-mint px-2.5 py-1 text-xs font-bold text-momentizing-teal">
+                  {tag}
                 </li>
               ))}
               {hiddenTags > 0 && (
                 <li className="rounded-full px-1.5 py-1 text-xs font-bold text-momentizing-muted">
                   +{hiddenTags}
-                  <span className="sr-only"> more</span>
+                  <span className="sr-only"> {t("site.spec.more")}</span>
                 </li>
               )}
             </ul>
@@ -149,7 +150,7 @@ export function SpecialistCard({ specialist: p, size = "default" }: SpecialistCa
                 <i aria-hidden="true" className="fas fa-map-marker-alt mt-1 w-3.5 flex-shrink-0 text-xs text-momentizing-teal" />
                 <span className={`min-w-0 ${compact ? "truncate" : ""}`}>
                   {city}
-                  {p.locations.length > 1 && !compact && <span className="text-momentizing-muted"> · {p.locations.length} locations</span>}
+                  {p.locations.length > 1 && !compact && <span className="text-momentizing-muted"> · {t("site.spec.locations", { n: p.locations.length })}</span>}
                 </span>
               </li>
             )}
@@ -166,21 +167,21 @@ export function SpecialistCard({ specialist: p, size = "default" }: SpecialistCa
               {fee ? (
                 <>
                   <span className="font-marketing-serif text-lg font-bold text-momentizing-slate">{fee}</span>
-                  <span className="block text-xs">per session</span>
+                  <span className="block text-xs">{t("site.spec.perSession")}</span>
                 </>
               ) : (
-                "Fee on profile"
+                t("site.spec.feeOnProfile")
               )}
             </p>
             {compact ? (
               <span className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-momentizing-teal text-white transition group-hover:bg-momentizing-slate group-focus-within:bg-momentizing-slate">
-                <span className="sr-only">View {p.name}&apos;s profile</span>
+                <span className="sr-only">{t("site.spec.viewProfileOf", { name: p.name })}</span>
                 <i className="fas fa-arrow-right transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden="true" />
               </span>
             ) : (
               <span className="inline-flex min-h-11 flex-shrink-0 items-center gap-2 rounded-full bg-momentizing-teal px-4 text-sm font-bold text-white transition group-hover:bg-momentizing-slate group-focus-within:bg-momentizing-slate">
-                View profile
-                <span className="sr-only"> of {p.name}</span>
+                {t("site.spec.viewProfile")}
+                <span className="sr-only"> {t("site.spec.ofName", { name: p.name })}</span>
                 <i className="fas fa-arrow-right text-xs transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden="true" />
               </span>
             )}
