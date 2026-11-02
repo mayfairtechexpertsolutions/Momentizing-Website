@@ -2,7 +2,8 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { FALLBACK_TIME_ZONE_LABEL, formatWorkingWindow, getFallbackSpecialist, isFallbackSpecialistId } from "@/lib/fallback-specialists";
+import { todayIso } from "@/lib/local-date";
+import { describeWorkingHours, expertZoneLabel, getFallbackSpecialist, isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import {
   practiceModeLabel,
   formatActiveDays,
@@ -297,15 +298,16 @@ export function CredentialsSection({ specialist: p }: { specialist: MarketingSpe
 
 /** Posted working hours for a built-in profile (the live site shows real open times instead). */
 export function WorkingHoursSection({ specialist: p }: { specialist: MarketingSpecialist }) {
-  const windows = getFallbackSpecialist(p.id)?.workingHours ?? [];
+  const fallback = getFallbackSpecialist(p.id);
+  const windows = fallback ? describeWorkingHours(fallback) : [];
   if (windows.length === 0) return null;
   return (
-    <SectionCard id="hours" icon="fa-clock" title={t("site.fallback.workingHours", { zone: FALLBACK_TIME_ZONE_LABEL })}>
+    <SectionCard id="hours" icon="fa-clock" title={t("site.fallback.workingHours", { zone: expertZoneLabel(fallback?.timeZone ?? "UTC", todayIso()) })}>
       <ul className="space-y-2 text-base text-momentizing-slate/90">
         {windows.map((w) => (
-          <li key={formatWorkingWindow(w)} className="flex items-start gap-3">
+          <li key={w} className="flex items-start gap-3">
             <i aria-hidden="true" className="far fa-calendar mt-1 w-5 flex-shrink-0 text-momentizing-gold-deep" />
-            {formatWorkingWindow(w)}
+            {w}
           </li>
         ))}
       </ul>

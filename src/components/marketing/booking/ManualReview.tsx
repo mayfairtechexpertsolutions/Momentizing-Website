@@ -2,6 +2,7 @@
 
 import { t } from "@/i18n";
 import { useEffect, useState, type RefObject } from "react";
+import { getFallbackSpecialist } from "@/lib/fallback-specialists";
 import { buildManualBookingMessage, formatManualWhen } from "@/lib/manual-booking";
 import { useWhatsAppLink } from "@/lib/whatsapp";
 import { ActionBar, BookButton, BookCard, InlineNotice, ReviewRow, StepHeading } from "./ui";
@@ -36,7 +37,8 @@ export function ManualReview({
   }, [sentLink, headingRef]);
 
   const specialist = draft.specialist;
-  if (!specialist || !draft.date || !draft.time) {
+  const expertTimeZone = specialist ? getFallbackSpecialist(specialist.id)?.timeZone : undefined;
+  if (!specialist || !expertTimeZone || !draft.date || !draft.time) {
     return (
       <BookCard>
         <StepHeading headingRef={headingRef} title={t("site.book.almost")} />
@@ -46,10 +48,11 @@ export function ManualReview({
     );
   }
 
-  const when = formatManualWhen(draft.date, draft.time);
+  const when = formatManualWhen(draft.date, draft.time, expertTimeZone);
   const link = whatsAppLink(
     buildManualBookingMessage({
       specialistName: specialist.name,
+      expertTimeZone,
       date: draft.date,
       time: draft.time,
       fullName: draft.fullName,

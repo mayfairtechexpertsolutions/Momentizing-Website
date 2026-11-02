@@ -3,10 +3,10 @@ import {
   FALLBACK_SPECIALISTS,
   fallbackDirectoryPage,
   formatClock,
-  formatWorkingWindow,
+  describeWorkingHours,
+  fallbackSlots,
   getFallbackSpecialist,
   isFallbackSpecialistId,
-  isWithinWorkingHours,
   toPublicCard,
 } from "./fallback-specialists";
 
@@ -18,16 +18,22 @@ describe("fallback specialists data", () => {
     expect(ids.every(isFallbackSpecialistId)).toBe(true);
   });
 
-  it("gives every profile a name, specialities, and valid working windows", () => {
+  it("gives every profile a name, specialities, and valid weekly slots", () => {
     for (const s of FALLBACK_SPECIALISTS) {
       expect(s.name).toBeTruthy();
       expect(s.specialisation).toBeTruthy();
-      expect(s.workingHours.length).toBeGreaterThan(0);
-      for (const w of s.workingHours) {
-        expect(w.from < w.to).toBe(true);
-        expect(w.days.every((d) => d >= 0 && d <= 6)).toBe(true);
+      expect(s.durationMinutes).toBeGreaterThan(0);
+      expect(s.weeklySlots.length).toBeGreaterThan(0);
+      for (const w of s.weeklySlots) {
+        expect(w.day >= 0 && w.day <= 6).toBe(true);
+        expect(w.times.length).toBeGreaterThan(0);
+        expect(w.times.every((time) => /^([01]\d|2[0-3]):[0-5]\d$/.test(time))).toBe(true);
       }
     }
+  });
+
+  it("gives every profile a valid IANA time zone", () => {
+    expect(FALLBACK_SPECIALISTS.every((s) => s.timeZone === "Asia/Jakarta")).toBe(true);
   });
 
   it("only Fida accepts couples", () => {
@@ -50,8 +56,6 @@ describe("fallback specialists data", () => {
 });
 
 describe("working hours", () => {
-  const adeline = getFallbackSpecialist(-1)!;
-
   it("formats clock times like the posters", () => {
     expect(formatClock("13:00")).toBe("1:00 PM");
     expect(formatClock("09:30")).toBe("9:30 AM");
@@ -59,14 +63,38 @@ describe("working hours", () => {
     expect(formatClock("12:00")).toBe("12:00 PM");
   });
 
-  it("formats a window", () => {
-    expect(formatWorkingWindow(getFallbackSpecialist(-4)!.workingHours[0])).toBe("Wednesday & Friday · 9:00 AM – 11:00 AM");
+  it("describes the posted hours, grouping days that share them", () => {
+    expect(describeWorkingHours(getFallbackSpecialist(-4)!)).toEqual(["Wednesday & Friday · 9:00 AM – 11:00 AM"]);
+    expect(describeWorkingHours(getFallbackSpecialist(-3)!)).toEqual(["Tuesday · 3:00 PM – 6:00 PM", "Saturday · 7:00 AM – 9:00 PM"]);
+  });
+});
+
+describe("fallbackSlots", () => {
+  const adeline = getFallbackSpecialist(-1)!;
+
+  it("expands the weekly pattern into UTC slots like the live endpoint (WIB = UTC+7)", () => {
+    // 2026-11-03 is a Tuesday: 13:00 and 14:00 WIB = 06:00 and 07:00 UTC.
+    const res = fallbackSlots(adeline, "2026-11-01", 14);
+    expect(res.days).toHaveLength(14);
+    expect(res.days.find((d) => d.date === "2026-11-03")?.times).toEqual(["06:00", "07:00"]);
+    expect(res.days.find((d) => d.date === "2026-11-04")?.times).toEqual([]);
+    expect(res.days.find((d) => d.date === "2026-11-10")?.times).toEqual(["06:00", "07:00"]);
+    expect(res.nextAvailableDate).toBe("2026-11-03");
+    expect(res.durationMinutes).toBe(60);
   });
 
-  it("detects whether a day and time fall inside the posted hours", () => {
-    // 2026-11-03 is a Tuesday.
-    expect(isWithinWorkingHours(adeline.workingHours, "2026-11-03", "13:00")).toBe(true);
-    expect(isWithinWorkingHours(adeline.workingHours, "2026-11-03", "15:00")).toBe(false);
-    expect(isWithinWorkingHours(adeline.workingHours, "2026-11-04", "13:00")).toBe(false);
+  it("honours the profile's own time zone, daylight saving included", () => {
+    // Sydney is UTC+11 in November (AEDT): Tuesday 13:00 there = Tuesday 02:00 UTC.
+    const sydney = { ...getFallbackSpecialist(-1)!, timeZone: "Australia/Sydney" };
+    expect(fallbackSlots(sydney, "2026-11-01", 14).days.find((d) => d.date === "2026-11-03")?.times).toEqual(["02:00", "03:00"]);
+    // ...and UTC+10 in July (AEST): the same wall time is an hour later in UTC terms.
+    expect(fallbackSlots(sydney, "2026-07-01", 14).days.find((d) => d.date === "2026-07-07")?.times).toEqual(["03:00", "04:00"]);
+  });
+
+  it("keeps the earliest WIB slot on its own UTC date and lists every slot of a long day", () => {
+    // Eivria, Saturday 07:00 WIB = 00:00 UTC (2026-11-07 is a Saturday).
+    const times = fallbackSlots(getFallbackSpecialist(-3)!, "2026-11-01", 14).days.find((d) => d.date === "2026-11-07")?.times;
+    expect(times).toHaveLength(14);
+    expect(times?.[0]).toBe("00:00");
   });
 });

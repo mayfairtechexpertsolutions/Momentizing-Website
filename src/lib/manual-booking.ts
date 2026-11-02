@@ -1,5 +1,5 @@
-import { FALLBACK_TIME_ZONE_LABEL, formatClock } from "./fallback-specialists";
-import { formatDateLong } from "./local-date";
+import { clockInZone, expertZoneLabel, formatClock } from "./fallback-specialists";
+import { formatDateLong, localToUtc, parseIsoLocal, zoneLabel } from "./local-date";
 
 /**
  * Booking by WhatsApp request, used when the backend is unavailable and a specialist has no real calendar.
@@ -10,23 +10,13 @@ import { formatDateLong } from "./local-date";
 /** Keeps the wa.me link comfortably under common URL length limits even with a long note. */
 export const MAX_MANUAL_NOTE_CHARS = 500;
 
-/** Start times offered in the manual picker (WIB), every 30 minutes. */
-const FIRST_START_HOUR = 6;
-const LAST_START_HOUR = 21;
-const START_STEP_MINUTES = 30;
-
-export const MANUAL_TIME_OPTIONS: string[] = Array.from({ length: (LAST_START_HOUR - FIRST_START_HOUR + 1) * (60 / START_STEP_MINUTES) }, (_, i) => {
-  const totalMinutes = FIRST_START_HOUR * 60 + i * START_STEP_MINUTES;
-  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
-  const minutes = String(totalMinutes % 60).padStart(2, "0");
-  return `${hours}:${minutes}`;
-});
-
 export interface ManualBookingRequest {
   specialistName: string;
-  /** Local calendar date, "YYYY-MM-DD". */
+  /** IANA zone the expert's hours are written in, e.g. "Asia/Jakarta". */
+  expertTimeZone: string;
+  /** The visitor's own calendar date, "YYYY-MM-DD". */
   date: string;
-  /** WIB start time, "HH:mm". */
+  /** Start time on the visitor's own clock, "HH:mm" (as picked in the slot picker). */
   time: string;
   fullName: string;
   whatsapp: string;
@@ -43,9 +33,20 @@ export interface ManualBookingRequest {
 
 const yesNo = (value: boolean | null): string => (value === null ? "Not answered" : value ? "Yes" : "No");
 
-/** "Friday, 3 October at 1:00 PM (WIB)" */
-export function formatManualWhen(date: string, time: string): string {
-  return `${formatDateLong(date)} at ${formatClock(time)} (${FALLBACK_TIME_ZONE_LABEL})`;
+/** The visitor's local `date` + `time` on the expert's clock, as "HH:mm". */
+export function toExpertClock(date: string, time: string, expertTimeZone: string): string {
+  const utc = localToUtc(date, time);
+  const [y, mo, d] = utc.date.split("-").map(Number);
+  const [h, m] = utc.time.split(":").map(Number);
+  return clockInZone(expertTimeZone, Date.UTC(y, mo - 1, d, h, m));
+}
+
+/** "Friday, 3 October at 1:00 PM (WIB)"; when the visitor is in another zone, also "= 2:00 PM WIB". */
+export function formatManualWhen(date: string, time: string, expertTimeZone: string): string {
+  const visitorZone = zoneLabel(parseIsoLocal(date));
+  const expertZone = expertZoneLabel(expertTimeZone, date);
+  const base = `${formatDateLong(date)} at ${formatClock(time)} (${visitorZone})`;
+  return visitorZone === expertZone ? base : `${base} = ${formatClock(toExpertClock(date, time, expertTimeZone))} ${expertZone}`;
 }
 
 function truncateNote(note: string): string {
@@ -59,7 +60,7 @@ export function buildManualBookingMessage(req: ManualBookingRequest): string {
     "Hi Momentizing, I'd like to request a session.",
     "",
     `Specialist: ${req.specialistName}`,
-    `Preferred time: ${formatManualWhen(req.date, req.time)}`,
+    `Preferred time: ${formatManualWhen(req.date, req.time, req.expertTimeZone)}`,
     `Name: ${req.fullName.trim()}`,
     `WhatsApp: ${req.whatsapp.trim()}`,
     `First time seeing a therapist or counsellor: ${yesNo(req.answers.firstTime)}`,

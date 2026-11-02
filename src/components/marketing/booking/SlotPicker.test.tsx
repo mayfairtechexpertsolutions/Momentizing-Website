@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SlotPicker } from "./SlotPicker";
 import * as api from "@/lib/guest-booking";
-import { localToUtc } from "@/lib/local-date";
+import { localToUtc, utcToLocal } from "@/lib/local-date";
 
 vi.mock("@/lib/guest-booking", async (orig) => ({ ...(await orig<typeof import("@/lib/guest-booking")>()), fetchSlots: vi.fn() }));
 const fetchSlots = vi.mocked(api.fetchSlots);
@@ -84,5 +84,21 @@ describe("SlotPicker", () => {
     await screen.findByRole("button", { name: /9:00/ });
     rerender(<SlotPicker specialistId={1} date="2026-10-02" onDateChange={() => {}} value={null} onChange={() => {}} refreshKey={1} />);
     await waitFor(() => expect(fetchSlots).toHaveBeenCalledTimes(2));
+  });
+
+  it("serves a built-in profile from its weekly pattern without calling the backend", async () => {
+    // Adeline (id -1) works Tuesdays 13:00 and 14:00 WIB = 06:00 and 07:00 UTC; the picker shows them on the visitor's own clock.
+    const visitorDate = utcToLocal("2026-11-03", "06:00").date;
+    render(<SlotPicker specialistId={-1} date={visitorDate} onDateChange={() => {}} value={null} onChange={() => {}} />);
+    expect(await screen.findAllByRole("button", { name: /\d:00/ })).toHaveLength(2);
+    expect(fetchSlots).not.toHaveBeenCalled();
+  });
+
+  it("offers the next day with openings when a built-in profile has none that day", async () => {
+    // 2026-11-04 (UTC) is a Wednesday: Adeline has no sessions, so a later Tuesday is offered.
+    const visitorDate = utcToLocal("2026-11-04", "06:00").date;
+    render(<SlotPicker specialistId={-1} date={visitorDate} onDateChange={() => {}} value={null} onChange={() => {}} />);
+    expect(await screen.findByText(/these days have openings/i)).toBeInTheDocument();
+    expect(fetchSlots).not.toHaveBeenCalled();
   });
 });

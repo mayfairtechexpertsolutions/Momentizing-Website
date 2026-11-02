@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { getFallbackSpecialist, fallbackSlots, isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import { fetchSlots, friendlyError, toViewerSlots, type PublicSlots } from "@/lib/guest-booking";
 import { addDaysIso, formatDateLong, formatDateShort, formatTime, parseIsoLocal, zoneLabel } from "@/lib/local-date";
 import { BookButton } from "./ui";
@@ -9,8 +10,8 @@ import { t } from "@/i18n";
 const WINDOW_DAYS = 14;
 
 /**
- * Real open times for one specialist on one date, straight from the same availability the logged-in booking screen
- * uses. It never hides a failure behind an empty list: a network/server error shows an error with a retry, and an
+ * Open times for one specialist on one date, from the same availability the logged-in booking screen uses (or, for a
+ * built-in profile while the backend is down, from its weekly pattern). It never hides a failure behind an empty list: a network/server error shows an error with a retry, and an
  * honestly empty day offers the next days that DO have openings.
  */
 export function SlotPicker({
@@ -44,7 +45,11 @@ export function SlotPicker({
     setError(null);
     /* eslint-enable react-hooks/set-state-in-effect */
     // One UTC day either side so the visitor's whole local day is covered, whichever side of UTC they live.
-    fetchSlots(specialistId, addDaysIso(date, -1), WINDOW_DAYS + 2)
+    const from = addDaysIso(date, -1);
+    const fallback = isFallbackSpecialistId(specialistId) ? getFallbackSpecialist(specialistId) : null;
+    // Built-in profiles have no backend calendar: their weekly pattern stands in, shaped like the real response.
+    const request = fallback ? Promise.resolve(fallbackSlots(fallback, from, WINDOW_DAYS + 2)) : fetchSlots(specialistId, from, WINDOW_DAYS + 2);
+    request
       .then((utc) => {
         const res = toViewerSlots(utc, date, WINDOW_DAYS);
         if (!cancelled) {
