@@ -326,7 +326,6 @@
   "site.fallback.notBooking": "Ini permintaan, bukan pemesanan.",
   "site.fallback.notBookingBody": "Tim kami akan membalas lewat WhatsApp untuk mengonfirmasi waktu dan mengatur pembayaran — tidak ada yang perlu dibayar sekarang.",
   "site.fallback.notConfirmed": "Sesi Anda belum dikonfirmasi. Tim kami akan membalas lewat WhatsApp untuk menyepakati waktu dengan Anda.",
-  "site.fallback.notice": "Menampilkan profil tim kami — ketersediaan jadwal langsung sedang tidak tersedia. Anda tetap bisa mengajukan sesi dan kami akan mengonfirmasinya lewat WhatsApp.",
   "site.fallback.offlineNotice": "Jadwal langsung sedang tidak tampil. Pilih siapa yang ingin Anda temui, pilih waktu, dan kami akan mengonfirmasinya lewat WhatsApp.",
   "site.fallback.openAgain": "Buka WhatsApp lagi",
   "site.fallback.outsideHours": "Itu di luar jam biasa {name}. Anda tetap bisa mengirim permintaan, dan tim kami akan menyarankan waktu terdekat yang cocok.",

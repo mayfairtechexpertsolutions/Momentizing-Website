@@ -326,7 +326,6 @@
   "site.fallback.notBooking": "This is a request, not a booking.",
   "site.fallback.notBookingBody": "Our team will reply on WhatsApp to confirm the time and arrange payment — there's nothing to pay now.",
   "site.fallback.notConfirmed": "Your session isn't confirmed yet. Our team will reply on WhatsApp to agree a time with you.",
-  "site.fallback.notice": "Showing our team's profiles — live availability is temporarily unavailable. You can still request a session and we'll confirm it with you on WhatsApp.",
   "site.fallback.offlineNotice": "Live availability isn't showing right now. Choose who you'd like to see, pick a time, and we'll confirm it with you on WhatsApp.",
   "site.fallback.openAgain": "Open WhatsApp again",
   "site.fallback.outsideHours": "That's outside {name}'s usual hours. You can still send the request, and our team will suggest the closest time that works.",
