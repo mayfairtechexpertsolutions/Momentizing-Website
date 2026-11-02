@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import { useWhatsAppLink } from "@/lib/whatsapp";
 
 interface SpecialistBookingPanelProps {
@@ -24,6 +25,13 @@ const REASSURANCES = [
   "Confirmed on WhatsApp",
 ];
 
+/** Built-in profiles have no live calendar: the visitor requests a time and the team confirms on WhatsApp. */
+const REQUEST_REASSURANCES = [
+  "No account needed",
+  "Choose the time you'd like",
+  "We confirm on WhatsApp",
+];
+
 /**
  * The "book with this specialist" card on a public profile. It sends the visitor into the real booking flow, which shows
  * this specialist's actual open times and can hold one — no account needed. (It used to show a hard-coded 09:00-17:00 grid
@@ -32,6 +40,7 @@ const REASSURANCES = [
 export function SpecialistBookingPanel({ specialistId, specialistName, acceptingNewClients, fee, freeFirstSession }: SpecialistBookingPanelProps) {
   const whatsAppLink = useWhatsAppLink();
   const first = specialistName.split(" ")[0];
+  const requestOnly = isFallbackSpecialistId(specialistId);
 
   if (!acceptingNewClients) {
     return (
@@ -61,13 +70,15 @@ export function SpecialistBookingPanel({ specialistId, specialistName, accepting
           )}
         </div>
       )}
-      <h2 className="mb-2 font-marketing-serif text-xl font-bold text-momentizing-gold-deep">Book with {first}</h2>
+      <h2 className="mb-2 font-marketing-serif text-xl font-bold text-momentizing-gold-deep">{requestOnly ? `Request a session with ${first}` : `Book with ${first}`}</h2>
       <p className="mb-5 text-sm leading-relaxed text-momentizing-muted">
-        Pick a time that suits you and reserve it in a few gentle steps.
+        {requestOnly
+          ? "Live availability isn't showing right now. Tell us when suits you and we'll confirm it on WhatsApp."
+          : "Pick a time that suits you and reserve it in a few gentle steps."}
       </p>
 
       <ul className="mb-6 space-y-2.5">
-        {REASSURANCES.map((r) => (
+        {(requestOnly ? REQUEST_REASSURANCES : REASSURANCES).map((r) => (
           <li key={r} className="flex items-center gap-3 text-sm font-semibold text-momentizing-slate">
             <span aria-hidden="true" className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-momentizing-mint text-xs text-momentizing-teal">
               <i aria-hidden="true" className="fas fa-check" />
@@ -78,7 +89,7 @@ export function SpecialistBookingPanel({ specialistId, specialistName, accepting
       </ul>
 
       <Link href={`/book?specialist=${specialistId}`} className={primaryClass}>
-        <i aria-hidden="true" className="far fa-calendar-check" /> Choose a time
+        <i aria-hidden="true" className="far fa-calendar-check" /> {requestOnly ? "Request a time" : "Choose a time"}
       </Link>
 
       <div className="my-5 flex items-center gap-3 text-xs font-bold tracking-wider text-momentizing-muted uppercase" aria-hidden="true">
@@ -119,7 +130,7 @@ export function MobileBookBar({ specialistId, fee }: { specialistId: number; fee
         href={`/book?specialist=${specialistId}`}
         className="ml-auto flex min-h-12 items-center justify-center rounded-full bg-momentizing-teal px-6 text-sm font-bold whitespace-nowrap text-white transition hover:bg-momentizing-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal"
       >
-        Choose a time
+        {isFallbackSpecialistId(specialistId) ? "Request a time" : "Choose a time"}
       </Link>
     </div>
   );

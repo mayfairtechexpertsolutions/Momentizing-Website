@@ -1,13 +1,15 @@
 "use client";
 
-import { errorMessage } from "@/lib/api";
+import { errorMessage, isBackendUnavailable } from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
-import { apiFetch, ApiError, type ApiFetchOptions } from "./api";
+import { apiFetch, type ApiFetchOptions } from "./api";
 
 interface QueryState<T> {
   data: T | null;
   error: string | null;
   isLoading: boolean;
+  /** The last failure was the backend being unreachable or broken (not a 4xx answer) — callers may show static fallback content. */
+  unavailable: boolean;
   refetch: () => void;
 }
 
@@ -15,6 +17,7 @@ interface QueryState<T> {
 export function useApiQuery<T>(path: string | null, options?: ApiFetchOptions, deps: unknown[] = []): QueryState<T> {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [unavailable, setUnavailable] = useState(false);
   const [isLoading, setIsLoading] = useState(path !== null);
   const [nonce, setNonce] = useState(0);
 
@@ -28,6 +31,7 @@ export function useApiQuery<T>(path: string | null, options?: ApiFetchOptions, d
     setPrevKey(requestKey);
     setIsLoading(path !== null);
     setError(null);
+    setUnavailable(false);
   }
 
   useEffect(() => {
@@ -38,7 +42,9 @@ export function useApiQuery<T>(path: string | null, options?: ApiFetchOptions, d
         if (!cancelled) setData(result);
       })
       .catch((err) => {
-        if (!cancelled) setError(errorMessage(err));
+        if (cancelled) return;
+        setError(errorMessage(err));
+        setUnavailable(isBackendUnavailable(err));
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -49,5 +55,5 @@ export function useApiQuery<T>(path: string | null, options?: ApiFetchOptions, d
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, nonce, ...deps]);
 
-  return { data, error, isLoading, refetch };
+  return { data, error, isLoading, unavailable, refetch };
 }

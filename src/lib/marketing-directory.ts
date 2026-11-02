@@ -1,3 +1,4 @@
+import { fallbackDirectoryPage, getFallbackSpecialist, isFallbackSpecialistId } from "./fallback-specialists";
 import { useApiQuery } from "./use-api-query";
 import type { PageResponse } from "./types";
 
@@ -82,9 +83,20 @@ export function primaryLocation(p: Pick<MarketingSpecialist, "locations">): Mark
   return p.locations.find((l) => l.primary) ?? p.locations[0] ?? null;
 }
 
-/** Single specialist by id — same public data as the directory list, used by the detail page. */
+/** Not-found text for an unknown fallback id; the profile page treats "not found" as a real 404, not a load failure. */
+const FALLBACK_NOT_FOUND = "Associate not found";
+
+/**
+ * Single specialist by id — same public data as the directory list, used by the detail page.
+ * A negative id is a built-in fallback profile (no request). A real id whose request fails because the backend is down
+ * stays an error: we can't know who that person is without the backend.
+ */
 export function useMarketingSpecialist(id: number) {
-  return useApiQuery<MarketingSpecialist>(`/specialist/directory/${id}`, { anonymous: true });
+  const fallbackId = isFallbackSpecialistId(id);
+  const query = useApiQuery<MarketingSpecialist>(fallbackId ? null : `/specialist/directory/${id}`, { anonymous: true });
+  if (!fallbackId) return query;
+  const fallback = getFallbackSpecialist(id);
+  return { ...query, data: fallback, error: fallback ? null : FALLBACK_NOT_FOUND, isLoading: false };
 }
 
 /** Public reviews list for a specialist — no auth required to read, matches the directory itself. */
@@ -96,11 +108,17 @@ export function useSpecialistReviews(id: number, page = 0) {
   );
 }
 
-/** Public marketing pages (homepage, /associates) — no auth required, backed by the real directory. */
-export function useMarketingDirectory(size = 50) {
-  return useApiQuery<PageResponse<MarketingSpecialist>>(`/specialist/directory?size=${size}`, {
+/**
+ * Public marketing pages (homepage, /associates) — no auth required, backed by the real directory.
+ * When the backend can't answer (down / 5xx — never for an empty list or a 4xx) the built-in team profiles are returned
+ * with `isFallback: true`, so the site still introduces the team.
+ */
+export function useMarketingDirectory(size = 50, enabled = true) {
+  const query = useApiQuery<PageResponse<MarketingSpecialist>>(enabled ? `/specialist/directory?size=${size}` : null, {
     anonymous: true,
   });
+  if (!query.unavailable) return { ...query, isFallback: false };
+  return { ...query, data: fallbackDirectoryPage(size), error: null, isLoading: false, isFallback: true };
 }
 
 export function specialisationTags(specialisation: string | null): string[] {

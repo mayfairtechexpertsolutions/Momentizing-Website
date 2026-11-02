@@ -2,6 +2,7 @@
 
 import { initials } from "@/components/marketing/booking/SpecialistParts";
 import Link from "next/link";
+import { isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import { useFavorites } from "@/lib/favorites";
 import {
   PRACTICE_MODE_LABEL,
@@ -169,7 +170,7 @@ export function SpecialistCard({ specialist: p, size = "default" }: SpecialistCa
                   <span className="block text-xs">per session</span>
                 </>
               ) : (
-                "Fee on profile"
+                isFallbackSpecialistId(p.id) ? "Fee shared on WhatsApp" : "Fee on profile"
               )}
             </p>
             {compact ? (

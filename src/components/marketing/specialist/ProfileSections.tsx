@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import { FALLBACK_TIME_ZONE_LABEL, formatWorkingWindow, getFallbackSpecialist, isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import {
   PRACTICE_MODE_LABEL,
   formatActiveDays,
@@ -69,7 +70,7 @@ export function ClosingCta({ specialist: p, fee }: { specialist: MarketingSpecia
         href={`/book?specialist=${p.id}`}
         className="relative mt-6 hidden min-h-12 items-center justify-center gap-2 rounded-full bg-white px-8 text-sm font-bold text-momentizing-teal transition hover:bg-momentizing-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none lg:inline-flex"
       >
-        <i aria-hidden="true" className="far fa-calendar-check" /> Choose a time
+        <i aria-hidden="true" className="far fa-calendar-check" /> {isFallbackSpecialistId(p.id) ? "Request a time" : "Choose a time"}
       </Link>
     </section>
   );
@@ -156,9 +157,14 @@ export function AboutSection({ specialist: p }: { specialist: MarketingSpecialis
 export function ExpectSection({ specialist: p }: { specialist: MarketingSpecialist }) {
   const first = p.name.split(" ")[0];
   const format = p.sessionFormats?.trim() || (PRACTICE_MODE_LABEL[p.practiceMode] ?? p.practiceMode);
+  const requestOnly = isFallbackSpecialistId(p.id);
   const steps = [
-    { icon: "far fa-calendar-check", title: "Choose a time", body: `See ${first}'s real open times and hold one. No account needed.` },
-    { icon: "fab fa-whatsapp", title: "Confirm on WhatsApp", body: "A quick message from your number tells us it's really you." },
+    requestOnly
+      ? { icon: "far fa-calendar-check", title: "Request a time", body: `Tell us the day and time you'd like with ${first}. No account needed.` }
+      : { icon: "far fa-calendar-check", title: "Choose a time", body: `See ${first}'s real open times and hold one. No account needed.` },
+    requestOnly
+      ? { icon: "fab fa-whatsapp", title: "Send it on WhatsApp", body: "We open WhatsApp with your request ready. Press Send and our team will confirm a time." }
+      : { icon: "fab fa-whatsapp", title: "Confirm on WhatsApp", body: "A quick message from your number tells us it's really you." },
     { icon: "fas fa-seedling", title: `Meet ${first}`, body: `${format.replace(/\.$/, "")}. Go at your own pace and share only what feels right.` },
   ];
 
@@ -191,7 +197,9 @@ export function ExpectSection({ specialist: p }: { specialist: MarketingSpeciali
       </ol>
       <p className="mt-5 flex items-start gap-3 rounded-2xl bg-momentizing-mint/60 p-4 text-sm leading-relaxed text-momentizing-slate">
         <i aria-hidden="true" className="fas fa-comments mt-0.5 text-momentizing-teal" />
-        {p.preferredContact === "VIA_ASSISTANT"
+        {requestOnly
+          ? `Our team will reply on WhatsApp to confirm a time with ${first}.`
+          : p.preferredContact === "VIA_ASSISTANT"
           ? `${first} coordinates through the Momentizing assistant rather than direct messaging, so you'll always have someone on hand.`
           : `You'll be able to message ${first} directly once you're connected.`}
       </p>
@@ -282,6 +290,24 @@ export function CredentialsSection({ specialist: p }: { specialist: MarketingSpe
           </ul>
         )}
       </div>
+    </SectionCard>
+  );
+}
+
+/** Posted working hours for a built-in profile (the live site shows real open times instead). */
+export function WorkingHoursSection({ specialist: p }: { specialist: MarketingSpecialist }) {
+  const windows = getFallbackSpecialist(p.id)?.workingHours ?? [];
+  if (windows.length === 0) return null;
+  return (
+    <SectionCard id="hours" icon="fa-clock" title={`Working hours (${FALLBACK_TIME_ZONE_LABEL})`}>
+      <ul className="space-y-2 text-base text-momentizing-slate/90">
+        {windows.map((w) => (
+          <li key={formatWorkingWindow(w)} className="flex items-start gap-3">
+            <i aria-hidden="true" className="far fa-calendar mt-1 w-5 flex-shrink-0 text-momentizing-gold-deep" />
+            {formatWorkingWindow(w)}
+          </li>
+        ))}
+      </ul>
     </SectionCard>
   );
 }

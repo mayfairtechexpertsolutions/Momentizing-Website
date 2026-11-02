@@ -89,6 +89,18 @@ export function errorMessage(err: unknown): string {
   return t("error.generic");
 }
 
+/** First HTTP status that means "the server is broken", as opposed to "your request was refused". */
+const SERVER_ERROR_STATUS = 500;
+
+/**
+ * True when the backend itself could not answer: no connection or timeout (fetch rejects with a non-ApiError) or a 5xx.
+ * A 4xx — including a genuine 404 — is the backend answering, so it must never trigger the static fallback content.
+ */
+export function isBackendUnavailable(err: unknown): boolean {
+  if (err instanceof ApiError) return err.status >= SERVER_ERROR_STATUS;
+  return err instanceof Error;
+}
+
 /** The reason for one request field, if the last failure was about it (for showing under that input). */
 export function fieldError(err: unknown, field: string): string | undefined {
   return err instanceof ApiError ? err.fieldErrors[field] : undefined;
