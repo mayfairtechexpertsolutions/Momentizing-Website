@@ -17,7 +17,6 @@ import {
   SectionCard,
   WorkingHoursSection,
 } from "@/components/marketing/specialist/ProfileSections";
-import { FallbackNotice } from "@/components/marketing/FallbackNotice";
 import { FALLBACK_SPECIALISTS, isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import { useMarketingDirectory, useMarketingSpecialist, formatSessionFee } from "@/lib/marketing-directory";
 import { t } from "@/i18n";
@@ -101,7 +100,6 @@ function AssociateDetail() {
             {/* minmax(0, 1fr): a bare 1fr track can't shrink below its content's min-width and would stretch the page on phones. */}
             <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10">
               <div className="space-y-6">
-                {isFallbackProfile && <FallbackNotice />}
                 <AboutSection specialist={psych} />
                 <ExpectSection specialist={psych} />
                 <LocationSection specialist={psych} />

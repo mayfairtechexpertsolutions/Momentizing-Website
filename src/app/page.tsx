@@ -11,7 +11,6 @@ import { BookingModal } from "@/components/marketing/BookingModal";
 import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp";
 import { SpecialistCard } from "@/components/marketing/SpecialistCard";
 import { UpcomingEventsBand } from "@/components/marketing/UpcomingEventsBand";
-import { FallbackNotice } from "@/components/marketing/FallbackNotice";
 import { useMarketingDirectory } from "@/lib/marketing-directory";
 import { usePackages, formatPackagePrice } from "@/lib/session-packages";
 import { t } from "@/i18n";
@@ -41,7 +40,7 @@ export default function MarketingHomePage() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingPackageId, setBookingPackageId] = useState<number | undefined>(undefined);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const { data: directoryPage, isLoading: directoryLoading, error: directoryError, refetch: refetchDirectory, isFallback: directoryIsFallback } = useMarketingDirectory(50);
+  const { data: directoryPage, isLoading: directoryLoading, error: directoryError, refetch: refetchDirectory } = useMarketingDirectory(50);
   const associates = directoryPage?.content ?? [];
   // Highest-rated first (no-review associates sort last); review count breaks ties between equal averages.
   const topRatedAssociates = [...associates]
@@ -331,7 +330,6 @@ export default function MarketingHomePage() {
             {t("site.home.topRatedBody")}
           </p>
 
-          {directoryIsFallback && <FallbackNotice className="mb-8" />}
           {directoryLoading ? (
             <div className="mb-16 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4" aria-busy="true">
               <span className="sr-only" role="status">{t("site.home.loadingSpecialists")}</span>

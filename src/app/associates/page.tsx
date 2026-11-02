@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FallbackNotice } from "@/components/marketing/FallbackNotice";
 import { SpecialistCard } from "@/components/marketing/SpecialistCard";
 import { useMarketingDirectory } from "@/lib/marketing-directory";
 import { useFavorites } from "@/lib/favorites";
@@ -13,7 +12,7 @@ export default function AssociatesPage() {
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const { favorites, isFavorite } = useFavorites();
 
-  const { data: page, error, isLoading, refetch, isFallback } = useMarketingDirectory(100);
+  const { data: page, error, isLoading, refetch } = useMarketingDirectory(100);
   const specialists = useMemo(() => page?.content ?? [], [page]);
 
   const filtered = useMemo(() => {
@@ -42,7 +41,6 @@ export default function AssociatesPage() {
       </header>
 
       <main id="main" className="mx-auto max-w-7xl px-6 pb-24">
-        {isFallback && <FallbackNotice className="mb-6" />}
         <div className="mb-8 flex flex-col gap-4 rounded-[2rem] border border-momentizing-gold/5 bg-white p-4 shadow-xl shadow-momentizing-gold/5 md:flex-row">
           <div className="relative flex-1">
             <i aria-hidden="true" className="fas fa-search absolute top-1/2 left-6 -translate-y-1/2 text-momentizing-teal" />
