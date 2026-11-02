@@ -1,6 +1,7 @@
 "use client";
 
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { t } from "@/i18n";
+import type { ButtonHTMLAttributes, ReactNode, RefObject } from "react";
 
 /**
  * Small, calm building blocks shared by the /book wizard. Deliberately a separate set from the client-app `ui/`
@@ -103,6 +104,70 @@ export function InlineNotice({
   return (
     <div role={role} className={`rounded-2xl border px-4 py-3 text-sm leading-relaxed ${tones[tone]}`}>
       {children}
+    </div>
+  );
+}
+
+export function StepHeading({ headingRef, title, sub }: { headingRef: RefObject<HTMLHeadingElement | null>; title: string; sub?: string }) {
+  return (
+    <header className="mb-6">
+      <h1 ref={headingRef} tabIndex={-1} className="font-marketing-serif text-3xl leading-tight outline-none sm:text-4xl">
+        {title}
+      </h1>
+      {sub && <p className="mt-2 text-base text-momentizing-muted">{sub}</p>}
+    </header>
+  );
+}
+
+/** Back / Continue. Fixed to the bottom on phones (thumb reach, above the notch), inline on larger screens. */
+export function ActionBar({
+  onBack,
+  onNext,
+  nextLabel,
+  nextDisabled,
+  loading,
+  hint,
+}: {
+  onBack?: () => void;
+  onNext: () => void;
+  nextLabel?: string;
+  nextDisabled?: boolean;
+  loading?: boolean;
+  hint?: string;
+}) {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-momentizing-slate/10 bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:static md:z-auto md:mt-8 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+      <div className="mx-auto flex max-w-2xl flex-col gap-2">
+        {hint && (
+          <p className="text-center text-sm text-momentizing-muted" role="status">
+            {hint}
+          </p>
+        )}
+        <div className="flex gap-3">
+          {onBack && (
+            <BookButton variant="secondary" onClick={onBack} className="flex-shrink-0">
+              {t("site.common.back")}
+            </BookButton>
+          )}
+          <BookButton onClick={onNext} disabled={nextDisabled} loading={loading} className="flex-1">
+            {nextLabel ?? t("site.common.continue")}
+          </BookButton>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ReviewRow({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
+  return (
+    <div className="flex items-start justify-between gap-4 rounded-2xl bg-momentizing-mint/60 px-4 py-3">
+      <div className="min-w-0">
+        <dt className="text-xs font-semibold tracking-wide text-momentizing-muted uppercase">{label}</dt>
+        <dd className="mt-0.5 break-words text-base font-semibold">{value}</dd>
+      </div>
+      <button type="button" onClick={onEdit} className="min-h-11 flex-shrink-0 px-2 text-sm font-semibold underline focus-visible:outline-2 focus-visible:outline-momentizing-teal">
+        {t("site.book.change")}<span className="sr-only"> {label}</span>
+      </button>
     </div>
   );
 }

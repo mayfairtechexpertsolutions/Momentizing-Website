@@ -2,6 +2,7 @@
 
 import { initials } from "@/components/marketing/booking/SpecialistParts";
 import Link from "next/link";
+import { isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import { useFavorites } from "@/lib/favorites";
 import {
   practiceModeLabel,
@@ -170,7 +171,7 @@ export function SpecialistCard({ specialist: p, size = "default" }: SpecialistCa
                   <span className="block text-xs">{t("site.spec.perSession")}</span>
                 </>
               ) : (
-                t("site.spec.feeOnProfile")
+                isFallbackSpecialistId(p.id) ? t("site.spec.feeSharedOnWhatsApp") : t("site.spec.feeOnProfile")
               )}
             </p>
             {compact ? (

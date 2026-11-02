@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ApiError, hasCode } from "@/lib/api";
+import { ApiError, hasCode, isBackendUnavailable } from "@/lib/api";
+import { FALLBACK_SPECIALISTS, getFallbackSpecialist, isFallbackSpecialistId, toPublicCard } from "@/lib/fallback-specialists";
 import { t } from "@/i18n";
 import {
   createGuestBooking,
@@ -19,10 +20,12 @@ import {
   type PublicSlots,
   type PublicSpecialistCard,
 } from "@/lib/guest-booking";
-import { formatDateLong, formatSessionWhen, formatTime, icsStamp, localToUtc, todayIso, zoneLabel } from "@/lib/local-date";
-import { BookButton, BookCard, Field, InlineNotice, inputClass } from "./ui";
+import { formatDateLong, formatSessionWhen, formatTime, icsStamp, localToUtc, parseIsoLocal, todayIso, zoneLabel } from "@/lib/local-date";
+import { ActionBar, BookButton, BookCard, Field, InlineNotice, ReviewRow, StepHeading, inputClass } from "./ui";
 import { DateStrip } from "./DateStrip";
 import { HelpSheet } from "./HelpSheet";
+import { ManualReview } from "./ManualReview";
+import { ManualTimeStep } from "./ManualTimeStep";
 import { SlotPicker } from "./SlotPicker";
 import { SpecialistNameSearch, SpecialistProfileSheet, SpecialistSuggestionCard, firstNameOf } from "./SpecialistParts";
 import { Stepper } from "./Stepper";
@@ -99,9 +102,11 @@ export function BookingWizard() {
   }, [dateParam]);
 
   useEffect(() => {
-    if (!hydrated || !specialistParam || !/^\d+$/.test(specialistParam)) return;
+    if (!hydrated || !specialistParam || !/^-?\d+$/.test(specialistParam)) return;
     let cancelled = false;
-    fetchPublicSpecialist(Number(specialistParam))
+    // A negative id is a built-in profile (shown while the backend is down): resolve it locally, no request.
+    const fallbackProfile = isFallbackSpecialistId(Number(specialistParam)) ? getFallbackSpecialist(Number(specialistParam)) : null;
+    (fallbackProfile ? Promise.resolve(toPublicCard(fallbackProfile)) : fetchPublicSpecialist(Number(specialistParam)))
       .then((s) => {
         // The link is the visitor's latest intent: it beats a specialist left over in an old draft. Switching to a
         // different specialist drops the old time (it belonged to someone else's calendar).
@@ -220,7 +225,8 @@ export function BookingWizard() {
     <>
       <Stepper step={stepIndex + 1} total={steps.length} label={t(steps[stepIndex].label)} />
 
-      {formTokenError && (
+      {/* The form token only matters for a real hold; a WhatsApp request (built-in profile) needs no backend. */}
+      {formTokenError && !(draft.specialist && isFallbackSpecialistId(draft.specialist.id)) && (
         <div className="mb-4">
           <InlineNotice tone="error" role="alert">
             {formTokenError}{" "}
@@ -243,7 +249,16 @@ export function BookingWizard() {
           onHelp={() => setHelpOpen(true)}
         />
       )}
-      {draft.step === "time" && (
+      {draft.step === "time" && draft.specialist && isFallbackSpecialistId(draft.specialist.id) && (
+        <ManualTimeStep
+          draft={draft}
+          patch={patch}
+          headingRef={headingRef}
+          onBack={linked ? undefined : () => goto("specialist")}
+          onNext={() => goto(linked ? "about" : "review")}
+        />
+      )}
+      {draft.step === "time" && !(draft.specialist && isFallbackSpecialistId(draft.specialist.id)) && (
         <StepTime
           draft={draft}
           patch={patch}
@@ -259,7 +274,17 @@ export function BookingWizard() {
           onDismissNotice={() => setSlotNotice(null)}
         />
       )}
-      {draft.step === "review" && (
+      {draft.step === "review" && draft.specialist && isFallbackSpecialistId(draft.specialist.id) && (
+        <ManualReview
+          draft={draft}
+          headingRef={headingRef}
+          onBack={() => goto(linked ? "about" : "time")}
+          onEdit={(id) => goto(linked && id === "specialist" ? "time" : id)}
+          onSent={clearDraft}
+          onStartOver={startOver}
+        />
+      )}
+      {draft.step === "review" && !(draft.specialist && isFallbackSpecialistId(draft.specialist.id)) && (
         <StepReview
           draft={draft}
           headingRef={headingRef}
@@ -303,56 +328,6 @@ export function BookingWizard() {
 }
 
 // ==================================================================== shared bits
-
-function StepHeading({ headingRef, title, sub }: { headingRef: React.RefObject<HTMLHeadingElement | null>; title: string; sub?: string }) {
-  return (
-    <header className="mb-6">
-      <h1 ref={headingRef} tabIndex={-1} className="font-marketing-serif text-3xl leading-tight outline-none sm:text-4xl">
-        {title}
-      </h1>
-      {sub && <p className="mt-2 text-base text-momentizing-muted">{sub}</p>}
-    </header>
-  );
-}
-
-/** Back / Continue. Fixed to the bottom on phones (thumb reach, above the notch), inline on larger screens. */
-function ActionBar({
-  onBack,
-  onNext,
-  nextLabel,
-  nextDisabled,
-  loading,
-  hint,
-}: {
-  onBack?: () => void;
-  onNext: () => void;
-  nextLabel?: string;
-  nextDisabled?: boolean;
-  loading?: boolean;
-  hint?: string;
-}) {
-  return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-momentizing-slate/10 bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:static md:z-auto md:mt-8 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
-      <div className="mx-auto flex max-w-2xl flex-col gap-2">
-        {hint && (
-          <p className="text-center text-sm text-momentizing-muted" role="status">
-            {hint}
-          </p>
-        )}
-        <div className="flex gap-3">
-          {onBack && (
-            <BookButton variant="secondary" onClick={onBack} className="flex-shrink-0">
-              {t("site.common.back")}
-            </BookButton>
-          )}
-          <BookButton onClick={onNext} disabled={nextDisabled} loading={loading} className="flex-1">
-            {nextLabel ?? t("site.common.continue")}
-          </BookButton>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function HelpMeFind({ onHelp }: { onHelp: () => void }) {
   return (
@@ -577,6 +552,8 @@ function StepSpecialist({
 }) {
   const [suggestions, setSuggestions] = useState<PublicSpecialistCard[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // The backend couldn't answer: offer the built-in team profiles instead of a dead end (booking then goes by WhatsApp).
+  const [offline, setOffline] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [profile, setProfile] = useState<PublicSpecialistCard | null>(null);
   const [byName, setByName] = useState(draft.mode === "SPECIFIC");
@@ -587,6 +564,7 @@ function StepSpecialist({
     /* eslint-disable react-hooks/set-state-in-effect -- reset before the (re)fetch */
     setSuggestions(null);
     setError(null);
+    setOffline(false);
     /* eslint-enable react-hooks/set-state-in-effect */
     fetchSuggestions({
       date: draft.date ?? undefined,
@@ -596,7 +574,11 @@ function StepSpecialist({
       forCouple: draft.answers.couple === true,
     })
       .then((s) => !cancelled && setSuggestions(s))
-      .catch((e) => !cancelled && setError(friendlyError(e)));
+      .catch((e) => {
+        if (cancelled) return;
+        if (isBackendUnavailable(e)) setOffline(true);
+        else setError(friendlyError(e));
+      });
     return () => {
       cancelled = true;
     };
@@ -620,7 +602,24 @@ function StepSpecialist({
             sub={draft.date ? t("site.book.whoSubDate", { date: formatDateLong(draft.date) }) : t("site.book.whoSub")}
           />
 
-          {error ? (
+          {offline ? (
+            <div className="grid gap-4">
+              <InlineNotice tone="warn" role="status">
+                {t("site.fallback.offlineNotice")}
+              </InlineNotice>
+              {FALLBACK_SPECIALISTS.map((s) => (
+                <SpecialistSuggestionCard
+                  key={s.id}
+                  specialist={toPublicCard(s)}
+                  requestedDate={null}
+                  selected={draft.specialist?.id === s.id}
+                  forCouple={draft.answers.couple === true}
+                  onChoose={() => choose(toPublicCard(s), "SPECIFIC")}
+                  onViewProfile={() => setProfile(toPublicCard(s))}
+                />
+              ))}
+            </div>
+          ) : error ? (
             <div role="alert" className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-900">
               <p className="font-semibold">{t("site.book.suggestError")}</p>
               <p className="mt-1">{error}</p>
@@ -653,7 +652,7 @@ function StepSpecialist({
           )}
 
           <div className="mt-8 border-t border-momentizing-slate/10 pt-6">
-            {byName ? (
+            {offline ? null : byName ? (
               <SpecialistNameSearch autoFocus={justOpenedByName} forCouple={draft.answers.couple === true} onPick={(s) => choose(s, "SPECIFIC")} />
             ) : (
               <BookButton
@@ -882,7 +881,7 @@ function StepReview({
         <StepHeading headingRef={headingRef} title={t("site.book.reviewTitle")} sub={t("site.book.reviewSub")} />
         <dl className="grid gap-3">
           <ReviewRow label={t("site.spec.specialist")} value={specialist.name} onEdit={() => onEdit("specialist")} />
-          <ReviewRow label={t("site.events.when")} value={t("site.book.whenValue", { date: formatDateLong(draft.date), time: formatTime(draft.time), zone: zoneLabel() })} onEdit={() => onEdit("time")} />
+          <ReviewRow label={t("site.events.when")} value={t("site.book.whenValue", { date: formatDateLong(draft.date), time: formatTime(draft.time), zone: zoneLabel(parseIsoLocal(draft.date)) })} onEdit={() => onEdit("time")} />
           <ReviewRow label={t("site.form.yourName")} value={draft.fullName} onEdit={() => onEdit("about")} />
           <ReviewRow label="WhatsApp" value={draft.whatsapp} onEdit={() => onEdit("about")} />
         </dl>
@@ -950,20 +949,6 @@ function CoupleMismatchNotice({
         </BookButton>
       </div>
     </InlineNotice>
-  );
-}
-
-function ReviewRow({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
-  return (
-    <div className="flex items-start justify-between gap-4 rounded-2xl bg-momentizing-mint/60 px-4 py-3">
-      <div className="min-w-0">
-        <dt className="text-xs font-semibold tracking-wide text-momentizing-muted uppercase">{label}</dt>
-        <dd className="mt-0.5 break-words text-base font-semibold">{value}</dd>
-      </div>
-      <button type="button" onClick={onEdit} className="min-h-11 flex-shrink-0 px-2 text-sm font-semibold underline focus-visible:outline-2 focus-visible:outline-momentizing-teal">
-        {t("site.book.change")}<span className="sr-only"> {label}</span>
-      </button>
-    </div>
   );
 }
 

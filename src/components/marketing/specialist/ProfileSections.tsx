@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import { FALLBACK_TIME_ZONE_LABEL, formatWorkingWindow, getFallbackSpecialist, isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import {
   practiceModeLabel,
   formatActiveDays,
@@ -70,7 +71,7 @@ export function ClosingCta({ specialist: p, fee }: { specialist: MarketingSpecia
         href={`/book?specialist=${p.id}`}
         className="relative mt-6 hidden min-h-12 items-center justify-center gap-2 rounded-full bg-white px-8 text-sm font-bold text-momentizing-teal transition hover:bg-momentizing-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none lg:inline-flex"
       >
-        <i aria-hidden="true" className="far fa-calendar-check" /> {t("site.spec.chooseTime")}
+        <i aria-hidden="true" className="far fa-calendar-check" /> {isFallbackSpecialistId(p.id) ? t("site.fallback.requestTime") : t("site.spec.chooseTime")}
       </Link>
     </section>
   );
@@ -157,9 +158,14 @@ export function AboutSection({ specialist: p }: { specialist: MarketingSpecialis
 export function ExpectSection({ specialist: p }: { specialist: MarketingSpecialist }) {
   const first = p.name.split(" ")[0];
   const format = p.sessionFormats?.trim() || (practiceModeLabel(p.practiceMode) ?? p.practiceMode);
+  const requestOnly = isFallbackSpecialistId(p.id);
   const steps = [
-    { icon: "far fa-calendar-check", title: t("site.spec.chooseTime"), body: t("site.spec.step1", { name: first }) },
-    { icon: "fab fa-whatsapp", title: t("site.spec.confirmOnWa"), body: t("site.spec.step2") },
+    requestOnly
+      ? { icon: "far fa-calendar-check", title: t("site.fallback.requestTime"), body: t("site.fallback.step1", { name: first }) }
+      : { icon: "far fa-calendar-check", title: t("site.spec.chooseTime"), body: t("site.spec.step1", { name: first }) },
+    requestOnly
+      ? { icon: "fab fa-whatsapp", title: t("site.fallback.sendOnWa"), body: t("site.fallback.step2") }
+      : { icon: "fab fa-whatsapp", title: t("site.spec.confirmOnWa"), body: t("site.spec.step2") },
     { icon: "fas fa-seedling", title: t("site.spec.meetName", { name: first }), body: t("site.spec.step3", { format: format.replace(/\.$/, "") }) },
   ];
 
@@ -192,9 +198,11 @@ export function ExpectSection({ specialist: p }: { specialist: MarketingSpeciali
       </ol>
       <p className="mt-5 flex items-start gap-3 rounded-2xl bg-momentizing-mint/60 p-4 text-sm leading-relaxed text-momentizing-slate">
         <i aria-hidden="true" className="fas fa-comments mt-0.5 text-momentizing-teal" />
-        {p.preferredContact === "VIA_ASSISTANT"
-          ? t("site.spec.viaAssistant", { name: first })
-          : t("site.spec.direct", { name: first })}
+        {requestOnly
+          ? t("site.fallback.contact", { name: first })
+          : p.preferredContact === "VIA_ASSISTANT"
+            ? t("site.spec.viaAssistant", { name: first })
+            : t("site.spec.direct", { name: first })}
       </p>
     </SectionCard>
   );
@@ -283,6 +291,24 @@ export function CredentialsSection({ specialist: p }: { specialist: MarketingSpe
           </ul>
         )}
       </div>
+    </SectionCard>
+  );
+}
+
+/** Posted working hours for a built-in profile (the live site shows real open times instead). */
+export function WorkingHoursSection({ specialist: p }: { specialist: MarketingSpecialist }) {
+  const windows = getFallbackSpecialist(p.id)?.workingHours ?? [];
+  if (windows.length === 0) return null;
+  return (
+    <SectionCard id="hours" icon="fa-clock" title={t("site.fallback.workingHours", { zone: FALLBACK_TIME_ZONE_LABEL })}>
+      <ul className="space-y-2 text-base text-momentizing-slate/90">
+        {windows.map((w) => (
+          <li key={formatWorkingWindow(w)} className="flex items-start gap-3">
+            <i aria-hidden="true" className="far fa-calendar mt-1 w-5 flex-shrink-0 text-momentizing-gold-deep" />
+            {formatWorkingWindow(w)}
+          </li>
+        ))}
+      </ul>
     </SectionCard>
   );
 }
