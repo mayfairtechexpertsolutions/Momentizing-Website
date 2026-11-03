@@ -1,6 +1,7 @@
 import { useApiQuery } from "./use-api-query";
 import type { PageResponse } from "./types";
 import { getLocale, t } from "@/i18n";
+import { FALLBACK_EVENT_NOT_FOUND, fallbackEventsPage, getFallbackEvent, isFallbackEventId } from "./fallback-events";
 
 /**
  * Public events from GET /public/events. Each session carries its wall-clock date/times on the event's own clock
@@ -49,13 +50,24 @@ export interface PublicEvent {
 export type EventWhen = "upcoming" | "past";
 export type EventFormatFilter = "ONLINE" | "IN_PERSON" | null;
 
+/**
+ * Live events. When the backend can't answer (down / 5xx — never for an empty list or a 4xx) the built-in events from
+ * `src/data/fallback-events.json` are returned with `isFallback: true`, so the site still shows what is on.
+ */
 export function useEvents(when: EventWhen, format: EventFormatFilter, size = 24) {
   const query = `when=${when}&size=${size}${format ? `&format=${format}` : ""}`;
-  return useApiQuery<PageResponse<PublicEvent>>(`/public/events?${query}`, { anonymous: true }, [query]);
+  const result = useApiQuery<PageResponse<PublicEvent>>(`/public/events?${query}`, { anonymous: true }, [query]);
+  if (!result.unavailable) return { ...result, isFallback: false };
+  return { ...result, data: fallbackEventsPage(when, format, size), error: null, isLoading: false, isFallback: true };
 }
 
+/** One event. A negative id is a built-in event (no request); a real id whose request fails stays a load error. */
 export function useEvent(id: number | null) {
-  return useApiQuery<PublicEvent>(id ? `/public/events/${id}` : null, { anonymous: true }, [id]);
+  const fallbackId = id !== null && isFallbackEventId(id);
+  const result = useApiQuery<PublicEvent>(id && !fallbackId ? `/public/events/${id}` : null, { anonymous: true }, [id]);
+  if (!fallbackId) return result;
+  const event = getFallbackEvent(id);
+  return { ...result, data: event, error: event ? null : FALLBACK_EVENT_NOT_FOUND, isLoading: false };
 }
 
 export const formatLabel = (format: EventFormat): string => t(`site.events.format.${format}`);

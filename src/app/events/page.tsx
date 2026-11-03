@@ -18,7 +18,7 @@ const FILTERS: { value: Filter; labelKey: string; when: EventWhen; format: Event
 export default function EventsPage() {
   const [filter, setFilter] = useState<Filter>("upcoming");
   const active = FILTERS.find((f) => f.value === filter) ?? FILTERS[0];
-  const { data, error, isLoading, unavailable, refetch } = useEvents(active.when, active.format);
+  const { data, error, isLoading, refetch } = useEvents(active.when, active.format);
   const whatsAppLink = useWhatsAppLink();
   const events = data?.content ?? [];
   // Feature the soonest upcoming event that is still on; past lists stay a plain grid.
@@ -61,7 +61,7 @@ export default function EventsPage() {
         ) : error ? (
           <div role="alert" className="mx-auto max-w-md py-24 text-center">
             <p className="font-marketing-serif text-xl">{t("site.events.loadError")}</p>
-            {!unavailable && <p className="mt-2 text-sm text-momentizing-muted">{error}</p>}
+            <p className="mt-2 text-sm text-momentizing-muted">{error}</p>
             <button
               type="button"
               onClick={refetch}
