@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { EventPosterFallback } from "@/components/marketing/EventPosterFallback";
+import { EventPoster } from "@/components/marketing/EventPoster";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { absoluteUrl } from "@/lib/site-url";
 import { eventSchema } from "@/lib/structured-data";
@@ -107,14 +107,7 @@ function EventBody({ event: e }: { event: PublicEvent }) {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <div className="flex flex-col gap-4">
             <div className="overflow-hidden rounded-3xl border border-momentizing-mint-deep bg-white">
-              {e.posterUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={e.posterUrl} alt={t("site.events.posterAlt", { title: e.title })} className="h-auto w-full" />
-              ) : (
-                <div className="aspect-[4/5]">
-                  <EventPosterFallback title={e.title} format={e.format} />
-                </div>
-              )}
+              <EventPoster event={e} alt={t("site.events.posterAlt", { title: e.title })} className="h-auto w-full" framedFallback />
             </div>
           </div>
 

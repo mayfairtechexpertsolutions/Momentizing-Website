@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { EventPosterFallback } from "./EventPosterFallback";
+import { EventPoster } from "./EventPoster";
 import { formatLabel, formatEventDate, headlineSession, placeText, priceText, timeRange, type PublicEvent } from "@/lib/events";
 import { t } from "@/i18n";
 
@@ -65,12 +65,7 @@ export function EventCard({ event: e, featured = false, compact = false }: { eve
     >
       {/* Featured: a fixed poster column keeps the wide card from growing taller than the screen. */}
       <div className={`relative aspect-[4/5] flex-shrink-0 bg-momentizing-cream ${featured ? "md:w-80 lg:w-96" : ""}`}>
-        {e.posterUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={e.posterUrl} alt="" loading="lazy" className="h-full w-full object-contain" />
-        ) : (
-          <EventPosterFallback title={e.title} format={e.format} />
-        )}
+        <EventPoster event={e} alt="" className="h-full w-full object-contain" />
         {s && (
           <span className="absolute top-4 left-4 rounded-2xl bg-momentizing-peach px-3 py-1.5 text-xs font-bold text-momentizing-gold-deep shadow-sm">
             {formatEventDate(s.date)}
