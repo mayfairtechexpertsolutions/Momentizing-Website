@@ -1,6 +1,8 @@
 "use client";
 
 import { CareerForm } from "@/components/marketing/careers/CareerForm";
+import { OfflineWhatsAppCard } from "@/components/marketing/OfflineWhatsAppCard";
+import { OnlineOnly } from "@/components/marketing/OnlineOnly";
 import { t } from "@/i18n";
 
 const STEPS = ["apply", "review", "meet", "join"];
@@ -30,7 +32,17 @@ export default function CareersPage() {
             {t("site.careers.applyNow")}
           </h2>
           <div className="mt-6">
-            <CareerForm />
+            <OnlineOnly
+              offline={
+                <OfflineWhatsAppCard
+                  title={t("site.offline.careersTitle")}
+                  body={t("site.offline.careersBody")}
+                  message={t("site.offline.careersMessage")}
+                />
+              }
+            >
+              <CareerForm />
+            </OnlineOnly>
           </div>
         </section>
       </main>

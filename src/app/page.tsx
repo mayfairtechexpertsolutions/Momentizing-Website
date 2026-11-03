@@ -14,6 +14,7 @@ import { UpcomingEventsBand } from "@/components/marketing/UpcomingEventsBand";
 import { useMarketingDirectory } from "@/lib/marketing-directory";
 import { usePackages, formatPackagePrice } from "@/lib/session-packages";
 import { t } from "@/i18n";
+import { OnlineOnly } from "@/components/marketing/OnlineOnly";
 
 // Mirrors the "Our service" row on the brand's Instagram artwork.
 const OFFERINGS = [
@@ -410,33 +411,35 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
-      <section className="border-t border-momentizing-gold/10 bg-white px-6 py-20 text-center">
-        <div className="mx-auto flex max-w-xl flex-col items-center gap-4">
-          <h2 className="font-marketing-serif text-2xl text-momentizing-slate">
-            {t("site.home.alreadyTitle")}
-          </h2>
-          <p className="text-sm text-momentizing-muted">
-            {t("site.home.alreadyBody")}
-          </p>
-          <div className="mt-2 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
-            <a
-              href={appLink("/register")}
-              className="inline-flex min-h-12 items-center justify-center rounded-full bg-momentizing-gold-deep px-8 py-4 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-slate"
-            >
-              {t("site.home.createAccount")}
-            </a>
-            <a
-              href={appLink("/login")}
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-momentizing-slate px-8 py-4 text-xs font-bold tracking-widest text-momentizing-slate uppercase transition hover:bg-momentizing-slate hover:text-white"
-            >
-              {t("site.home.login")}
+      <OnlineOnly>
+        <section className="border-t border-momentizing-gold/10 bg-white px-6 py-20 text-center">
+          <div className="mx-auto flex max-w-xl flex-col items-center gap-4">
+            <h2 className="font-marketing-serif text-2xl text-momentizing-slate">
+              {t("site.home.alreadyTitle")}
+            </h2>
+            <p className="text-sm text-momentizing-muted">
+              {t("site.home.alreadyBody")}
+            </p>
+            <div className="mt-2 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
+              <a
+                href={appLink("/register")}
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-momentizing-gold-deep px-8 py-4 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-slate"
+              >
+                {t("site.home.createAccount")}
+              </a>
+              <a
+                href={appLink("/login")}
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-momentizing-slate px-8 py-4 text-xs font-bold tracking-widest text-momentizing-slate uppercase transition hover:bg-momentizing-slate hover:text-white"
+              >
+                {t("site.home.login")}
+              </a>
+            </div>
+            <a href={appLink("/register/specialist")} className="mt-2 inline-flex min-h-11 items-center text-sm text-momentizing-muted underline">
+              {t("site.home.registerPractice")}
             </a>
           </div>
-          <a href={appLink("/register/specialist")} className="mt-2 inline-flex min-h-11 items-center text-sm text-momentizing-muted underline">
-            {t("site.home.registerPractice")}
-          </a>
-        </div>
-      </section>
+        </section>
+      </OnlineOnly>
       </main>
 
 

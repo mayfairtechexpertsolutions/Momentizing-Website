@@ -5,6 +5,7 @@ import Link from "next/link";
 import { appLink } from "@config";
 import { useWhatsAppLink } from "@/lib/whatsapp";
 import { t } from "@/i18n";
+import { OnlineOnly } from "./OnlineOnly";
 
 export function MarketingFooter() {
   const whatsAppLink = useWhatsAppLink();
@@ -35,9 +36,11 @@ export function MarketingFooter() {
         <Link href="/careers" className="inline-flex min-h-11 items-center hover:opacity-70">
           {t("site.nav.careers")}
         </Link>
-        <a href={appLink("/download")} className="inline-flex min-h-11 items-center hover:opacity-70">
-          {t("site.nav.getApp")}
-        </a>
+        <OnlineOnly>
+          <a href={appLink("/download")} className="inline-flex min-h-11 items-center hover:opacity-70">
+            {t("site.nav.getApp")}
+          </a>
+        </OnlineOnly>
         <a
           href={whatsAppLink(t("site.whatsapp.bookGreeting"))}
           target="_blank"
