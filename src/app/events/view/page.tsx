@@ -39,7 +39,7 @@ export default function EventDetailPage() {
 
 function EventDetail() {
   const id = Number(useSearchParams().get("id")) || null;
-  const { data: e, error, isLoading, refetch } = useEvent(id);
+  const { data: e, error, isLoading, unavailable, refetch } = useEvent(id);
   // Only a genuine 404 means "no such event"; anything else is a load problem and gets a retry.
   const notFound = !id || (!!error && /not found|tidak ditemukan/i.test(error));
 
@@ -63,7 +63,7 @@ function EventDetail() {
       {!isLoading && !e && !notFound && error && (
         <div role="alert" className="px-6 pt-48 pb-24 text-center">
           <p className="mb-2 font-marketing-serif text-2xl">{t("site.events.loadErrorOne")}</p>
-          <p className="mb-6 text-sm text-momentizing-muted">{error}</p>
+          {!unavailable && <p className="mb-6 text-sm text-momentizing-muted">{error}</p>}
           <button
             type="button"
             onClick={refetch}

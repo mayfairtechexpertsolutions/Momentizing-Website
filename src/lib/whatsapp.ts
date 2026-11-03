@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiFetch } from "./api";
+import { knownWhatsAppNumber, probeBackend } from "./backend-status";
 
 /** Fallback business number, in wa.me click-to-chat format (digits only, country code, no "+"). The live value is
  * edited by the Super Admin (Admin → Settings → WhatsApp) and fetched from /public/contact-info; this is only used
@@ -17,29 +17,13 @@ export function buildWhatsAppLink(message?: string, number: string = MOMENTIZING
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
-let loaded: string | null = null;
-let inflight: Promise<string> | null = null;
-
-function loadNumber(): Promise<string> {
-  inflight ??= apiFetch<{ whatsappNumber: string }>("/public/contact-info", { anonymous: true })
-    .then((info) => {
-      loaded = info.whatsappNumber.replace(/\D/g, "") || MOMENTIZING_WHATSAPP_NUMBER;
-      return loaded;
-    })
-    .catch(() => {
-      inflight = null; // try again on the next mount
-      return MOMENTIZING_WHATSAPP_NUMBER;
-    });
-  return inflight;
-}
-
 /** wa.me link builder bound to the business number currently configured in Admin (fetched once per page load). */
 export function useWhatsAppLink(): (message?: string) => string {
-  const [number, setNumber] = useState<string>(loaded ?? MOMENTIZING_WHATSAPP_NUMBER);
+  const [number, setNumber] = useState<string>(knownWhatsAppNumber() ?? MOMENTIZING_WHATSAPP_NUMBER);
   useEffect(() => {
     let cancelled = false;
-    loadNumber().then((n) => {
-      if (!cancelled) setNumber(n);
+    probeBackend().then((n) => {
+      if (!cancelled && n) setNumber(n);
     });
     return () => {
       cancelled = true;

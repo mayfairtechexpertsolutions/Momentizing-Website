@@ -8,6 +8,8 @@ import { BookButton, Field, InlineNotice, inputClass } from "./ui";
 import { Sheet } from "./Sheet";
 import { TurnstileWidget, TURNSTILE_ENABLED } from "./TurnstileWidget";
 import { withBase } from "@/lib/base-path";
+import { useBackendStatus } from "@/lib/backend-status";
+import { useWhatsAppLink } from "@/lib/whatsapp";
 
 export interface HelpPrefill {
   fullName: string;
@@ -32,6 +34,8 @@ export function HelpSheet({
   prefill: HelpPrefill;
   formToken: string;
 }) {
+  const whatsAppLink = useWhatsAppLink();
+  const backendOffline = useBackendStatus() === "offline";
   const [fullName, setFullName] = useState(prefill.fullName);
   const [whatsapp, setWhatsapp] = useState(prefill.whatsapp);
   const [times, setTimes] = useState("");
@@ -88,7 +92,20 @@ export function HelpSheet({
 
   return (
     <Sheet open={open} onClose={onClose} title={done ? t("site.help2.doneTitle") : t("site.help2.title")} labelledBy="help-title">
-      {done ? (
+      {backendOffline ? (
+        <div className="flex flex-col gap-4">
+          <p className="text-momentizing-muted">{t("site.offline.helpBody")}</p>
+          <a
+            href={whatsAppLink(t("site.offline.helpMessage", { name: fullName.trim() || "-", date: prefill.preferredDate ?? "-" }))}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-momentizing-teal px-6 py-3 text-sm font-semibold text-white transition hover:bg-momentizing-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal"
+          >
+            <i aria-hidden="true" className="fab fa-whatsapp text-lg" /> {t("site.offline.whatsappButton")}
+            <span className="sr-only"> {t("site.common.newTab")}</span>
+          </a>
+        </div>
+      ) : done ? (
         <div className="flex flex-col gap-4" role="status">
           <InlineNotice tone="success">
             {t("site.help2.thanksA", { name: fullName.trim().split(" ")[0] })} <strong>{whatsapp}</strong> {t("site.help2.thanksB")}

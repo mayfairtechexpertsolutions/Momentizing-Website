@@ -38,7 +38,7 @@ export function ManualReview({
 
   const specialist = draft.specialist;
   const expertTimeZone = specialist ? getFallbackSpecialist(specialist.id)?.timeZone : undefined;
-  if (!specialist || !expertTimeZone || !draft.date || !draft.time) {
+  if (!specialist || !draft.date || !draft.time) {
     return (
       <BookCard>
         <StepHeading headingRef={headingRef} title={t("site.book.almost")} />

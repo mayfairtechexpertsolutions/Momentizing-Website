@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_MANUAL_NOTE_CHARS, buildManualBookingMessage, formatManualWhen, toExpertClock, type ManualBookingRequest } from "./manual-booking";
+import { MAX_MANUAL_NOTE_CHARS, buildManualBookingMessage, formatManualWhen, requestedHoursSlots, toExpertClock, type ManualBookingRequest } from "./manual-booking";
 
 const base: ManualBookingRequest = {
   specialistName: "Adeline Herdianto",
@@ -59,5 +59,22 @@ describe("time zones", () => {
     expect(when).toContain("1:00 PM");
     // Visitor in Los Angeles: 13:00 PST is 04:00 the next day in Jakarta. On a Jakarta clock no conversion is added.
     expect(when.includes("= ")).toBe(!/\((WIB|GMT\+7)\)/.test(when));
+  });
+});
+
+describe("without a known expert zone", () => {
+  it("states the time on the visitor's clock only", () => {
+    const text = formatManualWhen("2026-11-03", "13:00");
+    expect(text).toContain("1:00 PM");
+    expect(text).not.toContain("=");
+  });
+});
+
+describe("requestedHoursSlots", () => {
+  it("offers the same waking-hours grid on every day of the window", () => {
+    const res = requestedHoursSlots(7, "Someone", "2026-11-03", 3);
+    expect(res.days.map((d) => d.date)).toEqual(["2026-11-03", "2026-11-04", "2026-11-05"]);
+    expect(res.days[0].times[0]).toBe("08:00");
+    expect(res.days[0].times.at(-1)).toBe("20:00");
   });
 });
