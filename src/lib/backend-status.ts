@@ -16,11 +16,18 @@ const RECHECK_INTERVAL_MS = 30_000;
 /** A backend that hangs counts as down: without this the probe could stay "checking" for minutes. */
 const PROBE_TIMEOUT_MS = 8_000;
 
+/**
+ * After a real request fails, the status stays offline at least this long even if the lightweight probe answers:
+ * a partly broken backend (probe fine, bookings failing) must not flip the page back and forth under the visitor.
+ */
+const FAILURE_HOLD_MS = RECHECK_INTERVAL_MS;
+
 const CONTACT_INFO_PATH = "/public/contact-info";
 
 let status: BackendStatus = "checking";
 let whatsappNumber: string | null = null;
 let inflight: Promise<string | null> | null = null;
+let lastFailureAt = Number.NEGATIVE_INFINITY;
 const listeners = new Set<() => void>();
 
 function setStatus(next: BackendStatus) {
@@ -37,7 +44,7 @@ export function probeBackend(): Promise<string | null> {
   inflight ??= apiFetch<{ whatsappNumber: string }>(CONTACT_INFO_PATH, { anonymous: true, signal: AbortSignal.timeout(PROBE_TIMEOUT_MS) })
     .then((info) => {
       whatsappNumber = info.whatsappNumber.replace(/\D/g, "") || null;
-      setStatus("online");
+      if (Date.now() - lastFailureAt >= FAILURE_HOLD_MS) setStatus("online");
       return whatsappNumber;
     })
     .catch((err) => {
@@ -58,6 +65,7 @@ export function knownWhatsAppNumber(): string | null {
 
 /** Called when a real request fails because the backend is down, so the whole site reacts at once. */
 export function reportBackendUnavailable() {
+  lastFailureAt = Date.now();
   setStatus("offline");
 }
 
@@ -97,5 +105,6 @@ export function resetBackendStatusForTests() {
   status = "checking";
   whatsappNumber = null;
   inflight = null;
+  lastFailureAt = Number.NEGATIVE_INFINITY;
   listeners.clear();
 }

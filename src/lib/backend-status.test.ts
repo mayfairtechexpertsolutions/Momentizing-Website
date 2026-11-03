@@ -56,4 +56,23 @@ describe("backend status", () => {
     });
     expect(result.current).toBe("online");
   });
+
+  it("stays offline for a while after a real request failed, even if the probe still answers", async () => {
+    vi.useFakeTimers();
+    apiFetch.mockResolvedValue({ whatsappNumber: "628112233" });
+    const { result } = renderHook(() => useBackendStatus());
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(result.current).toBe("online");
+    act(() => reportBackendUnavailable());
+    await act(async () => {
+      await probeBackend();
+    });
+    expect(result.current).toBe("offline");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30_000);
+    });
+    expect(result.current).toBe("online");
+  });
 });

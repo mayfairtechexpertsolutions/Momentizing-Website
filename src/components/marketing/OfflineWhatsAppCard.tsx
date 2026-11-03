@@ -5,11 +5,11 @@ import { useWhatsAppLink } from "@/lib/whatsapp";
 import { BookCard } from "./booking/ui";
 
 /** What a page shows in place of a backend-only feature while the backend is down: say what to do, then open WhatsApp. */
-export function OfflineWhatsAppCard({ title, body, message }: { title: string; body: string; message: string }) {
+export function OfflineWhatsAppCard({ title, body, message, as: Heading = "h2" }: { title: string; body: string; message: string; as?: "h1" | "h2" }) {
   const whatsAppLink = useWhatsAppLink();
   return (
     <BookCard>
-      <h2 className="font-marketing-serif text-2xl font-semibold">{title}</h2>
+      <Heading className="font-marketing-serif text-2xl font-semibold">{title}</Heading>
       <p className="mt-2 text-momentizing-muted">{body}</p>
       <a
         href={whatsAppLink(message)}

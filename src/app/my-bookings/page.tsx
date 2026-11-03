@@ -12,6 +12,7 @@ export default function MyBookingsPage() {
         <OnlineOnly
           offline={
             <OfflineWhatsAppCard
+              as="h1"
               title={t("site.offline.myBookingsTitle")}
               body={t("site.offline.myBookingsBody")}
               message={t("site.offline.myBookingsMessage")}
