@@ -13,7 +13,7 @@ describe("useMarketingDirectory fallback", () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("Failed to fetch"));
     const { result } = renderHook(() => useMarketingDirectory(50));
     await waitFor(() => expect(result.current.isFallback).toBe(true));
-    expect(result.current.data?.content).toHaveLength(5);
+    expect(result.current.data?.content).toHaveLength(8);
     expect(result.current.error).toBeNull();
   });
 

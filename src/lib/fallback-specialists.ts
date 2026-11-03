@@ -7,10 +7,10 @@ import type { MarketingSpecialist, MarketingSpecialistLocation } from "./marketi
 import type { PageResponse } from "./types";
 
 /**
- * Static copy of the team's public profiles, transcribed from the "Our Experts" posters. It is shown ONLY when the
+ * Static copy of the team's public profiles, transcribed from "Momentizing Associate Profile 2026.pdf". It is shown ONLY when the
  * backend is unreachable or broken (see `isBackendUnavailable`), so the site never goes blank. It carries no real
  * ids, fees, reviews or open slots, so booking switches to a WhatsApp request (see `manual-booking.ts`).
- * When a poster changes, edit `src/data/fallback-specialists.json`; the live directory always wins when the backend answers.
+ * When the profile PDF changes, edit `src/data/fallback-specialists.json`; the live directory always wins when the backend answers.
  */
 
 /** Full English day names; the position is the 0 = Monday … 6 = Sunday index used by `DAY_LABELS` in marketing-directory. */

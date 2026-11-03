@@ -87,16 +87,16 @@ describe("SlotPicker", () => {
   });
 
   it("serves a built-in profile from its weekly pattern without calling the backend", async () => {
-    // Adeline (id -1) works Tuesdays 13:00 and 14:00 WIB = 06:00 and 07:00 UTC; the picker shows them on the visitor's own clock.
-    const visitorDate = utcToLocal("2026-11-03", "06:00").date;
+    // Adeline (id -1) works Tuesdays 15:30 and 16:30 WIB = 08:30 and 09:30 UTC; the picker shows them on the visitor's own clock.
+    const visitorDate = utcToLocal("2026-11-03", "08:30").date;
     render(<SlotPicker specialistId={-1} date={visitorDate} onDateChange={() => {}} value={null} onChange={() => {}} />);
-    expect(await screen.findAllByRole("button", { name: /\d:00/ })).toHaveLength(2);
+    expect(await screen.findAllByRole("button", { name: /\d:30/ })).toHaveLength(2);
     expect(fetchSlots).not.toHaveBeenCalled();
   });
 
   it("offers the next day with openings when a built-in profile has none that day", async () => {
     // 2026-11-04 (UTC) is a Wednesday: Adeline has no sessions, so a later Tuesday is offered.
-    const visitorDate = utcToLocal("2026-11-04", "06:00").date;
+    const visitorDate = utcToLocal("2026-11-04", "08:30").date;
     render(<SlotPicker specialistId={-1} date={visitorDate} onDateChange={() => {}} value={null} onChange={() => {}} />);
     expect(await screen.findByText(/these days have openings/i)).toBeInTheDocument();
     expect(fetchSlots).not.toHaveBeenCalled();

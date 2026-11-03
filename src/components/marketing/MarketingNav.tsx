@@ -97,7 +97,7 @@ export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProp
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <Link href="/" className="flex-shrink-0" onClick={() => setMenuOpen(false)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={withBase("/website/momentizing-logo.jpeg")} alt="Momentizing" width={200} height={71} className="h-12 mix-blend-multiply md:h-14 lg:h-12 xl:h-14" />
+          <img src={withBase("/website/momentizing-logo.jpeg")} alt="Momentizing" width={1000} height={274} className="h-14 w-auto max-w-none mix-blend-multiply md:h-16 lg:h-14 xl:h-16" />
         </Link>
 
         {variant === "simple" ? (

@@ -30,7 +30,7 @@ export default function HelpPage() {
       <main className="mx-auto flex min-h-screen w-full max-w-md flex-col gap-5 px-5 pt-8 pb-10">
         <div className="flex items-center justify-between">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={withBase("/website/momentizing-logo.jpeg")} alt="Momentizing" className="h-9" />
+          <img src={withBase("/website/momentizing-logo.jpeg")} alt="Momentizing" className="h-12 mix-blend-multiply" />
           <button
             onClick={() => (window.history.length > 1 ? router.back() : router.push("/"))}
             className="inline-flex min-h-11 items-center text-sm text-momentizing-muted hover:text-momentizing-slate"
