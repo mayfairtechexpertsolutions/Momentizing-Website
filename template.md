@@ -28,6 +28,8 @@ Defined as CSS variables in `:root` and exposed to Tailwind through `@theme inli
 | `--momentizing-muted` | `#4a5d54` | Secondary text (replaces all grey-400..700) | 6.5:1 on cream |
 | `--momentizing-gold` | `#e8a07e` | Decorative: borders, rings, underline accents; **text only on slate** | 5.8:1 on slate — never on light |
 
+**Offline notices are informational, not warnings:** when the backend is down and a flow moves to WhatsApp, say what the visitor does next in a calm positive voice (info tone, WhatsApp icon); never say something is "not showing", "unavailable" or "can't reach the server".
+
 Status colours (errors, warnings) come from the neutral `--crms-red` etc. in `globals.css` only where a form needs them; keep them AA-darkened.
 
 **Rules**

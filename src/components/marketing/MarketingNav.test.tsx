@@ -1,8 +1,11 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { MarketingNav } from "./MarketingNav";
+import { useBackendStatus } from "@/lib/backend-status";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+vi.mock("@/lib/backend-status", () => ({ useBackendStatus: vi.fn(() => "online") }));
+const backendStatus = vi.mocked(useBackendStatus);
 
 describe("MarketingNav", () => {
   it("shows Events in the bar", () => {
@@ -31,6 +34,15 @@ describe("MarketingNav", () => {
     const panel = document.getElementById(trigger.getAttribute("aria-controls")!)!;
     expect(within(panel).getByRole("link", { name: /my bookings/i }).getAttribute("href")).toBe("/my-bookings");
     expect(within(panel).getByRole("link", { name: /log in/i }).getAttribute("href")).toContain("/login");
+  });
+
+  it("drops the Account menu (bookings, login, app) while the backend is down, keeping the language switch", () => {
+    backendStatus.mockReturnValue("offline");
+    render(<MarketingNav />);
+    expect(screen.queryByRole("button", { name: "Account" })).toBeNull();
+    expect(screen.queryByRole("link", { name: /log in|get the app|my bookings/i })).toBeNull();
+    expect(screen.getByRole("link", { name: "Book a Session" })).toBeTruthy();
+    backendStatus.mockReturnValue("online");
   });
 
   it("lists Events in the mobile menu", () => {

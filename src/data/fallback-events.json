@@ -1,0 +1,28 @@
+{
+  "_help": "Events shown ONLY when the live backend is unavailable (the live events always win when it answers). Edit this file to add or change them. Each entry: id = a unique NEGATIVE whole number (-1, -2, ...). enabled = false hides an entry without deleting it (leave out to mean true); the sample below is disabled: copy it, change it and set \"enabled\": true. title is required. summary is one short line for cards; description is the longer text (blank lines make paragraphs). tags = short words. format = \"ONLINE\", \"IN_PERSON\" or \"HYBRID\"; IN_PERSON and HYBRID should have venueName and city (address and mapUrl optional); ONLINE may set onlineUrl to a public joining link, otherwise the page says the link is sent when people register. registrationUrl = where Register opens (leave \"\" for no Register button). priceType = \"FREE\" or \"PAID\"; priceLabel is the text shown for PAID, e.g. \"IDR 150,000\". poster = file name only of an image placed in public/events/ (see src/data/README.md); leave \"\" to use the default brand poster. timeZone is REQUIRED and must be an IANA name such as Asia/Jakarta (WIB), Asia/Makassar (WITA) or Asia/Jayapura (WIT), never an abbreviation or offset. sessions = one entry per date: date \"YYYY-MM-DD\", startTime and endTime 24h \"HH:mm\" on the event's own clock (timeZone), optional label such as \"Day 1\". cancelled = true marks a cancelled event. Whether an event is upcoming or past is worked out from today's date automatically.",
+  "events": [
+    {
+      "id": -1,
+      "enabled": false,
+      "title": "SAMPLE: Calm Mind Evening (replace this)",
+      "summary": "A relaxed evening of breathing and grounding practices.",
+      "description": "Join one of our psychologists for a gentle, practical session on calming a busy mind.\n\nNo experience needed. Bring a notebook.",
+      "tags": ["Mindfulness", "Stress"],
+      "format": "HYBRID",
+      "venueName": "Momentizing Studio",
+      "address": "Jl. Contoh No. 1",
+      "city": "Jakarta",
+      "mapUrl": "",
+      "onlineUrl": "",
+      "registrationUrl": "",
+      "priceType": "FREE",
+      "priceLabel": "",
+      "poster": "",
+      "timeZone": "Asia/Jakarta",
+      "cancelled": false,
+      "sessions": [
+        { "date": "2027-01-15", "startTime": "19:00", "endTime": "21:00", "label": "" }
+      ]
+    }
+  ]
+}

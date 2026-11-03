@@ -1,5 +1,6 @@
 import { clockInZone, expertZoneLabel, formatClock } from "./fallback-specialists";
-import { formatDateLong, localToUtc, parseIsoLocal, zoneLabel } from "./local-date";
+import { addDaysIso, formatDateLong, localToUtc, parseIsoLocal, zoneLabel } from "./local-date";
+import type { PublicSlots } from "./guest-booking";
 
 /**
  * Booking by WhatsApp request, used when the backend is unavailable and a specialist has no real calendar.
@@ -12,8 +13,8 @@ export const MAX_MANUAL_NOTE_CHARS = 500;
 
 export interface ManualBookingRequest {
   specialistName: string;
-  /** IANA zone the expert's hours are written in, e.g. "Asia/Jakarta". */
-  expertTimeZone: string;
+  /** IANA zone the expert's hours are written in, e.g. "Asia/Jakarta". Unknown for specialists whose profile came from the backend. */
+  expertTimeZone?: string;
   /** The visitor's own calendar date, "YYYY-MM-DD". */
   date: string;
   /** Start time on the visitor's own clock, "HH:mm" (as picked in the slot picker). */
@@ -42,10 +43,11 @@ export function toExpertClock(date: string, time: string, expertTimeZone: string
 }
 
 /** "Friday, 3 October at 1:00 PM (WIB)"; when the visitor is in another zone, also "= 2:00 PM WIB". */
-export function formatManualWhen(date: string, time: string, expertTimeZone: string): string {
+export function formatManualWhen(date: string, time: string, expertTimeZone?: string): string {
   const visitorZone = zoneLabel(parseIsoLocal(date));
-  const expertZone = expertZoneLabel(expertTimeZone, date);
   const base = `${formatDateLong(date)} at ${formatClock(time)} (${visitorZone})`;
+  if (!expertTimeZone) return base;
+  const expertZone = expertZoneLabel(expertTimeZone, date);
   return visitorZone === expertZone ? base : `${base} = ${formatClock(toExpertClock(date, time, expertTimeZone))} ${expertZone}`;
 }
 
@@ -74,4 +76,26 @@ export function buildManualBookingMessage(req: ManualBookingRequest): string {
   if (note) lines.push(`Note: ${note}`);
   lines.push("", "Please let me know if this time works. Thank you!");
   return lines.join("\n");
+}
+
+/** Preferred-time grid offered when a specialist's real calendar can't be loaded: waking hours on the visitor's own clock. */
+const REQUEST_FIRST_HOUR = 8;
+const REQUEST_LAST_HOUR = 20;
+const REQUEST_SESSION_MINUTES = 60;
+
+/**
+ * Stand-in for a specialist's live calendar while the backend is down: every day offers the same hourly times, already
+ * on the visitor's clock. It knows nothing about the specialist's hours or bookings; the team confirms on WhatsApp.
+ */
+export function requestedHoursSlots(specialistId: number, specialistName: string, fromLocal: string, days: number): PublicSlots {
+  const times = Array.from({ length: REQUEST_LAST_HOUR - REQUEST_FIRST_HOUR + 1 }, (_, i) => `${String(REQUEST_FIRST_HOUR + i).padStart(2, "0")}:00`);
+  return {
+    specialistId,
+    specialistName,
+    durationMinutes: REQUEST_SESSION_MINUTES,
+    sessionTypes: [],
+    timezone: "viewer",
+    days: Array.from({ length: days }, (_, i) => ({ date: addDaysIso(fromLocal, i), times })),
+    nextAvailableDate: fromLocal,
+  };
 }

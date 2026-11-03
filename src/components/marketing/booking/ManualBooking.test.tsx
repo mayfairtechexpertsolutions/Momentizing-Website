@@ -32,4 +32,11 @@ describe("ManualReview", () => {
     expect(screen.getByText(/isn't confirmed yet/i)).toBeTruthy();
     open.mockRestore();
   });
+
+  it("works for a backend specialist whose working-hours zone is unknown", () => {
+    const real = { ...adeline, id: 42, name: "Real Person" };
+    render(<ManualReview draft={{ ...draft, specialist: real }} headingRef={createRef()} onBack={vi.fn()} onEdit={vi.fn()} onSent={vi.fn()} onStartOver={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Send request on WhatsApp" })).toBeTruthy();
+    expect(screen.getByText("Real Person")).toBeTruthy();
+  });
 });

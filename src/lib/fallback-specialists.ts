@@ -257,7 +257,7 @@ function zoneOffsetMinutes(timeZone: string, utcMs: number): number {
 }
 
 /** The UTC instant at which the clock in `timeZone` reads the given wall time. Handles zones with daylight saving. */
-function zonedWallTimeToUtcMs(timeZone: string, year: number, month: number, day: number, hour: number, minute: number): number {
+export function zonedWallTimeToUtcMs(timeZone: string, year: number, month: number, day: number, hour: number, minute: number): number {
   const wallAsUtc = Date.UTC(year, month - 1, day, hour, minute);
   const firstGuess = wallAsUtc - zoneOffsetMinutes(timeZone, wallAsUtc) * MS_PER_MINUTE;
   return wallAsUtc - zoneOffsetMinutes(timeZone, firstGuess) * MS_PER_MINUTE;

@@ -8,6 +8,7 @@ import { withBase } from "@/lib/base-path";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { NavMenu, type NavMenuItem } from "./NavMenu";
 import { t } from "@/i18n";
+import { useBackendStatus } from "@/lib/backend-status";
 
 // Every home section that follows the nav targets, so the highlight clears once you scroll past Corporate.
 const SECTION_IDS = ["services", "packages", "corporate", "associates-preview", "events", "faq"];
@@ -86,7 +87,9 @@ export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProp
     { href: anchor("packages"), label: t("site.nav.packages"), description: t("site.nav.packagesDesc"), icon: "fas fa-layer-group" },
     { href: anchor("corporate"), label: t("site.nav.corporateWellbeing"), description: t("site.nav.corporateDesc"), icon: "fas fa-building" },
   ];
-  const accountItems: NavMenuItem[] = [
+  // Bookings lookup, login and the app all live on the backend, so they only appear while it answers.
+  const backendOnline = useBackendStatus() === "online";
+  const accountItems: NavMenuItem[] = !backendOnline ? [] : [
     { href: "/my-bookings", label: t("site.nav.myBookings"), description: t("site.nav.myBookingsDesc"), icon: "far fa-calendar-check" },
     { href: appLink("/login"), label: t("site.nav.logIn"), description: t("site.nav.logInDesc"), icon: "fas fa-arrow-right-to-bracket", external: true },
     { href: appLink("/download"), label: t("site.nav.getApp"), description: t("site.nav.getAppDesc"), icon: "fas fa-mobile-screen", external: true },
@@ -125,6 +128,9 @@ export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProp
                 </Link>
               </div>
               <div className="flex items-center gap-4">
+                {accountItems.length === 0 ? (
+                  <LocaleSwitcher className="text-momentizing-muted" selectClassName="bg-white text-momentizing-slate" />
+                ) : (
                 <NavMenu
                   label={t("site.nav.account")}
                   align="right"
@@ -138,6 +144,7 @@ export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProp
                   }
                   footer={<LocaleSwitcher className="w-full justify-between text-momentizing-muted" selectClassName="bg-white text-momentizing-slate" />}
                 />
+                )}
                 <Link href="/book" className={`rounded-full bg-momentizing-teal px-6 py-3 text-white transition hover:bg-momentizing-slate ${path === "/book" ? "bg-momentizing-slate" : ""}`}>
                   {t("site.nav.bookSession")}
                 </Link>
@@ -187,16 +194,20 @@ export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProp
               {t("site.nav.careers")}
             </Link>
           </MobileGroup>
-          <MobileGroup title={t("site.nav.yourAccount")}>
-            <Link href="/my-bookings" aria-current={pageCurrent("/my-bookings")} className={mobileCurrent("/my-bookings")} onClick={close}>
-              {t("site.nav.myBookings")}
-            </Link>
-            <a href={appLink("/login")} onClick={close}>
-              {t("site.nav.logIn")}
-            </a>
-            <a href={appLink("/download")} onClick={close}>
-              {t("site.nav.getApp")}
-            </a>
+          <MobileGroup title={backendOnline ? t("site.nav.yourAccount") : t("site.nav.language")}>
+            {backendOnline && (
+              <>
+                <Link href="/my-bookings" aria-current={pageCurrent("/my-bookings")} className={mobileCurrent("/my-bookings")} onClick={close}>
+                  {t("site.nav.myBookings")}
+                </Link>
+                <a href={appLink("/login")} onClick={close}>
+                  {t("site.nav.logIn")}
+                </a>
+                <a href={appLink("/download")} onClick={close}>
+                  {t("site.nav.getApp")}
+                </a>
+              </>
+            )}
             <LocaleSwitcher className="min-h-11 font-normal tracking-normal normal-case text-momentizing-muted" selectClassName="bg-white text-momentizing-slate" />
           </MobileGroup>
           <Link

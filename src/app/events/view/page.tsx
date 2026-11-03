@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { EventPosterFallback } from "@/components/marketing/EventPosterFallback";
+import { EventPoster } from "@/components/marketing/EventPoster";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { absoluteUrl } from "@/lib/site-url";
 import { eventSchema } from "@/lib/structured-data";
@@ -39,7 +39,7 @@ export default function EventDetailPage() {
 
 function EventDetail() {
   const id = Number(useSearchParams().get("id")) || null;
-  const { data: e, error, isLoading, refetch } = useEvent(id);
+  const { data: e, error, isLoading, unavailable, refetch } = useEvent(id);
   // Only a genuine 404 means "no such event"; anything else is a load problem and gets a retry.
   const notFound = !id || (!!error && /not found|tidak ditemukan/i.test(error));
 
@@ -63,7 +63,7 @@ function EventDetail() {
       {!isLoading && !e && !notFound && error && (
         <div role="alert" className="px-6 pt-48 pb-24 text-center">
           <p className="mb-2 font-marketing-serif text-2xl">{t("site.events.loadErrorOne")}</p>
-          <p className="mb-6 text-sm text-momentizing-muted">{error}</p>
+          {!unavailable && <p className="mb-6 text-sm text-momentizing-muted">{error}</p>}
           <button
             type="button"
             onClick={refetch}
@@ -107,14 +107,7 @@ function EventBody({ event: e }: { event: PublicEvent }) {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <div className="flex flex-col gap-4">
             <div className="overflow-hidden rounded-3xl border border-momentizing-mint-deep bg-white">
-              {e.posterUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={e.posterUrl} alt={t("site.events.posterAlt", { title: e.title })} className="h-auto w-full" />
-              ) : (
-                <div className="aspect-[4/5]">
-                  <EventPosterFallback title={e.title} format={e.format} />
-                </div>
-              )}
+              <EventPoster event={e} alt={t("site.events.posterAlt", { title: e.title })} className="h-auto w-full" framedFallback />
             </div>
           </div>
 
