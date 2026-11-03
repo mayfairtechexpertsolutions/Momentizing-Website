@@ -4,7 +4,10 @@ import userEvent from "@testing-library/user-event";
 import { SlotPicker } from "./SlotPicker";
 import * as api from "@/lib/guest-booking";
 import { localToUtc, utcToLocal } from "@/lib/local-date";
+import { ApiError } from "@/lib/api";
+import { reportBackendUnavailable } from "@/lib/backend-status";
 
+vi.mock("@/lib/backend-status", () => ({ reportBackendUnavailable: vi.fn() }));
 vi.mock("@/lib/guest-booking", async (orig) => ({ ...(await orig<typeof import("@/lib/guest-booking")>()), fetchSlots: vi.fn() }));
 const fetchSlots = vi.mocked(api.fetchSlots);
 
@@ -46,8 +49,16 @@ describe("SlotPicker", () => {
     expect(screen.getByRole("button", { name: /9:00/ })).toHaveAttribute("aria-pressed", "false");
   });
 
-  it("shows a real ERROR with a retry when loading fails — never a misleading empty list", async () => {
-    fetchSlots.mockRejectedValueOnce(new Error("Network down"));
+  it("offers preferred times, not an error, when the backend is unreachable", async () => {
+    fetchSlots.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(<SlotPicker specialistId={1} date="2026-10-02" onDateChange={() => {}} value={null} onChange={() => {}} />);
+    expect(await screen.findByRole("button", { name: /9:00/ })).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(reportBackendUnavailable).toHaveBeenCalled();
+  });
+
+  it("shows a real ERROR with a retry when the backend answers with a refusal — never a misleading empty list", async () => {
+    fetchSlots.mockRejectedValueOnce(new ApiError("Not allowed", 403));
     render(<SlotPicker specialistId={1} date="2026-10-02" onDateChange={() => {}} value={null} onChange={() => {}} />);
     expect(await screen.findByRole("alert")).toHaveTextContent(/couldn't load the available times/i);
     expect(screen.queryByText(/no open times/i)).not.toBeInTheDocument();

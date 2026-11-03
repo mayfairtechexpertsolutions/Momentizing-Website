@@ -65,7 +65,7 @@ export function SpecialistBookingPanel({ specialistId, specialistName, accepting
       )}
       <h2 className="mb-2 font-marketing-serif text-xl font-bold text-momentizing-gold-deep">{requestOnly ? t("site.fallback.requestTitle", { name: first }) : t("site.spec.bookWith", { name: first })}</h2>
       <p className="mb-5 text-sm leading-relaxed text-momentizing-muted">
-        {requestOnly ? t("site.fallback.requestBlurb") : t("site.panel.pickTime")}
+        {requestOnly ? t("site.fallback.requestBlurb", { name: first }) : t("site.panel.pickTime")}
       </p>
 
       <ul className="mb-6 space-y-2.5">

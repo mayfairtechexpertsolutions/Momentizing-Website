@@ -30,6 +30,8 @@ import { SpecialistNameSearch, SpecialistProfileSheet, SpecialistSuggestionCard,
 import { Stepper } from "./Stepper";
 import { TurnstileWidget, TURNSTILE_ENABLED } from "./TurnstileWidget";
 import { WhyJoinCard } from "./WhyJoinCard";
+import { OnlineOnly } from "../OnlineOnly";
+import { reportBackendUnavailable, useBackendStatus } from "@/lib/backend-status";
 import { YesNoField } from "./YesNoField";
 import {
   CONCERNS,
@@ -82,6 +84,10 @@ export function BookingWizard() {
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   const patch = useCallback((p: Partial<Draft>) => setDraft((d) => ({ ...d, ...p })), []);
+  // Built-in profiles have no backend calendar, and while the backend is down no specialist can be held: the booking
+  // is then a request the visitor sends on WhatsApp. It switches back by itself once the backend answers again.
+  const backendOffline = useBackendStatus() === "offline";
+  const manualFlow = backendOffline || (draft.specialist !== null && isFallbackSpecialistId(draft.specialist.id));
 
   // ---- restore what the visitor already did (refresh / back button), then apply deep links
   useEffect(() => {
@@ -136,7 +142,11 @@ export function BookingWizard() {
         setFormToken(t.formToken);
         setFormTokenError(null);
       })
-      .catch((e) => setFormTokenError(friendlyError(e)));
+      .catch((e) => {
+        // A down backend switches the whole booking to WhatsApp (see `manualFlow`); only real refusals are shown.
+        if (isBackendUnavailable(e)) reportBackendUnavailable();
+        else setFormTokenError(friendlyError(e));
+      });
   }, []);
   useEffect(() => {
     loadFormToken();
@@ -225,7 +235,7 @@ export function BookingWizard() {
       <Stepper step={stepIndex + 1} total={steps.length} label={t(steps[stepIndex].label)} />
 
       {/* The form token only matters for a real hold; a WhatsApp request (built-in profile) needs no backend. */}
-      {formTokenError && !(draft.specialist && isFallbackSpecialistId(draft.specialist.id)) && (
+      {formTokenError && !manualFlow && (
         <div className="mb-4">
           <InlineNotice tone="error" role="alert">
             {formTokenError}{" "}
@@ -264,7 +274,7 @@ export function BookingWizard() {
           onDismissNotice={() => setSlotNotice(null)}
         />
       )}
-      {draft.step === "review" && draft.specialist && isFallbackSpecialistId(draft.specialist.id) && (
+      {draft.step === "review" && manualFlow && (
         <ManualReview
           draft={draft}
           headingRef={headingRef}
@@ -274,7 +284,7 @@ export function BookingWizard() {
           onStartOver={startOver}
         />
       )}
-      {draft.step === "review" && !(draft.specialist && isFallbackSpecialistId(draft.specialist.id)) && (
+      {draft.step === "review" && !manualFlow && (
         <StepReview
           draft={draft}
           headingRef={headingRef}
@@ -543,7 +553,9 @@ function StepSpecialist({
   const [suggestions, setSuggestions] = useState<PublicSpecialistCard[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   // The backend couldn't answer: offer the built-in team profiles instead of a dead end (booking then goes by WhatsApp).
-  const [offline, setOffline] = useState(false);
+  const [fetchFailedOffline, setOffline] = useState(false);
+  const backendOffline = useBackendStatus() === "offline";
+  const offline = fetchFailedOffline || backendOffline;
   const [attempt, setAttempt] = useState(0);
   const [profile, setProfile] = useState<PublicSpecialistCard | null>(null);
   const [byName, setByName] = useState(draft.mode === "SPECIFIC");
@@ -566,8 +578,10 @@ function StepSpecialist({
       .then((s) => !cancelled && setSuggestions(s))
       .catch((e) => {
         if (cancelled) return;
-        if (isBackendUnavailable(e)) setOffline(true);
-        else setError(friendlyError(e));
+        if (isBackendUnavailable(e)) {
+          reportBackendUnavailable();
+          setOffline(true);
+        } else setError(friendlyError(e));
       });
     return () => {
       cancelled = true;
@@ -594,8 +608,8 @@ function StepSpecialist({
 
           {offline ? (
             <div className="grid gap-4">
-              <InlineNotice tone="warn" role="status">
-                {t("site.fallback.offlineNotice")}
+              <InlineNotice role="status">
+                <i aria-hidden="true" className="fab fa-whatsapp mr-1.5 text-momentizing-teal" /> {t("site.fallback.offlineNotice")}
               </InlineNotice>
               {FALLBACK_SPECIALISTS.map((s) => (
                 <SpecialistSuggestionCard
@@ -692,6 +706,7 @@ function StepTime({
 }) {
   const specialist = draft.specialist;
   const date = draft.date ?? todayIso();
+  const backendOffline = useBackendStatus() === "offline";
 
   if (!specialist) {
     return (
@@ -706,7 +721,7 @@ function StepTime({
   return (
     <>
       <BookCard>
-        <StepHeading headingRef={headingRef} title={linked ? t("site.book.step.dayTime") : t("site.spec.chooseTime")} sub={isFallbackSpecialistId(specialist.id) ? t("site.fallback.timeSub", { name: firstNameOf(specialist.name) }) : t("site.book.realTimesWith", { name: specialist.name })} />
+        <StepHeading headingRef={headingRef} title={linked ? t("site.book.step.dayTime") : t("site.spec.chooseTime")} sub={isFallbackSpecialistId(specialist.id) || backendOffline ? t("site.fallback.timeSub", { name: firstNameOf(specialist.name) }) : t("site.book.realTimesWith", { name: specialist.name })} />
         {notice && (
           <div className="mb-5">
             <InlineNotice tone="warn" role="alert">
@@ -845,18 +860,20 @@ function StepReview({
       );
       onHeld(booking);
     } catch (e) {
-      if (e instanceof ApiError) {
-        if (hasCode(e, ...SLOT_GONE_CODES)) {
-          onSlotGone(t("error.slotGone"));
-        } else if (hasCode(e, ...COUPLE_MISMATCH_CODES)) {
-          setError({ text: e.message, couple: true });
-        } else if (e.status === 422) {
-          setError({ text: e.message, help: true });
-        } else {
-          setError({ text: e.message, help: e.status === 409 || e.status === 429 });
-        }
+      if (isBackendUnavailable(e)) {
+        // The wizard now shows the WhatsApp request for these same details; nothing to report as an error.
+        reportBackendUnavailable();
+        return;
+      }
+      if (!(e instanceof ApiError)) throw e;
+      if (hasCode(e, ...SLOT_GONE_CODES)) {
+        onSlotGone(t("error.slotGone"));
+      } else if (hasCode(e, ...COUPLE_MISMATCH_CODES)) {
+        setError({ text: e.message, couple: true });
+      } else if (e.status === 422) {
+        setError({ text: e.message, help: true });
       } else {
-        setError({ text: t("error.networkSaved") });
+        setError({ text: e.message, help: e.status === 409 || e.status === 429 });
       }
       refreshFormToken();
     } finally {
@@ -1174,7 +1191,9 @@ function StepDone({ active, headingRef, onAnother }: { active: ActiveBooking; he
         </div>
       </BookCard>
 
-      <WhyJoinCard claimToken={active.claimToken || null} fullName={active.fullName} />
+      <OnlineOnly>
+        <WhyJoinCard claimToken={active.claimToken || null} fullName={active.fullName} />
+      </OnlineOnly>
     </div>
   );
 }

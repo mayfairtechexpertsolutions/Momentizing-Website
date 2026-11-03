@@ -4,6 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { getFallbackSpecialist, fallbackSlots, isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import { fetchSlots, friendlyError, toViewerSlots, type PublicSlots } from "@/lib/guest-booking";
 import { addDaysIso, formatDateLong, formatDateShort, formatTime, parseIsoLocal, zoneLabel } from "@/lib/local-date";
+import { isBackendUnavailable } from "@/lib/api";
+import { reportBackendUnavailable } from "@/lib/backend-status";
+import { requestedHoursSlots } from "@/lib/manual-booking";
 import { BookButton } from "./ui";
 import { t } from "@/i18n";
 
@@ -58,7 +61,14 @@ export function SlotPicker({
         }
       })
       .catch((e) => {
-        if (!cancelled) setError(friendlyError(e));
+        if (cancelled) return;
+        if (isBackendUnavailable(e)) {
+          // No live calendar: offer preferred times instead of an error. The request goes to the team on WhatsApp.
+          reportBackendUnavailable();
+          setData(requestedHoursSlots(specialistId, "", date, WINDOW_DAYS));
+          return;
+        }
+        setError(friendlyError(e));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
