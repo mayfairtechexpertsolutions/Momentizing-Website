@@ -68,7 +68,7 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
         fullName: fullName || null,
         email: email || null,
         phone: phone || null,
-        packageId: packageId ?? null,
+        packageId: packageId != null && packageId > 0 ? packageId : null,
         message: message || null,
         channel,
       }),

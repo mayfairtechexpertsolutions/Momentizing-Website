@@ -164,16 +164,18 @@ export function getFallbackEvent(id: number, now = new Date()): PublicEvent | nu
  * The built-in events for one list request, shaped like the live page. Upcoming runs soonest first, past latest first.
  * A HYBRID event counts as both ONLINE and IN_PERSON, so it shows under either filter.
  */
-export function selectEventsPage(events: PublicEvent[], when: EventWhen, format: EventFormatFilter, size: number): PageResponse<PublicEvent> {
+export function selectEventsPage(events: PublicEvent[], when: EventWhen, format: EventFormatFilter, size: number, page = 0): PageResponse<PublicEvent> {
   const matching = events
     .filter((e) => (when === "past" ? e.past : !e.past))
     .filter((e) => !format || e.format === format || e.format === "HYBRID");
   const key = (e: PublicEvent) => (when === "past" ? e.sessions[e.sessions.length - 1].endsAt : (e.nextStartsAt ?? e.sessions[0].startsAt));
   matching.sort((a, b) => (when === "past" ? key(b).localeCompare(key(a)) : key(a).localeCompare(key(b))));
-  const content = matching.slice(0, Math.max(0, size));
-  return { content, totalElements: matching.length, totalPages: matching.length > 0 ? 1 : 0, number: 0, size, first: true, last: true };
+  const per = Math.max(1, size);
+  const totalPages = Math.ceil(matching.length / per);
+  const content = matching.slice(page * per, (page + 1) * per);
+  return { content, totalElements: matching.length, totalPages, number: page, size, first: page === 0, last: page >= totalPages - 1 };
 }
 
-export function fallbackEventsPage(when: EventWhen, format: EventFormatFilter, size: number, now = new Date()): PageResponse<PublicEvent> {
-  return selectEventsPage(getFallbackEvents(now), when, format, size);
+export function fallbackEventsPage(when: EventWhen, format: EventFormatFilter, size: number, now = new Date(), page = 0): PageResponse<PublicEvent> {
+  return selectEventsPage(getFallbackEvents(now), when, format, size, page);
 }

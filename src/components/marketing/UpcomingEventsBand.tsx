@@ -11,7 +11,7 @@ import { t } from "@/i18n";
  * No `data-reveal`: it mounts after the scroll-reveal observer has run and would otherwise stay hidden.
  */
 export function UpcomingEventsBand() {
-  const { data } = useEvents("upcoming", null, 3);
+  const { data } = useEvents("upcoming", null, 3, 0);
   const events = (data?.content ?? []).filter((e) => !e.cancelled);
   if (events.length === 0) return null;
 

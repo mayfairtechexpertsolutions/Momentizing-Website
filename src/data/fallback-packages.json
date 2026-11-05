@@ -1,0 +1,93 @@
+{
+  "_help": "Care Packages shown ONLY when the live backend is unavailable (the live packages always win when it answers). Edit this file to add or change them. Each entry: id = a unique NEGATIVE whole number (-1, -2, ...). enabled = false hides an entry without deleting it (leave out to mean true). name is required; the site groups cards into Individual, Couples and Assessments by words in the name (\"Couple\", \"Assessment\"). sessionCount = how many sessions the package includes (a whole number, 1 or more; 1 shows as a single session). price = the STARTING price in whole currency units for the whole package, e.g. 700000 for Rp 700,000 — the site always shows it as \"Start from\". currency = a 3-letter code such as \"USD\" or \"IDR\"; IDR is shown as Rp 700,000 and USD with a $ sign. discountPercent = the saving, 1 to 99, or null for none (informational only; the price is not recalculated). description = one or two short lines shown on the card (leave \"\" for none). badge = a short label such as \"Most Popular\" (leave \"\" for none). The cards are shown in the order listed here.",
+  "packages": [
+    {
+      "id": -1,
+      "enabled": true,
+      "name": "Single Session",
+      "sessionCount": 1,
+      "price": 250000,
+      "currency": "IDR",
+      "discountPercent": null,
+      "description": "A 60-minute one-to-one session. A gentle first step for a specific concern.",
+      "badge": ""
+    },
+    {
+      "id": -2,
+      "enabled": true,
+      "name": "Caring Session",
+      "sessionCount": 3,
+      "price": 700000,
+      "currency": "IDR",
+      "discountPercent": null,
+      "description": "Three 60-minute sessions to start building steady support.",
+      "badge": ""
+    },
+    {
+      "id": -3,
+      "enabled": true,
+      "name": "Comfortable Session",
+      "sessionCount": 5,
+      "price": 1100000,
+      "currency": "IDR",
+      "discountPercent": null,
+      "description": "Five 60-minute sessions for building resilience and lasting habits.",
+      "badge": "Most Popular"
+    },
+    {
+      "id": -4,
+      "enabled": true,
+      "name": "Compassionate Session",
+      "sessionCount": 8,
+      "price": 1800000,
+      "currency": "IDR",
+      "discountPercent": null,
+      "description": "Eight 60-minute sessions of deeper support through bigger life changes.",
+      "badge": ""
+    },
+    {
+      "id": -5,
+      "enabled": true,
+      "name": "Couple Session",
+      "sessionCount": 1,
+      "price": 500000,
+      "currency": "IDR",
+      "discountPercent": null,
+      "description": "A 60-minute session for you and your partner, together.",
+      "badge": ""
+    },
+    {
+      "id": -6,
+      "enabled": true,
+      "name": "Couple Package",
+      "sessionCount": 3,
+      "price": 1500000,
+      "currency": "IDR",
+      "discountPercent": null,
+      "description": "Three 60-minute sessions to grow understanding and connection as a couple.",
+      "badge": ""
+    },
+    {
+      "id": -7,
+      "enabled": true,
+      "name": "Couple Assessment",
+      "sessionCount": 1,
+      "price": 1800000,
+      "currency": "IDR",
+      "discountPercent": null,
+      "description": "A structured assessment of your relationship, with a clear report.",
+      "badge": ""
+    },
+    {
+      "id": -8,
+      "enabled": true,
+      "name": "Individual Assessment",
+      "sessionCount": 1,
+      "price": 150000,
+      "currency": "IDR",
+      "discountPercent": null,
+      "description": "Counseling report, ADHD, personality, intelligence, and depression/anxiety assessments.",
+      "badge": ""
+    }
+  ]
+}

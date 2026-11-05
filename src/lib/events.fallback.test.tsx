@@ -16,7 +16,7 @@ describe("events hooks", () => {
     const spy = vi.spyOn(fallback, "fallbackEventsPage");
     useApiQuery.mockReturnValue(state({ unavailable: true, error: "Can't reach the server" }));
     const { result } = renderHook(() => useEvents("upcoming", null));
-    expect(spy).toHaveBeenCalledWith("upcoming", null, 24);
+    expect(spy).toHaveBeenCalledWith("upcoming", null, 12, expect.any(Date), 0);
     expect(result.current).toMatchObject({ isFallback: true, error: null, isLoading: false });
   });
 

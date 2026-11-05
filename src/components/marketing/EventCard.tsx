@@ -5,9 +5,9 @@ import { t } from "@/i18n";
 
 /**
  * One event on /events and the home "Upcoming events" band. Posters are usually portrait, so the 4:5 frame letterboxes
- * on cream rather than cropping. `featured` lays the card out wide (poster beside text) from `md` up.
+ * on cream rather than cropping. The default card is small enough for a 4-column grid; `compact` is the poster-less home band ticket.
  */
-export function EventCard({ event: e, featured = false, compact = false }: { event: PublicEvent; featured?: boolean; compact?: boolean }) {
+export function EventCard({ event: e, compact = false }: { event: PublicEvent; compact?: boolean }) {
   const s = headlineSession(e);
   const more = Math.max(0, e.sessions.filter((x) => !e.past && new Date(x.endsAt) > new Date()).length - 1);
   if (compact) {
@@ -59,53 +59,45 @@ export function EventCard({ event: e, featured = false, compact = false }: { eve
   return (
     <Link
       href={`/events/view?id=${e.id}`}
-      className={`group flex overflow-hidden rounded-3xl border border-momentizing-mint-deep bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
-        featured ? "flex-col md:flex-row" : "flex-col"
-      }`}
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-momentizing-mint-deep bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
-      {/* Featured: a fixed poster column keeps the wide card from growing taller than the screen. */}
-      <div className={`relative aspect-[4/5] flex-shrink-0 bg-momentizing-cream ${featured ? "md:w-80 lg:w-96" : ""}`}>
+      <div className="relative aspect-[4/5] flex-shrink-0 bg-momentizing-cream">
         <EventPoster event={e} alt="" className="h-full w-full object-contain" />
         {s && (
-          <span className="absolute top-4 left-4 rounded-2xl bg-momentizing-peach px-3 py-1.5 text-xs font-bold text-momentizing-gold-deep shadow-sm">
-            {formatEventDate(s.date)}
+          <span className="absolute top-3 left-3 rounded-xl bg-momentizing-peach px-2.5 py-1 text-xs font-bold text-momentizing-gold-deep shadow-sm">
+            {formatEventDate(s.date, { day: "numeric", month: "short" })}
           </span>
         )}
         {e.cancelled && (
-          <span className="absolute top-4 right-4 rounded-full bg-momentizing-slate px-3 py-1.5 text-xs font-bold text-white">{t("site.events.cancelled")}</span>
+          <span className="absolute top-3 right-3 rounded-full bg-momentizing-slate px-2.5 py-1 text-xs font-bold text-white">{t("site.events.cancelled")}</span>
         )}
       </div>
-      <div className={`flex flex-1 flex-col gap-3 ${featured ? "p-6 md:p-10" : "p-5"}`}>
-        <div className="flex flex-wrap gap-2 text-xs font-bold">
-          <span className="rounded-full bg-momentizing-mint px-3 py-1 text-momentizing-teal">{formatLabel(e.format)}</span>
-          <span className="rounded-full bg-momentizing-cream px-3 py-1 text-momentizing-gold-deep">{priceText(e)}</span>
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <div className="flex flex-wrap gap-1.5 text-xs font-bold">
+          <span className="rounded-full bg-momentizing-mint px-2.5 py-0.5 text-momentizing-teal">{formatLabel(e.format)}</span>
+          <span className="rounded-full bg-momentizing-cream px-2.5 py-0.5 text-momentizing-gold-deep">{priceText(e)}</span>
         </div>
         <h3
-          className={`font-marketing-serif leading-snug font-semibold text-momentizing-gold-deep group-hover:underline ${
-            featured ? "text-2xl md:text-3xl" : "text-xl"
-          } ${e.cancelled ? "line-through decoration-1" : ""}`}
+          className={`line-clamp-2 font-marketing-serif text-lg leading-snug font-semibold text-momentizing-gold-deep group-hover:underline ${
+            e.cancelled ? "line-through decoration-1" : ""
+          }`}
         >
           {e.title}
         </h3>
-        {e.summary && <p className={`leading-relaxed text-momentizing-muted ${featured ? "text-base" : "text-sm"}`}>{e.summary}</p>}
-        <div className="mt-auto flex flex-col gap-1 pt-2 text-sm">
+        <div className="mt-auto flex flex-col gap-0.5 pt-1 text-sm">
           {s && (
-            <p className="font-semibold text-momentizing-slate">
-              <i aria-hidden="true" className="far fa-clock mr-2 text-momentizing-teal" />
+            <p className="truncate font-semibold text-momentizing-slate">
+              {s && <span className="sr-only">{formatEventDate(s.date)}. </span>}
+              <i aria-hidden="true" className="far fa-clock mr-2 w-4 text-momentizing-teal" />
               {timeRange(s, e.timezoneLabel)}
-              {more > 0 && <span className="font-normal text-momentizing-muted"> · {t(more === 1 ? "site.events.moreDate" : "site.events.moreDates", { n: more })}</span>}
+              {more > 0 && <span className="font-normal text-momentizing-muted"> · {t("site.events.more", { n: more })}</span>}
             </p>
           )}
-          <p className="text-momentizing-muted">
-            <i aria-hidden="true" className={`fas ${e.format === "ONLINE" ? "fa-video" : "fa-location-dot"} mr-2 text-momentizing-teal`} />
+          <p className="truncate text-momentizing-muted">
+            <i aria-hidden="true" className={`fas ${e.format === "ONLINE" ? "fa-video" : "fa-location-dot"} mr-2 w-4 text-momentizing-teal`} />
             {placeText(e)}
           </p>
         </div>
-        {featured && (
-          <span className="mt-2 inline-flex min-h-11 w-fit items-center rounded-full bg-momentizing-teal px-6 py-3 text-xs font-bold tracking-widest text-white uppercase">
-            {t("site.events.seeDetails")}
-          </span>
-        )}
       </div>
     </Link>
   );

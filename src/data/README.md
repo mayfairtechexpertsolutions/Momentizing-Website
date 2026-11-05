@@ -9,6 +9,14 @@ Put its poster in `public/events/` and set `"poster"` to the **file name only** 
 - Files in `public/` are public. A bad date, time, time zone, format or id fails the build with a message naming the event.
 - Upcoming/past is worked out from today's date, so finished events move to *Past events* by themselves.
 
+# Care Packages
+
+Built-in Care Packages live in `src/data/fallback-packages.json` and are shown **only when the backend is unavailable**
+(the live packages always win). Edit the file to change names, prices or descriptions; the `_help` text explains every field.
+A bad id, price, currency or discount fails the build with a message naming the package. Prices are written in whole
+currency units (`250000` = Rp 250,000), always shown as "Start from", and cards are shown in the order listed. Names containing
+"Couple" or "Assessment" are grouped under the Couples / Assessments tabs.
+
 # Team photos
 
 Put each built-in profile's photo in `public/team/`, then set `"photo"` in `src/data/fallback-specialists.json` to the

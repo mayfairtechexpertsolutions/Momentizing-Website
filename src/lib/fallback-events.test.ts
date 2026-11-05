@@ -97,6 +97,12 @@ describe("selectEventsPage", () => {
     expect(page.totalElements).toBe(3);
   });
 
+  it("serves later pages and flags the first and last", () => {
+    const second = selectEventsPage(all, "upcoming", null, 2, 1);
+    expect(second.content).toHaveLength(1);
+    expect(second).toMatchObject({ number: 1, totalPages: 2, first: false, last: true });
+  });
+
   it("returns an empty page, not an error, when nothing matches", () => {
     expect(selectEventsPage([], "upcoming", null, 24)).toMatchObject({ content: [], totalElements: 0, totalPages: 0 });
   });

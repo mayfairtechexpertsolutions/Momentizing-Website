@@ -120,42 +120,6 @@
       }
     },
     {
-      "id": -2,
-      "name": "Norma Nida",
-      "professionType": "COUNSELOR",
-      "timeZone": "Asia/Jakarta",
-      "photo": "norma-nida.jpg",
-      "gender": "FEMALE",
-      "practiceMode": "ONLINE",
-      "locations": [
-        {
-          "label": "Purbalingga",
-          "address": "Purbalingga"
-        }
-      ],
-      "languages": ["Bahasa Indonesia", "English"],
-      "yearsExperience": null,
-      "licenceNumber": null,
-      "sessionFeeCents": null,
-      "sessionFeeCurrency": "IDR",
-      "bio": "Counselor of Momentizing, available for online counseling.",
-      "areasOfExpertise": [
-        "Personal development",
-        "Career mapping"
-      ],
-      "credentials": [
-        "Gestalt Therapy approach",
-        "Rational Emotive Behavioral Therapy (REBT) Training"
-      ],
-      "weeklySlots": {
-        "Friday": [
-          "13:00",
-          "14:00",
-          "15:00"
-        ]
-      }
-    },
-    {
       "id": -4,
       "name": "Fida Muljono",
       "professionType": "COACH",

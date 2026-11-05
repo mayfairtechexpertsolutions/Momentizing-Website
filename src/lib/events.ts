@@ -47,6 +47,9 @@ export interface PublicEvent {
   sessions: PublicEventSession[];
 }
 
+/** Cards per page on /events: fills whole rows of the 2-, 3- and 4-column grids. */
+export const EVENTS_PAGE_SIZE = 12;
+
 export type EventWhen = "upcoming" | "past";
 export type EventFormatFilter = "ONLINE" | "IN_PERSON" | null;
 
@@ -54,11 +57,11 @@ export type EventFormatFilter = "ONLINE" | "IN_PERSON" | null;
  * Live events. When the backend can't answer (down / 5xx — never for an empty list or a 4xx) the built-in events from
  * `src/data/fallback-events.json` are returned with `isFallback: true`, so the site still shows what is on.
  */
-export function useEvents(when: EventWhen, format: EventFormatFilter, size = 24) {
-  const query = `when=${when}&size=${size}${format ? `&format=${format}` : ""}`;
-  const result = useApiQuery<PageResponse<PublicEvent>>(`/public/events?${query}`, { anonymous: true }, [query]);
+export function useEvents(when: EventWhen, format: EventFormatFilter, size = EVENTS_PAGE_SIZE, page = 0, enabled = true) {
+  const query = `when=${when}&page=${page}&size=${size}${format ? `&format=${format}` : ""}`;
+  const result = useApiQuery<PageResponse<PublicEvent>>(enabled ? `/public/events?${query}` : null, { anonymous: true }, [query]);
   if (!result.unavailable) return { ...result, isFallback: false };
-  return { ...result, data: fallbackEventsPage(when, format, size), error: null, isLoading: false, isFallback: true };
+  return { ...result, data: fallbackEventsPage(when, format, size, new Date(), page), error: null, isLoading: false, isFallback: true };
 }
 
 /** One event. A negative id is a built-in event (no request); a real id whose request fails stays a load error. */

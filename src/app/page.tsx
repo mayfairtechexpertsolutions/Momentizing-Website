@@ -12,8 +12,9 @@ import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp";
 import { SpecialistCard } from "@/components/marketing/SpecialistCard";
 import { UpcomingEventsBand } from "@/components/marketing/UpcomingEventsBand";
 import { useMarketingDirectory } from "@/lib/marketing-directory";
-import { usePackages, formatPackagePrice } from "@/lib/session-packages";
+import { usePackages } from "@/lib/session-packages";
 import { t } from "@/i18n";
+import { PackagesSection } from "@/components/marketing/PackagesSection";
 import { OnlineOnly } from "@/components/marketing/OnlineOnly";
 
 // Mirrors the "Our service" row on the brand's Instagram artwork.
@@ -195,96 +196,14 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
-      <section id="packages" className="on-dark bg-momentizing-slate px-6 py-24 text-white">
-        <div data-reveal className="mx-auto max-w-7xl text-center">
-          <h2 className="mb-12 font-marketing-serif text-4xl text-momentizing-gold">{t("site.home.packagesTitle")}</h2>
-          {packagesLoading ? (
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3" aria-busy="true">
-              <span className="sr-only" role="status">{t("site.home.loadingPackages")}</span>
-              {[0, 1, 2].map((i) => (
-                <div key={i} aria-hidden="true" className="h-72 animate-pulse rounded-[2.5rem] bg-white/10 motion-reduce:animate-none" />
-              ))}
-            </div>
-          ) : packagesError ? (
-            <div role="alert" className="mx-auto max-w-md">
-              <p className="mb-8 text-white/85">
-                {t("site.home.packagesError")}
-              </p>
-              <div className="flex flex-col justify-center gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={refetchPackages}
-                  className="min-h-12 rounded-full border border-white/40 px-8 py-3 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-white hover:text-momentizing-slate"
-                >
-                  {t("site.common.tryAgain")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openBooking()}
-                  className="min-h-12 rounded-full bg-momentizing-gold-deep px-8 py-3 text-xs font-bold tracking-widest text-white uppercase transition hover:bg-white hover:text-momentizing-gold-deep"
-                >
-                  {t("site.home.talkToTeam")}
-                </button>
-              </div>
-            </div>
-          ) : (packages ?? []).length === 0 ? (
-            <div className="mx-auto max-w-md">
-              <p className="mb-8 text-sm text-white/85">
-                {t("site.home.packagesEmpty")}
-              </p>
-              <button
-                type="button"
-                onClick={() => openBooking()}
-                className="min-h-12 rounded-full bg-momentizing-gold-deep px-10 py-4 text-xs font-bold tracking-widest text-white uppercase shadow-lg shadow-momentizing-gold/20 transition hover:bg-white hover:text-momentizing-gold-deep"
-              >
-                {t("site.home.talkToTeam")}
-              </button>
-            </div>
-          ) : (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {(packages ?? []).map((pkg) => {
-              const popular = Boolean(pkg.badgeLabel);
-              return (
-                <div
-                  key={pkg.id}
-                  className={
-                    popular
-                      ? "marketing-card relative rounded-[2.5rem] border border-momentizing-gold bg-white/10 p-10 shadow-2xl"
-                      : "marketing-card relative rounded-[2.5rem] border border-white/20 bg-white/5 p-10 transition hover:border-momentizing-gold"
-                  }
-                >
-                  {popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-momentizing-gold-deep px-4 py-1 text-xs font-bold tracking-widest text-white uppercase">
-                      {pkg.badgeLabel}
-                    </div>
-                  )}
-                  <h3
-                    className={`mb-4 font-marketing-sans text-xs font-bold tracking-widest uppercase ${
-                      popular ? "text-momentizing-mint-deep" : "text-momentizing-gold"
-                    }`}
-                  >
-                    {pkg.name}
-                  </h3>
-                  <div className="mb-6 font-marketing-serif text-4xl">{formatPackagePrice(pkg)}</div>
-                  {pkg.description && <p className="mb-8 text-sm text-white/85">{pkg.description}</p>}
-                  <button
-                    type="button"
-                    onClick={() => (pkg.sessionCount === 1 ? router.push("/book") : openBooking(pkg.id))}
-                    className={
-                      popular
-                        ? "w-full rounded-full bg-momentizing-gold-deep py-4 text-xs font-bold tracking-widest text-white uppercase shadow-lg shadow-momentizing-gold/20 transition hover:bg-white hover:text-momentizing-gold-deep"
-                        : "w-full rounded-full bg-white/15 py-4 text-xs font-bold tracking-widest uppercase transition hover:bg-white hover:text-momentizing-slate"
-                    }
-                  >
-                    {pkg.sessionCount === 1 ? t("site.nav.bookSession") : t("site.home.askPackage")}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-          )}
-        </div>
-      </section>
+      <PackagesSection
+        packages={packages}
+        loading={packagesLoading}
+        error={packagesError}
+        onRetry={refetchPackages}
+        onEnquire={openBooking}
+        onBookSession={() => router.push("/book")}
+      />
 
       <section id="corporate" className="px-6 py-24">
         <div data-reveal className="mx-auto grid max-w-7xl items-center gap-16 md:grid-cols-2">

@@ -3,8 +3,8 @@
   "events": [
     {
       "id": -1,
-      "enabled": false,
-      "title": "SAMPLE: Calm Mind Evening (replace this)",
+      "enabled": true,
+      "title": "Calm Mind Evening",
       "summary": "A relaxed evening of breathing and grounding practices.",
       "description": "Join one of our psychologists for a gentle, practical session on calming a busy mind.\n\nNo experience needed. Bring a notebook.",
       "tags": ["Mindfulness", "Stress"],
@@ -22,6 +22,32 @@
       "cancelled": false,
       "sessions": [
         { "date": "2027-01-15", "startTime": "19:00", "endTime": "21:00", "label": "" }
+      ]
+    },
+    {
+      "id": -2,
+      "enabled": true,
+      "title": "Healthy Boundaries Circle",
+      "summary": "A four-part online circle on saying no with kindness.",
+      "description": "A small, guided circle led by one of our psychologists. Each session builds on the last, but you are welcome to join any single date.\n\nCome as you are. Cameras optional.",
+      "tags": ["Boundaries", "Relationships"],
+      "format": "ONLINE",
+      "venueName": "",
+      "address": "",
+      "city": "",
+      "mapUrl": "",
+      "onlineUrl": "",
+      "registrationUrl": "",
+      "priceType": "PAID",
+      "priceLabel": "IDR 150,000",
+      "poster": "",
+      "timeZone": "Asia/Jakarta",
+      "cancelled": false,
+      "sessions": [
+        { "date": "2026-11-12", "startTime": "19:30", "endTime": "21:00", "label": "Part 1" },
+        { "date": "2026-11-26", "startTime": "19:30", "endTime": "21:00", "label": "Part 2" },
+        { "date": "2026-12-17", "startTime": "19:30", "endTime": "21:00", "label": "Part 3" },
+        { "date": "2027-01-21", "startTime": "19:30", "endTime": "21:00", "label": "Part 4" }
       ]
     }
   ]
