@@ -20,10 +20,10 @@
           "address": "Jakarta"
         }
       ],
-      "languages": [],
-      "yearsExperience": null,
-      "licenceNumber": null,
-      "sessionFeeCents": null,
+      "languages": ["Bahasa Indonesia", "English"],
+      "yearsExperience": "7 years",
+      "licenceNumber": "WI00001944167237",
+      "sessionFeeCents": 500000,
       "sessionFeeCurrency": "IDR",
       "bio": "Founder of Momentizing. Clinical psychologist & Intercultural counselor.",
       "areasOfExpertise": [
@@ -36,7 +36,11 @@
       "credentials": [
         "M.Sc., M.Psi., Psikolog"
       ],
-      "weeklySlots": {}
+      "weeklySlots": {
+        "Tuesday":["9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"],
+        "Wednesday":["9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"],
+        "Friday":["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"]
+      }
     },
     {
       "id": -1,
@@ -52,10 +56,10 @@
           "address": "Tangerang"
         }
       ],
-      "languages": [],
-      "yearsExperience": null,
-      "licenceNumber": null,
-      "sessionFeeCents": null,
+      "languages": ["Bahasa Indonesia", "English"],
+      "yearsExperience": "6 years",
+      "licenceNumber": "MH00002076609000",
+      "sessionFeeCents": 350000,
       "sessionFeeCurrency": "IDR",
       "bio": "Clinical psychologist of Momentizing.",
       "areasOfExpertise": [
@@ -95,7 +99,7 @@
       "languages": ["Bahasa Indonesia", "English"],
       "yearsExperience": null,
       "licenceNumber": null,
-      "sessionFeeCents": null,
+      "sessionFeeCents": 350000,
       "sessionFeeCurrency": "IDR",
       "bio": "Clinical psychologist of Momentizing.",
       "areasOfExpertise": [
@@ -120,6 +124,42 @@
       }
     },
     {
+      "id": -2,
+      "name": "Norma Nida",
+      "professionType": "COUNSELOR",
+      "timeZone": "Asia/Jakarta",
+      "photo": "norma-nida.jpg",
+      "gender": "FEMALE",
+      "practiceMode": "ONLINE",
+      "locations": [
+        {
+          "label": "Purbalingga",
+          "address": "Purbalingga"
+        }
+      ],
+      "languages": ["Bahasa Indonesia", "English"],
+      "yearsExperience": null,
+      "licenceNumber": null,
+      "sessionFeeCents": 250000,
+      "sessionFeeCurrency": "IDR",
+      "bio": "Counselor of Momentizing, available for online counseling.",
+      "areasOfExpertise": [
+        "Personal development",
+        "Career mapping"
+      ],
+      "credentials": [
+        "Gestalt Therapy approach",
+        "Rational Emotive Behavioral Therapy (REBT) Training"
+      ],
+      "weeklySlots": {
+        "Friday": [
+          "13:00",
+          "14:00",
+          "15:00"
+        ]
+      }
+    },
+    {
       "id": -4,
       "name": "Fida Muljono",
       "professionType": "COACH",
@@ -136,7 +176,7 @@
       "languages": ["Bahasa Indonesia", "English", "French"],
       "yearsExperience": null,
       "licenceNumber": null,
-      "sessionFeeCents": null,
+      "sessionFeeCents": 500000,
       "sessionFeeCurrency": "IDR",
       "bio": "Intercultural mixed couple coach of Momentizing.",
       "acceptsCouple": true,
@@ -181,7 +221,7 @@
       "languages": ["Bahasa Indonesia", "English"],
       "yearsExperience": null,
       "licenceNumber": null,
-      "sessionFeeCents": null,
+      "sessionFeeCents": 450000,
       "sessionFeeCurrency": "IDR",
       "bio": "Yoga Instructor & Access Bars Practitioner of Momentizing.",
       "areasOfExpertise": [
@@ -224,7 +264,7 @@
       "languages": ["Bahasa Indonesia", "English"],
       "yearsExperience": null,
       "licenceNumber": null,
-      "sessionFeeCents": null,
+      "sessionFeeCents": 250000,
       "sessionFeeCurrency": "IDR",
       "bio": "Emotional Freedom Technique Practitioner of Momentizing.",
       "areasOfExpertise": [
@@ -261,7 +301,7 @@
       "languages": ["Bahasa Indonesia", "English", "French"],
       "yearsExperience": null,
       "licenceNumber": null,
-      "sessionFeeCents": null,
+      "sessionFeeCents": 450000,
       "sessionFeeCurrency": "IDR",
       "bio": "B4 Format & Access Bars Practitioner of Momentizing.",
       "areasOfExpertise": [],
