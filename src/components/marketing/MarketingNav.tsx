@@ -5,7 +5,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { appLink } from "@config";
 import { withBase } from "@/lib/base-path";
-import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { NavMenu, type NavMenuItem } from "./NavMenu";
 import { t } from "@/i18n";
 import { useBackendStatus } from "@/lib/backend-status";
@@ -128,9 +127,7 @@ export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProp
                 </Link>
               </div>
               <div className="flex items-center gap-4">
-                {accountItems.length === 0 ? (
-                  <LocaleSwitcher className="text-momentizing-muted" selectClassName="bg-white text-momentizing-slate" />
-                ) : (
+                {accountItems.length > 0 && (
                 <NavMenu
                   label={t("site.nav.account")}
                   align="right"
@@ -142,7 +139,6 @@ export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProp
                       <i aria-hidden="true" className="far fa-user text-sm" /> {t("site.nav.account")}
                     </>
                   }
-                  footer={<LocaleSwitcher className="w-full justify-between text-momentizing-muted" selectClassName="bg-white text-momentizing-slate" />}
                 />
                 )}
                 <Link href="/book" className={`rounded-full bg-momentizing-teal px-6 py-3 text-white transition hover:bg-momentizing-slate ${path === "/book" ? "bg-momentizing-slate" : ""}`}>
@@ -194,8 +190,8 @@ export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProp
               {t("site.nav.careers")}
             </Link>
           </MobileGroup>
-          <MobileGroup title={backendOnline ? t("site.nav.yourAccount") : t("site.nav.language")}>
-            {backendOnline && (
+          {backendOnline && (
+          <MobileGroup title={t("site.nav.yourAccount")}>
               <>
                 <Link href="/my-bookings" aria-current={pageCurrent("/my-bookings")} className={mobileCurrent("/my-bookings")} onClick={close}>
                   {t("site.nav.myBookings")}
@@ -207,9 +203,8 @@ export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProp
                   {t("site.nav.getApp")}
                 </a>
               </>
-            )}
-            <LocaleSwitcher className="min-h-11 font-normal tracking-normal normal-case text-momentizing-muted" selectClassName="bg-white text-momentizing-slate" />
           </MobileGroup>
+          )}
           <Link
             href="/book"
             onClick={close}
