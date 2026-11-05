@@ -36,7 +36,6 @@ export const metadata: Metadata = {
     images: [{ url: "website/heart-psychology.png", width: 780, height: 541, alt: "A heart held in caring hands" }],
   },
   twitter: { card: "summary_large_image", title: "Momentizing — Healing Without Borders", description: SITE_DESCRIPTION },
-  icons: { icon: "icon-192.png", apple: "icon-192.png" },
 };
 
 export const viewport: Viewport = {
