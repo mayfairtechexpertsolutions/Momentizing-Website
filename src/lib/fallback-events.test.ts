@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import fallbackData from "@/data/fallback-events.json";
 import {
   FALLBACK_EVENT_NOT_FOUND,
   getFallbackEvent,
@@ -109,9 +110,13 @@ describe("selectEventsPage", () => {
 });
 
 describe("the shipped file", () => {
-  it("loads and keeps the disabled sample out of the site", () => {
-    expect(getFallbackEvents(NOW)).toEqual([]);
-    expect(getFallbackEvent(-1, NOW)).toBeNull();
+  it("loads and shows exactly the enabled entries, keeping disabled ones out of the site", () => {
+    const records = (fallbackData as { events: { id: number; enabled?: boolean }[] }).events;
+    const enabled = records.filter((r) => r.enabled !== false).map((r) => r.id);
+    expect(getFallbackEvents(NOW).map((e) => e.id).sort()).toEqual([...enabled].sort());
+    for (const r of records.filter((x) => x.enabled === false)) {
+      expect(getFallbackEvent(r.id, NOW)).toBeNull();
+    }
   });
 
   it("knows built-in ids by their sign", () => {

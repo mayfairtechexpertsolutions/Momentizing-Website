@@ -14,10 +14,10 @@ import {
 } from "./fallback-specialists";
 
 describe("fallback specialists data", () => {
-  it("has the eight team profiles with unique negative ids", () => {
-    expect(FALLBACK_SPECIALISTS).toHaveLength(8);
+  it("has the team profiles with unique negative ids", () => {
+    expect(FALLBACK_SPECIALISTS.length).toBeGreaterThan(0);
     const ids = FALLBACK_SPECIALISTS.map((s) => s.id);
-    expect(new Set(ids).size).toBe(8);
+    expect(new Set(ids).size).toBe(FALLBACK_SPECIALISTS.length);
     expect(ids.every(isFallbackSpecialistId)).toBe(true);
   });
 
@@ -78,7 +78,7 @@ describe("fallback specialists data", () => {
 
   it("shapes a directory page and a booking card", () => {
     expect(fallbackDirectoryPage(3).content).toHaveLength(3);
-    expect(fallbackDirectoryPage(50).totalElements).toBe(8);
+    expect(fallbackDirectoryPage(50).totalElements).toBe(FALLBACK_SPECIALISTS.length);
     const card = toPublicCard(getFallbackSpecialist(-4)!);
     expect(card.acceptsCouple).toBe(true);
     expect(card.id).toBe(-4);

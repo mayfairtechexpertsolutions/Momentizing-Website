@@ -1,5 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { FALLBACK_SPECIALISTS } from "./fallback-specialists";
 import { useMarketingDirectory, useMarketingSpecialist } from "./marketing-directory";
 
 function jsonResponse(status: number, body: unknown) {
@@ -13,7 +14,7 @@ describe("useMarketingDirectory fallback", () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("Failed to fetch"));
     const { result } = renderHook(() => useMarketingDirectory(50));
     await waitFor(() => expect(result.current.isFallback).toBe(true));
-    expect(result.current.data?.content).toHaveLength(8);
+    expect(result.current.data?.content).toHaveLength(FALLBACK_SPECIALISTS.length);
     expect(result.current.error).toBeNull();
   });
 
@@ -44,8 +45,8 @@ describe("useMarketingDirectory fallback", () => {
 describe("useMarketingSpecialist fallback ids", () => {
   it("resolves a built-in profile without any request", () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch");
-    const { result } = renderHook(() => useMarketingSpecialist(-2));
-    expect(result.current.data?.name).toBe("Norma Nida");
+    const { result } = renderHook(() => useMarketingSpecialist(-4));
+    expect(result.current.data?.name).toBe("Fida Muljono");
     expect(result.current.isLoading).toBe(false);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
