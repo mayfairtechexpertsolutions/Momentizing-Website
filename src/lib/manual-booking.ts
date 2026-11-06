@@ -42,13 +42,27 @@ export function toExpertClock(date: string, time: string, expertTimeZone: string
   return clockInZone(expertTimeZone, Date.UTC(y, mo - 1, d, h, m));
 }
 
-/** "Friday, 3 October at 1:00 PM (WIB)"; when the visitor is in another zone, also "= 2:00 PM WIB". */
+/** The expert's calendar date ("YYYY-MM-DD") at the instant of the visitor's local `date` + `time`. */
+function toExpertDate(date: string, time: string, expertTimeZone: string): string {
+  const utc = localToUtc(date, time);
+  const [y, mo, d] = utc.date.split("-").map(Number);
+  const [h, m] = utc.time.split(":").map(Number);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: expertTimeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(Date.UTC(y, mo - 1, d, h, m)));
+}
+
+/**
+ * "Friday, 3 October at 1:00 PM (WIB)"; when the visitor is in another zone, also "= 2:00 PM WIB", and the expert's
+ * day when it differs ("= 12:00 AM GMT+7 on Tuesday, November 3"), so 9 AM Monday in California is not read as Monday midnight.
+ */
 export function formatManualWhen(date: string, time: string, expertTimeZone?: string): string {
   const visitorZone = zoneLabel(parseIsoLocal(date));
   const base = `${formatDateLong(date)} at ${formatClock(time)} (${visitorZone})`;
   if (!expertTimeZone) return base;
   const expertZone = expertZoneLabel(expertTimeZone, date);
-  return visitorZone === expertZone ? base : `${base} = ${formatClock(toExpertClock(date, time, expertTimeZone))} ${expertZone}`;
+  if (visitorZone === expertZone) return base;
+  const expertDate = toExpertDate(date, time, expertTimeZone);
+  const onDay = expertDate === date ? "" : ` on ${formatDateLong(expertDate)}`;
+  return `${base} = ${formatClock(toExpertClock(date, time, expertTimeZone))} ${expertZone}${onDay}`;
 }
 
 function truncateNote(note: string): string {
@@ -98,4 +112,25 @@ export function requestedHoursSlots(specialistId: number, specialistName: string
     days: Array.from({ length: days }, (_, i) => ({ date: addDaysIso(fromLocal, i), times })),
     nextAvailableDate: fromLocal,
   };
+}
+
+/** A WhatsApp request needs a person to read it, so a time starting sooner than this from now is not offered. */
+export const REQUEST_LEAD_MINUTES = 120;
+
+/**
+ * Removes times that have already started (or start within the lead time) from slots already expressed on the
+ * visitor's own clock (`toViewerSlots` output), and recomputes `nextAvailableDate`. Only the built-in/WhatsApp-request
+ * calendars need this: live slots come from a backend that knows the time.
+ */
+export function dropPastTimes(slots: PublicSlots, now: Date = new Date(), leadMinutes: number = REQUEST_LEAD_MINUTES): PublicSlots {
+  const cutoff = now.getTime() + leadMinutes * 60_000;
+  const days = slots.days.map((d) => ({
+    date: d.date,
+    times: d.times.filter((time) => {
+      const [h, m] = time.split(":").map(Number);
+      const [y, mo, day] = d.date.split("-").map(Number);
+      return new Date(y, mo - 1, day, h, m ?? 0).getTime() >= cutoff;
+    }),
+  }));
+  return { ...slots, days, nextAvailableDate: days.find((d) => d.times.length > 0)?.date ?? null };
 }

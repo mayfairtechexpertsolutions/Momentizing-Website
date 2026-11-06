@@ -10,10 +10,13 @@ export default function AssociatesPage() {
   const [search, setSearch] = useState("");
   const [acceptingOnly, setAcceptingOnly] = useState(false);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const { favorites, isFavorite } = useFavorites();
+  const { isFavorite } = useFavorites();
 
   const { data: page, error, isLoading, refetch } = useMarketingDirectory(100);
   const specialists = useMemo(() => page?.content ?? [], [page]);
+
+  // Only favourites that are in the list on screen (a built-in profile saved offline is not there once the live list loads).
+  const favoriteCount = specialists.filter((p) => isFavorite(p.id)).length;
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -25,7 +28,8 @@ export default function AssociatesPage() {
         p.name.toLowerCase().includes(term) ||
         (p.specialisation ?? "").toLowerCase().includes(term) ||
         (p.languages ?? "").toLowerCase().includes(term) ||
-        (p.bio ?? "").toLowerCase().includes(term);
+        (p.bio ?? "").toLowerCase().includes(term) ||
+        p.locations.some((l) => `${l.label ?? ""} ${l.address ?? ""}`.toLowerCase().includes(term));
       return matchesAccepting && matchesFavorite && matchesSearch;
     });
   }, [specialists, search, acceptingOnly, favoritesOnly, isFavorite]);
@@ -71,7 +75,7 @@ export default function AssociatesPage() {
               }`}
             >
               <i aria-hidden="true" className={favoritesOnly ? "fas fa-heart" : "far fa-heart"} />
-              {t("site.assoc.favorites")}{favorites.length > 0 ? ` (${favorites.length})` : ""}
+              {t("site.assoc.favorites")}{favoriteCount > 0 ? ` (${favoriteCount})` : ""}
             </button>
           </div>
         </div>
@@ -98,11 +102,14 @@ export default function AssociatesPage() {
             {favoritesOnly ? t("site.assoc.noFavorites") : t("site.assoc.noMatch")}
           </div>
         ) : (
+          <>
+          <h2 className="sr-only">{t("site.assoc.listHeading")}</h2>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:grid-cols-4">
             {filtered.map((specialist) => (
               <SpecialistCard key={specialist.id} specialist={specialist} />
             ))}
           </div>
+          </>
         )}
       </main>
 

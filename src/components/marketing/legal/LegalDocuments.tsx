@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { withBase } from "@/lib/base-path";
-import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp";
+import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp-constants";
 
 /** Shown at the top of both documents. Bump when the wording changes in a way users should know about. */
 export const LEGAL_EFFECTIVE_DATE = "22 October 2026";
@@ -122,7 +122,7 @@ export function TermsDocument() {
               {MOMENTIZING_WHATSAPP_DISPLAY}). If we do not receive it in time, the hold expires and the time is released. Our team may also confirm a booking by hand.
             </>,
             "Times are shown on your own clock, with the time zone named. Please check the time zone before you confirm.",
-            "Booking details, reminders and changes are sent to you on WhatsApp, and by email or app notification if you have an account. By booking you agree to be contacted this way about that booking.",
+            "Booking details, reminders and changes are sent to you on WhatsApp, and by email or app notification if you have an account. By booking you agree to be contacted this way about that booking. We send promotional messages, such as news of events, only if you separately say yes, and you can opt out at any time by replying STOP or by contacting us.",
             "If we cannot find a time that suits you, you can ask for help. Our team will contact you on WhatsApp, usually within one business day.",
             "Recurring sessions are set up with our team after your first session. We will confirm every date with you.",
           ]}
@@ -341,7 +341,10 @@ export function PrivacyDocument() {
       </Section>
 
       <Section title="4. What stays in your browser">
-        <p>We do not use cookies on this website. We use your browser&apos;s own storage in two ways:</p>
+        <p>
+          We do not set cookies of our own, and we do not use advertising or analytics cookies. We use your
+          browser&apos;s own storage in two ways:
+        </p>
         <List
           items={[
             <>
@@ -357,6 +360,17 @@ export function PrivacyDocument() {
           ]}
         />
         <p>The site also works if you block this storage.</p>
+        <p>
+          Some features load content from other companies, which then receive your network (IP) address and browser
+          details and may use their own storage under their own policies:
+        </p>
+        <List
+          items={[
+            "Cloudflare Turnstile, on the booking form, to tell people from bots.",
+            "YouTube (privacy-enhanced mode) or Vimeo, only on an event page that has a promo video, and only when it is shown.",
+            "Google Maps, only if you tap a map or directions link.",
+          ]}
+        />
       </Section>
 
       <Section title="5. Who can see your information">
@@ -393,7 +407,7 @@ export function PrivacyDocument() {
 
       <Section title="6. Where your data is processed">
         <p>
-          Our providers may process data in Indonesia and in other countries. When your data leaves your country, we
+          Our providers (including Twilio, Amazon Web Services, Google Firebase, Cloudflare and Xendit) may process data in Indonesia and in other countries, including Singapore, the United States and the European Union. When your data leaves your country, we
           take steps to make sure it stays protected to a standard that is at least equal to this policy (for example,
           through contractual safeguards).
         </p>
@@ -416,7 +430,7 @@ export function PrivacyDocument() {
           We use encryption in transit (HTTPS) and encrypt journal entries at rest. Passwords are stored only in hashed form.
           Access is limited by role, and specialist access to client information is logged. Bookings are protected against
           bots and impersonation, including by verifying your WhatsApp number. No system is perfectly secure. If a breach
-          is likely to harm you, we will tell you, and the authorities where required, without undue delay.
+          is likely to harm you, we will tell you, and the authorities where required, in writing and within 3 x 24 hours of becoming aware of it, as Indonesian law requires.
         </p>
       </Section>
 

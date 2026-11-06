@@ -17,8 +17,9 @@ import {
   SectionCard,
   WorkingHoursSection,
 } from "@/components/marketing/specialist/ProfileSections";
-import { FALLBACK_SPECIALISTS, isFallbackSpecialistId } from "@/lib/fallback-specialists";
+import { fallbackSpecialists, isFallbackSpecialistId } from "@/lib/fallback-specialists";
 import { useMarketingDirectory, useMarketingSpecialist, formatSessionFee } from "@/lib/marketing-directory";
+import { useWhatsAppLink } from "@/lib/whatsapp";
 import { t } from "@/i18n";
 
 /** The profile id comes from `?id=` (not a `[id]` segment) so the site can be statically exported for GitHub Pages;
@@ -41,45 +42,68 @@ function AssociateDetail() {
   const searchParams = useSearchParams();
   const psychId = Number(searchParams.get("id"));
 
-  const { data: psych, error, isLoading, refetch } = useMarketingSpecialist(psychId);
+  const { data: psych, error, isLoading, unavailable, refetch } = useMarketingSpecialist(psychId);
+  const whatsAppLink = useWhatsAppLink();
   const { data: others } = useMarketingDirectory(4, !isFallbackSpecialistId(psychId));
   const isFallbackProfile = isFallbackSpecialistId(psychId);
 
   // Only a genuine 404 means "no such associate"; any other failure is a load problem and must not say the person doesn't exist.
   const loadFailed = !!error && !/not found|tidak ditemukan/i.test(error);
-  const otherAssociates = (isFallbackProfile ? FALLBACK_SPECIALISTS : (others?.content ?? [])).filter((p) => p.id !== psychId).slice(0, 3);
+  const otherAssociates = (isFallbackProfile ? fallbackSpecialists() : (others?.content ?? [])).filter((p) => p.id !== psychId).slice(0, 3);
   const fee = psych ? formatSessionFee(psych.sessionFeeCents, psych.sessionFeeCurrency) : null;
 
   return (
     <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
       {isLoading && (
-        <p role="status" className="px-6 pt-48 pb-24 text-center font-marketing-serif text-lg text-momentizing-muted">
-          {t("site.spec.loadingProfile")}
-        </p>
+        <main id="main">
+          <p role="status" className="px-6 pt-48 pb-24 text-center font-marketing-serif text-lg text-momentizing-muted">
+            {t("site.spec.loadingProfile")}
+          </p>
+        </main>
       )}
 
       {!isLoading && !psych && loadFailed && (
         // Anything other than a genuine 404 is a load failure — don't tell the visitor the specialist doesn't exist.
-        <div role="alert" className="px-6 pt-48 pb-24 text-center">
-          <p className="mb-2 font-marketing-serif text-2xl">{t("site.spec.loadError")}</p>
-          <p className="mb-6 text-sm text-momentizing-muted">{error}</p>
-          <button
-            type="button"
-            onClick={refetch}
-            className="min-h-12 rounded-full bg-momentizing-teal px-8 py-3 text-sm font-bold text-white transition hover:bg-momentizing-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal"
-          >
-            {t("site.common.tryAgain")}
-          </button>
-        </div>
+        <main id="main" className="px-6 pt-48 pb-24 text-center">
+          <div role="alert">
+          <h1 className="mb-2 font-marketing-serif text-2xl">{t("site.spec.loadError")}</h1>
+          <p className="mx-auto mb-6 max-w-md text-sm text-momentizing-muted">{unavailable ? t("site.spec.offlineBody") : error}</p>
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={refetch}
+              className="min-h-12 rounded-full bg-momentizing-teal px-8 py-3 text-sm font-bold text-white transition hover:bg-momentizing-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal"
+            >
+              {t("site.common.tryAgain")}
+            </button>
+            {unavailable && (
+              <>
+                <Link href="/associates" className="inline-flex min-h-12 items-center rounded-full border border-momentizing-slate/30 px-8 py-3 text-sm font-bold transition hover:bg-momentizing-mint">
+                  {t("site.spec.backToAll")}
+                </Link>
+                <a
+                  href={whatsAppLink(t("site.spec.offlineMessage"))}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-12 items-center gap-2 rounded-full border border-momentizing-slate/30 px-8 py-3 text-sm font-bold transition hover:bg-momentizing-mint"
+                >
+                  <i aria-hidden="true" className="fab fa-whatsapp" /> {t("site.offline.whatsappButton")}
+                  <span className="sr-only"> {t("site.common.newTab")}</span>
+                </a>
+              </>
+            )}
+          </div>
+          </div>
+        </main>
       )}
 
       {!isLoading && !psych && !loadFailed && (
-        <div className="px-6 pt-48 pb-24 text-center">
-          <p className="mb-4 font-marketing-serif text-2xl text-momentizing-muted">{t("site.spec.notFound")}</p>
+        <main id="main" className="px-6 pt-48 pb-24 text-center">
+          <h1 className="mb-4 font-marketing-serif text-2xl text-momentizing-muted">{t("site.spec.notFound")}</h1>
           <Link href="/associates" className="inline-flex min-h-11 items-center font-bold text-momentizing-teal underline">
             {t("site.spec.backToAll")}
           </Link>
-        </div>
+        </main>
       )}
 
       {psych && (

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ApiError, hasCode, isBackendUnavailable } from "@/lib/api";
-import { FALLBACK_SPECIALISTS, getFallbackSpecialist, isFallbackSpecialistId, toPublicCard } from "@/lib/fallback-specialists";
+import { fallbackSpecialists, getFallbackSpecialist, isFallbackSpecialistId, toPublicCard } from "@/lib/fallback-specialists";
 import { t } from "@/i18n";
 import {
   createGuestBooking,
@@ -83,7 +83,7 @@ export function BookingWizard() {
   const [slotNotice, setSlotNotice] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
-  const patch = useCallback((p: Partial<Draft>) => setDraft((d) => ({ ...d, ...p })), []);
+  const patch = useCallback((p: Partial<Draft> | ((d: Draft) => Partial<Draft>)) => setDraft((d) => ({ ...d, ...(typeof p === "function" ? p(d) : p) })), []);
   // Built-in profiles have no backend calendar, and while the backend is down no specialist can be held: the booking
   // is then a request the visitor sends on WhatsApp. It switches back by itself once the backend answers again.
   const backendOffline = useBackendStatus() === "offline";
@@ -151,6 +151,15 @@ export function BookingWizard() {
   useEffect(() => {
     loadFormToken();
   }, [loadFormToken]);
+  // The token request fails while the backend is down; fetch it again once the backend answers.
+  const hadOffline = useRef(false);
+  useEffect(() => {
+    if (backendOffline) hadOffline.current = true;
+    else if (hadOffline.current) {
+      hadOffline.current = false;
+      loadFormToken();
+    }
+  }, [backendOffline, loadFormToken]);
 
   // Move keyboard/screen-reader focus to the new step's heading whenever the step changes.
   const stepKey = active ? `active-${active.booking.status}` : draft.step;
@@ -247,7 +256,7 @@ export function BookingWizard() {
       )}
 
       {draft.step === "date" && <StepDate draft={draft} patch={patch} headingRef={headingRef} onNext={() => goto("about")} />}
-      {draft.step === "about" && <StepAbout draft={draft} patch={patch} headingRef={headingRef} onBack={linked ? () => goto("time") : () => goto("date")} onNext={() => goto(linked ? "review" : draft.specialist ? "time" : "specialist")} />}
+      {draft.step === "about" && <StepAbout draft={draft} patch={patch} headingRef={headingRef} onBack={linked ? () => goto("time") : () => goto("date")} onNext={() => goto(linked ? "review" : draft.specialist ? "time" : "specialist")} linked={linked} />}
       {draft.step === "specialist" && (
         <StepSpecialist
           draft={draft}
@@ -340,7 +349,7 @@ function HelpMeFind({ onHelp }: { onHelp: () => void }) {
   );
 }
 
-type Patch = (p: Partial<Draft>) => void;
+type Patch = (p: Partial<Draft> | ((d: Draft) => Partial<Draft>)) => void;
 type HeadingRef = React.RefObject<HTMLHeadingElement | null>;
 
 // ==================================================================== 1. date
@@ -368,16 +377,18 @@ function StepAbout({
   headingRef,
   onBack,
   onNext,
+  linked,
 }: {
   draft: Draft;
   patch: Patch;
   headingRef: HeadingRef;
   onBack: () => void;
   onNext: () => void;
+  linked: boolean;
 }) {
   const [tried, setTried] = useState(false);
   const a = draft.answers;
-  const setAnswer = (k: keyof Draft["answers"], v: boolean) => patch({ answers: { ...a, [k]: v } });
+  const setAnswer = (k: keyof Draft["answers"], v: boolean) => patch((d) => ({ answers: { ...d.answers, [k]: v } }));
 
   const errors = {
     name: draft.fullName.trim().length < 2 ? t("site.book.nameRequired") : null,
@@ -386,8 +397,9 @@ function StepAbout({
     minor: a.adult === false,
     mismatch: couplesMismatch(a, draft.specialist),
     consent: !draft.consent,
+    healthConsent: !draft.healthConsent,
   };
-  const valid = !errors.name && !errors.phone && !errors.unanswered && !errors.minor && !errors.mismatch && !errors.consent;
+  const valid = !errors.name && !errors.phone && !errors.unanswered && !errors.minor && !errors.mismatch && !errors.consent && !errors.healthConsent;
 
   function next() {
     setTried(true);
@@ -400,11 +412,11 @@ function StepAbout({
     }, 0);
   }
 
-  const toggleConcern = (c: string) => patch({ concerns: draft.concerns.includes(c) ? draft.concerns.filter((x) => x !== c) : [...draft.concerns, c] });
+  const toggleConcern = (c: string) => patch((d) => ({ concerns: d.concerns.includes(c) ? d.concerns.filter((x) => x !== c) : [...d.concerns, c] }));
 
   return (
     <BookCard>
-      <StepHeading headingRef={headingRef} title={t("site.book.aboutTitle")} sub={t("site.book.aboutSub")} />
+      <StepHeading headingRef={headingRef} title={t("site.book.aboutTitle")} sub={linked ? t("site.book.aboutSubLinked") : t("site.book.aboutSub")} />
 
       <div className="flex flex-col gap-6">
         <Field id="fullName" label={t("site.form.yourName")} error={tried ? errors.name : null}>
@@ -526,6 +538,25 @@ function StepAbout({
             </p>
           )}
         </div>
+
+        <div>
+          <label className="flex cursor-pointer items-start gap-3 text-sm text-momentizing-muted">
+            <input
+              name="healthConsentAccepted"
+              type="checkbox"
+              checked={draft.healthConsent}
+              onChange={(e) => patch({ healthConsent: e.target.checked })}
+              className="mt-1 h-5 w-5 flex-shrink-0 accent-[var(--momentizing-teal)]"
+              aria-describedby={tried && errors.healthConsent ? "health-consent-error" : undefined}
+            />
+            <span>{t("site.book.healthConsent")}</span>
+          </label>
+          {tried && errors.healthConsent && (
+            <p id="health-consent-error" role="alert" className="mt-1 text-sm font-medium text-red-700">
+              {t("site.book.healthConsentRequired")}
+            </p>
+          )}
+        </div>
       </div>
 
       <ActionBar onBack={onBack} onNext={next} hint={tried && !valid ? t("site.book.needsAttention") : undefined} />
@@ -568,6 +599,11 @@ function StepSpecialist({
     setError(null);
     setOffline(false);
     /* eslint-enable react-hooks/set-state-in-effect */
+    // Already known to be down: show the WhatsApp list at once instead of firing a request that must fail.
+    if (backendOffline) {
+      setOffline(true);
+      return;
+    }
     fetchSuggestions({
       date: draft.date ?? undefined,
       concerns: draft.concerns,
@@ -603,7 +639,7 @@ function StepSpecialist({
           <StepHeading
             headingRef={headingRef}
             title={t("site.book.whoTitle")}
-            sub={draft.date ? t("site.book.whoSubDate", { date: formatDateLong(draft.date) }) : t("site.book.whoSub")}
+            sub={draft.date && !offline ? t("site.book.whoSubDate", { date: formatDateLong(draft.date) }) : t("site.book.whoSub")}
           />
 
           {offline ? (
@@ -611,13 +647,14 @@ function StepSpecialist({
               <InlineNotice role="status">
                 <i aria-hidden="true" className="fab fa-whatsapp mr-1.5 text-momentizing-teal" /> {t("site.fallback.offlineNotice")}
               </InlineNotice>
-              {FALLBACK_SPECIALISTS.map((s) => (
+              {fallbackSpecialists().map((s) => (
                 <SpecialistSuggestionCard
                   key={s.id}
                   specialist={toPublicCard(s)}
                   requestedDate={null}
                   selected={draft.specialist?.id === s.id}
                   forCouple={draft.answers.couple === true}
+                  prefersOnline={draft.answers.online}
                   onChoose={() => choose(toPublicCard(s), "SPECIFIC")}
                   onViewProfile={() => setProfile(toPublicCard(s))}
                 />
@@ -648,6 +685,7 @@ function StepSpecialist({
                   requestedDate={draft.date}
                   selected={draft.specialist?.id === s.id}
                   forCouple={draft.answers.couple === true}
+                  prefersOnline={draft.answers.online}
                   onChoose={() => choose(s, "SUGGESTED")}
                   onViewProfile={() => setProfile(s)}
                 />

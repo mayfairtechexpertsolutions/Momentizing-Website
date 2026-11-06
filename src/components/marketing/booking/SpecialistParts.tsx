@@ -73,6 +73,7 @@ export function SpecialistSuggestionCard({
   requestedDate,
   selected,
   forCouple = false,
+  prefersOnline = null,
   onChoose,
   onViewProfile,
 }: {
@@ -80,6 +81,8 @@ export function SpecialistSuggestionCard({
   requestedDate: string | null;
   selected?: boolean;
   forCouple?: boolean;
+  /** The visitor's answer to "would you prefer online sessions?"; a profile that can't meet it gets a heads-up chip. */
+  prefersOnline?: boolean | null;
   onChoose: () => void;
   onViewProfile: () => void;
 }) {
@@ -105,6 +108,8 @@ export function SpecialistSuggestionCard({
 
       <div className="flex flex-wrap gap-2">
         {forCouple && (specialist.acceptsCouple ? <Fact>{t("site.book.couplesWelcome")}</Fact> : <IndividualOnlyChip />)}
+        {prefersOnline === true && specialist.practiceMode === "IN_PERSON" && <Fact>{t("site.book.inPersonOnlyChip")}</Fact>}
+        {prefersOnline === false && specialist.practiceMode === "ONLINE" && <Fact>{t("site.book.onlineOnlyChip")}</Fact>}
         {availability && (
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${

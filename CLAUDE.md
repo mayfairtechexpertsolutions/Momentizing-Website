@@ -66,7 +66,7 @@ src/lib/                 api client, typed endpoint wrappers, hooks, pure helper
 4. Every booking/application POST carries an `Idempotency-Key` (`newIdempotencyKey()`), so double-taps and retries never create duplicates.
 5. Crisis resources on `/help` and the "urgent" path in `/book` stay reachable and accurate. Never bury them.
 6. Visitor data stays client-side only in: `localStorage` favorites, and in `sessionStorage` the booking draft (includes name and WhatsApp number), the active booking and its claim token. Every storage access is wrapped so the site works with storage blocked. Clear the draft once a booking is created. The claim token also travels to the app in the URL fragment (not the query string) because the app is usually a different origin.
-7. The business WhatsApp number lives in one place (`src/lib/whatsapp.ts`); it must match what the backend verifies against.
+7. The business WhatsApp number lives in one place (`src/lib/whatsapp-constants.ts`, which must stay free of `"use client"`); it must match what the backend verifies against.
 
 ## Safety
 - Don't commit or paste real keys. Turnstile *site* keys are public; secret keys belong only on the backend.

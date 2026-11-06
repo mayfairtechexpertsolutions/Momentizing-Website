@@ -189,6 +189,9 @@ export function MarketingNav({ variant = "full", simpleLabel }: MarketingNavProp
             <Link href="/careers" aria-current={pageCurrent("/careers")} className={mobileCurrent("/careers")} onClick={close}>
               {t("site.nav.careers")}
             </Link>
+            <Link href="/help" aria-current={pageCurrent("/help")} className={mobileCurrent("/help")} onClick={close}>
+              {t("site.footer.help")}
+            </Link>
           </MobileGroup>
           {backendOnline && (
           <MobileGroup title={t("site.nav.yourAccount")}>

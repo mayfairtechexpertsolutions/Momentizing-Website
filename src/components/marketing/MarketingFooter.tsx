@@ -36,6 +36,9 @@ export function MarketingFooter() {
         <Link href="/careers" className="inline-flex min-h-11 items-center hover:opacity-70">
           {t("site.nav.careers")}
         </Link>
+        <Link href="/help" className="inline-flex min-h-11 items-center hover:opacity-70">
+          {t("site.footer.help")}
+        </Link>
         <OnlineOnly>
           <a href={appLink("/download")} className="inline-flex min-h-11 items-center hover:opacity-70">
             {t("site.nav.getApp")}
@@ -50,6 +53,8 @@ export function MarketingFooter() {
           <i className="fab fa-whatsapp" aria-hidden="true" /> {t("site.footer.whatsapp")}
         </a>
       </div>
+      <p className="mx-auto mt-4 max-w-2xl px-4 text-xs text-momentizing-muted">{t("site.footer.disclaimer")}</p>
+      <p className="mx-auto mt-1 max-w-2xl px-4 text-xs text-momentizing-muted">{t("site.footer.credits")}</p>
       <LocaleSwitcher className="mt-3 justify-center text-momentizing-muted" selectClassName="bg-white text-momentizing-slate" />
     </footer>
   );

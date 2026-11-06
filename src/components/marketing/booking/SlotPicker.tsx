@@ -6,7 +6,7 @@ import { fetchSlots, friendlyError, toViewerSlots, type PublicSlots } from "@/li
 import { addDaysIso, formatDateLong, formatDateShort, formatTime, parseIsoLocal, zoneLabel } from "@/lib/local-date";
 import { isBackendUnavailable } from "@/lib/api";
 import { reportBackendUnavailable } from "@/lib/backend-status";
-import { requestedHoursSlots } from "@/lib/manual-booking";
+import { dropPastTimes, requestedHoursSlots } from "@/lib/manual-booking";
 import { BookButton } from "./ui";
 import { t } from "@/i18n";
 
@@ -54,7 +54,9 @@ export function SlotPicker({
     const request = fallback ? Promise.resolve(fallbackSlots(fallback, from, WINDOW_DAYS + 2)) : fetchSlots(specialistId, from, WINDOW_DAYS + 2);
     request
       .then((utc) => {
-        const res = toViewerSlots(utc, date, WINDOW_DAYS);
+        const viewer = toViewerSlots(utc, date, WINDOW_DAYS);
+        // A built-in calendar knows nothing about the clock: never offer a time that has already passed today.
+        const res = fallback ? dropPastTimes(viewer) : viewer;
         if (!cancelled) {
           setData(res);
           onLoaded?.(res);
@@ -65,7 +67,7 @@ export function SlotPicker({
         if (isBackendUnavailable(e)) {
           // No live calendar: offer preferred times instead of an error. The request goes to the team on WhatsApp.
           reportBackendUnavailable();
-          setData(requestedHoursSlots(specialistId, "", date, WINDOW_DAYS));
+          setData(dropPastTimes(requestedHoursSlots(specialistId, "", date, WINDOW_DAYS)));
           return;
         }
         setError(friendlyError(e));

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { MAX_MANUAL_NOTE_CHARS, buildManualBookingMessage, formatManualWhen, requestedHoursSlots, toExpertClock, type ManualBookingRequest } from "./manual-booking";
+import { MAX_MANUAL_NOTE_CHARS, buildManualBookingMessage, dropPastTimes, formatManualWhen, requestedHoursSlots, toExpertClock, type ManualBookingRequest } from "./manual-booking";
+import type { PublicSlots } from "./guest-booking";
 
 const base: ManualBookingRequest = {
   specialistName: "Adeline Herdianto",
@@ -76,5 +77,41 @@ describe("requestedHoursSlots", () => {
     expect(res.days.map((d) => d.date)).toEqual(["2026-11-03", "2026-11-04", "2026-11-05"]);
     expect(res.days[0].times[0]).toBe("08:00");
     expect(res.days[0].times.at(-1)).toBe("20:00");
+  });
+});
+
+describe("dropPastTimes", () => {
+  const slots = (): PublicSlots => ({
+    specialistId: -4,
+    specialistName: "Fida",
+    durationMinutes: 60,
+    sessionTypes: [],
+    timezone: "viewer",
+    days: [
+      { date: "2026-11-06", times: ["09:00", "10:00", "15:00", "16:00"] },
+      { date: "2026-11-07", times: ["09:00"] },
+    ],
+    nextAvailableDate: "2026-11-06",
+  });
+
+  it("drops times that have passed or start within the lead time, keeps later days", () => {
+    const out = dropPastTimes(slots(), new Date(2026, 10, 6, 13, 33), 120);
+    expect(out.days[0].times).toEqual(["16:00"]);
+    expect(out.days[1].times).toEqual(["09:00"]);
+    expect(out.nextAvailableDate).toBe("2026-11-06");
+  });
+
+  it("moves nextAvailableDate when today is used up, and to null when nothing is left", () => {
+    expect(dropPastTimes(slots(), new Date(2026, 10, 6, 20, 0)).nextAvailableDate).toBe("2026-11-07");
+    expect(dropPastTimes(slots(), new Date(2026, 10, 8, 0, 0)).nextAvailableDate).toBeNull();
+  });
+});
+
+describe("formatManualWhen across the date line", () => {
+  it("names the expert's day when it differs from the visitor's (suite runs in America/Los_Angeles unless TEST_TZ is set)", () => {
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const text = formatManualWhen("2026-11-02", "09:00", "Asia/Jakarta");
+    if (zone === "America/Los_Angeles") expect(text).toMatch(/9:00 AM \(PST\) = 12:00 AM GMT\+7 on Tuesday, November 3$/);
+    if (zone === "Asia/Jakarta") expect(text).toBe("Monday, November 2 at 9:00 AM (GMT+7)");
   });
 });

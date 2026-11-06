@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import fallbackData from "@/data/fallback-events.json";
 import {
   FALLBACK_EVENT_NOT_FOUND,

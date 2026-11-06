@@ -1,5 +1,5 @@
 import { absoluteUrl, SITE_DESCRIPTION } from "@/lib/site-url";
-import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp";
+import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp-constants";
 
 export const dynamic = "force-static";
 

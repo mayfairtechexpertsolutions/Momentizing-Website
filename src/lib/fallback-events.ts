@@ -1,5 +1,6 @@
 import fallbackData from "@/data/fallback-events.json";
 import { withBase } from "./base-path";
+import { getLocale } from "@/i18n";
 import { expertZoneLabel, zonedWallTimeToUtcMs } from "./fallback-specialists";
 import type { EventFormat, EventFormatFilter, EventWhen, PublicEvent, PublicEventSession } from "./events";
 import type { PageResponse } from "./types";
@@ -55,6 +56,8 @@ export interface FallbackEventRecord {
   timeZone: string;
   cancelled?: boolean;
   sessions: SessionRecord[];
+  /** Optional Indonesian text shown when the visitor reads the site in Bahasa Indonesia; a missing field shows the English one. */
+  translations?: { id?: { title?: string; summary?: string; description?: string; tags?: string[] } };
 }
 
 function fail(who: string, problem: string): never {
@@ -121,15 +124,17 @@ function toSession(record: FallbackEventRecord, s: SessionRecord, index: number)
 
 /** Today's built-in event, shaped like the live response so callers need no special case. `now` only decides `past`. */
 export function toPublicEvent(record: FallbackEventRecord, now = new Date()): PublicEvent {
+  const tr = getLocale() === "id" ? record.translations?.id : undefined;
+  const text = { title: tr?.title ?? record.title, summary: tr?.summary ?? record.summary, description: tr?.description ?? record.description, tags: tr?.tags ?? record.tags };
   const sessions = [...record.sessions].sort((a, b) => `${a.date}${a.startTime}`.localeCompare(`${b.date}${b.startTime}`)).map((s, i) => toSession(record, s, i));
   const nextSession = sessions.find((s) => new Date(s.endsAt) > now);
   const lastEnd = sessions[sessions.length - 1].endsAt;
   return {
     id: record.id,
-    title: record.title,
-    summary: record.summary || null,
-    description: record.description || null,
-    tags: record.tags ?? [],
+    title: text.title,
+    summary: text.summary || null,
+    description: text.description || null,
+    tags: text.tags ?? [],
     format: record.format as EventFormat,
     venueName: record.venueName || null,
     address: record.address || null,

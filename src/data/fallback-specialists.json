@@ -1,5 +1,5 @@
 {
-  "_help": "Team profiles shown ONLY when the live backend is unavailable. Ids must be unique negative numbers. weeklySlots lists the session start times per weekday (full English day names, 24h HH:mm, written in the profile's own timeZone); each slot lasts durationMinutes. A profile may set its own durationMinutes, otherwise defaultDurationMinutes applies. timeZone is REQUIRED per profile and must be an IANA time zone name in Area/City form, case-sensitive: Asia/Jakarta (WIB, UTC+7), Asia/Makassar (WITA, UTC+8), Asia/Jayapura (WIT, UTC+9), Asia/Singapore, Australia/Sydney. Do NOT use abbreviations or offsets such as WIB, GMT+7 or UTC+7. Daylight saving is handled automatically. Leave out acceptsCouple to mean false. photo: file name only of an image placed in public/team/ (see src/data/README.md); leave \"\" to use the default portrait. gender: \"FEMALE\", \"MALE\" or \"NEUTRAL\" (picks the default portrait shown when there is no photo; never shown on the site). practiceMode: \"ONLINE\", \"IN_PERSON\" or \"HYBRID\"; IN_PERSON and HYBRID need at least one entry in locations ({ \"label\", \"address\" }, the first is the main one). languages: list of names, e.g. [\"Bahasa Indonesia\", \"English\"]. yearsExperience / licenceNumber: null when unknown. sessionFeeCents / sessionFeeCurrency mirror the backend fields (IDR 500,000 = 50000000); the fee is kept for the team and is NOT shown on the website.",
+  "_help": "Team profiles shown ONLY when the live backend is unavailable. Ids must be unique negative numbers. weeklySlots lists the session start times per weekday (full English day names, 24h HH:mm, written in the profile's own timeZone); each slot lasts durationMinutes. A profile may set its own durationMinutes, otherwise defaultDurationMinutes applies. timeZone is REQUIRED per profile and must be an IANA time zone name in Area/City form, case-sensitive: Asia/Jakarta (WIB, UTC+7), Asia/Makassar (WITA, UTC+8), Asia/Jayapura (WIT, UTC+9), Asia/Singapore, Australia/Sydney. Do NOT use abbreviations or offsets such as WIB, GMT+7 or UTC+7. Daylight saving is handled automatically. Leave out acceptsCouple to mean false. photo: file name only of an image placed in public/team/ (see src/data/README.md); leave \"\" to use the default portrait. gender: \"FEMALE\", \"MALE\" or \"NEUTRAL\" (picks the default portrait shown when there is no photo; never shown on the site). practiceMode: \"ONLINE\", \"IN_PERSON\" or \"HYBRID\"; IN_PERSON and HYBRID need at least one entry in locations ({ \"label\", \"address\" }, the first is the main one). languages: list of names, e.g. [\"Bahasa Indonesia\", \"English\"]. yearsExperience / licenceNumber: null when unknown. sessionFeeCents / sessionFeeCurrency mirror the backend fields (IDR 500,000 = 50000000); the fee is kept for the team and is NOT shown on the website. translations.id (optional, per profile): Indonesian bio, areasOfExpertise and credentials, shown when the visitor reads the site in Bahasa Indonesia; the lists must have the same number of entries as the English ones, in the same order. Leave a field out to show the English text. DRAFT: the current Indonesian text was machine-drafted and still needs review by an Indonesian speaker on the team (see Website/QA-CHECKLIST.md F8).",
   "defaultDurationMinutes": 60,
   "specialists": [
     {
@@ -20,7 +20,10 @@
           "address": "Jakarta"
         }
       ],
-      "languages": ["Bahasa Indonesia", "English"],
+      "languages": [
+        "Bahasa Indonesia",
+        "English"
+      ],
       "yearsExperience": "7 years",
       "licenceNumber": "WI00001944167237",
       "sessionFeeCents": 500000,
@@ -37,9 +40,52 @@
         "M.Sc., M.Psi., Psikolog"
       ],
       "weeklySlots": {
-        "Tuesday":["9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"],
-        "Wednesday":["9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"],
-        "Friday":["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"]
+        "Tuesday": [
+          "09:00",
+          "10:00",
+          "11:00",
+          "12:00",
+          "13:00",
+          "14:00",
+          "15:00",
+          "16:00",
+          "17:00"
+        ],
+        "Wednesday": [
+          "09:00",
+          "10:00",
+          "11:00",
+          "12:00",
+          "13:00",
+          "14:00",
+          "15:00",
+          "16:00",
+          "17:00"
+        ],
+        "Friday": [
+          "10:00",
+          "11:00",
+          "12:00",
+          "13:00",
+          "14:00",
+          "15:00",
+          "16:00"
+        ]
+      },
+      "translations": {
+        "id": {
+          "bio": "Pendiri Momentizing. Psikolog klinis & konselor lintas budaya.",
+          "areasOfExpertise": [
+            "Masalah penyesuaian diri",
+            "Gangguan perkembangan saraf (neurodevelopmental)",
+            "Trauma",
+            "Hubungan (pranikah hingga pernikahan)",
+            "Duka & kehilangan"
+          ],
+          "credentials": [
+            "M.Sc., M.Psi., Psikolog"
+          ]
+        }
       }
     },
     {
@@ -56,7 +102,10 @@
           "address": "Tangerang"
         }
       ],
-      "languages": ["Bahasa Indonesia", "English"],
+      "languages": [
+        "Bahasa Indonesia",
+        "English"
+      ],
       "yearsExperience": "6 years",
       "licenceNumber": "MH00002076609000",
       "sessionFeeCents": 350000,
@@ -80,6 +129,24 @@
           "15:30",
           "16:30"
         ]
+      },
+      "translations": {
+        "id": {
+          "bio": "Psikolog klinis Momentizing.",
+          "areasOfExpertise": [
+            "Kecemasan/Depresi",
+            "Masalah terkait suasana hati",
+            "Gangguan tidur",
+            "Gangguan makan",
+            "Gangguan kepribadian"
+          ],
+          "credentials": [
+            "M.Psi., Psikolog",
+            "Modalitas terapi: pendekatan Solution Focused-Brief Therapy",
+            "Modalitas terapi: pendekatan Reality Therapy",
+            "Modalitas terapi: pendekatan Emotion-Focused Therapy"
+          ]
+        }
       }
     },
     {
@@ -96,7 +163,10 @@
           "address": "Bali"
         }
       ],
-      "languages": ["Bahasa Indonesia", "English"],
+      "languages": [
+        "Bahasa Indonesia",
+        "English"
+      ],
       "yearsExperience": null,
       "licenceNumber": null,
       "sessionFeeCents": 350000,
@@ -121,6 +191,20 @@
           "19:00",
           "20:00"
         ]
+      },
+      "translations": {
+        "id": {
+          "bio": "Psikolog klinis Momentizing.",
+          "areasOfExpertise": [
+            "Kecemasan/Depresi",
+            "Masalah terkait suasana hati",
+            "Pengembangan identitas"
+          ],
+          "credentials": [
+            "S.Psi., Psikolog",
+            "Peserta pelatihan Terapi Seni & Tari"
+          ]
+        }
       }
     },
     {
@@ -137,7 +221,10 @@
           "address": "Purbalingga"
         }
       ],
-      "languages": ["Bahasa Indonesia", "English"],
+      "languages": [
+        "Bahasa Indonesia",
+        "English"
+      ],
       "yearsExperience": null,
       "licenceNumber": null,
       "sessionFeeCents": 250000,
@@ -157,6 +244,19 @@
           "14:00",
           "15:00"
         ]
+      },
+      "translations": {
+        "id": {
+          "bio": "Konselor Momentizing, tersedia untuk konseling daring.",
+          "areasOfExpertise": [
+            "Pengembangan diri",
+            "Pemetaan karier"
+          ],
+          "credentials": [
+            "Pendekatan Terapi Gestalt",
+            "Pelatihan Rational Emotive Behavioral Therapy (REBT)"
+          ]
+        }
       }
     },
     {
@@ -173,7 +273,11 @@
           "address": "Bintaro, Jakarta"
         }
       ],
-      "languages": ["Bahasa Indonesia", "English", "French"],
+      "languages": [
+        "Bahasa Indonesia",
+        "English",
+        "French"
+      ],
       "yearsExperience": null,
       "licenceNumber": null,
       "sessionFeeCents": 500000,
@@ -202,6 +306,24 @@
           "09:00",
           "10:00"
         ]
+      },
+      "translations": {
+        "id": {
+          "bio": "Coach pasangan campuran lintas budaya di Momentizing.",
+          "areasOfExpertise": [
+            "Anak lintas budaya (Third Culture Kid/TCK)",
+            "Hubungan lintas budaya",
+            "Pola asuh",
+            "Pengembangan diri",
+            "Konseling masa pendekatan"
+          ],
+          "credentials": [
+            "Coach Internasional Bersertifikat",
+            "Pasangan menikah campuran (coaching masa pendekatan)",
+            "Pelatihan korporat untuk lingkungan dan pekerja lintas budaya",
+            "Sekolah Internasional"
+          ]
+        }
       }
     },
     {
@@ -218,7 +340,10 @@
           "address": "Bali"
         }
       ],
-      "languages": ["Bahasa Indonesia", "English"],
+      "languages": [
+        "Bahasa Indonesia",
+        "English"
+      ],
       "yearsExperience": null,
       "licenceNumber": null,
       "sessionFeeCents": 450000,
@@ -245,6 +370,23 @@
           "09:00",
           "10:00"
         ]
+      },
+      "translations": {
+        "id": {
+          "bio": "Instruktur Yoga & Praktisi Access Bars di Momentizing.",
+          "areasOfExpertise": [
+            "Kecemasan/Depresi",
+            "Masalah terkait suasana hati",
+            "Burnout (kelelahan kerja)",
+            "Duka",
+            "Pernikahan & keluarga",
+            "Trauma"
+          ],
+          "credentials": [
+            "Praktisi Yoga Bersertifikat",
+            "Access Bars Bersertifikat"
+          ]
+        }
       }
     },
     {
@@ -261,7 +403,10 @@
           "address": "Bintaro, Jakarta"
         }
       ],
-      "languages": ["Bahasa Indonesia", "English"],
+      "languages": [
+        "Bahasa Indonesia",
+        "English"
+      ],
       "yearsExperience": null,
       "licenceNumber": null,
       "sessionFeeCents": 250000,
@@ -282,6 +427,19 @@
         "Thursday": [
           "09:00"
         ]
+      },
+      "translations": {
+        "id": {
+          "bio": "Praktisi Emotional Freedom Technique (EFT) di Momentizing.",
+          "areasOfExpertise": [
+            "Kecemasan/Depresi",
+            "Masalah terkait suasana hati",
+            "Gangguan tidur",
+            "Gangguan makan",
+            "Masalah pola asuh"
+          ],
+          "credentials": []
+        }
       }
     },
     {
@@ -298,7 +456,11 @@
           "address": "Bintaro, Jakarta"
         }
       ],
-      "languages": ["Bahasa Indonesia", "English", "French"],
+      "languages": [
+        "Bahasa Indonesia",
+        "English",
+        "French"
+      ],
       "yearsExperience": null,
       "licenceNumber": null,
       "sessionFeeCents": 450000,
@@ -316,6 +478,13 @@
         "Saturday": [
           "09:00"
         ]
+      },
+      "translations": {
+        "id": {
+          "bio": "Praktisi B4 Format & Access Bars di Momentizing.",
+          "areasOfExpertise": [],
+          "credentials": []
+        }
       }
     }
   ]

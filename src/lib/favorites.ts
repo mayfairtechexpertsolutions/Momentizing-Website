@@ -4,15 +4,27 @@ import { useCallback, useEffect, useState } from "react";
 
 const STORAGE_KEY = "momentizing:favorite-specialists";
 
+/** Used only while storage is blocked (private window, cleared site data): hearts still toggle for this page view. */
+let memoryFavorites: number[] = [];
+
 function readStored(): number[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
+    if (!raw) return memoryFavorites;
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed.filter((v) => typeof v === "number") : [];
   } catch {
-    return [];
+    return memoryFavorites;
+  }
+}
+
+function writeStored(next: number[]) {
+  memoryFavorites = next;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    /* storage blocked: the in-memory copy above keeps the heart working until the page is closed */
   }
 }
 
@@ -43,7 +55,7 @@ export function useFavorites() {
   const toggleFavorite = useCallback((id: number) => {
     const current = readStored();
     const next = current.includes(id) ? current.filter((v) => v !== id) : [...current, id];
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    writeStored(next);
     window.dispatchEvent(new Event(FAVORITES_EVENT));
   }, []);
 

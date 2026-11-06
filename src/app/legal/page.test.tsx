@@ -20,10 +20,10 @@ describe("LegalPage", () => {
     expect(screen.getByText(/not equipped for emergencies/i)).toBeTruthy();
   });
 
-  it("opens the Privacy Policy from #privacy, and states that there are no cookies", () => {
+  it("opens the Privacy Policy from #privacy, and states that we set no cookies of our own", () => {
     window.location.hash = "privacy";
     render(<LegalPage />);
     expect(screen.getByRole("heading", { level: 2, name: "Privacy Policy" })).toBeTruthy();
-    expect(screen.getByText(/do not use cookies/i)).toBeTruthy();
+    expect(screen.getByText(/do not set cookies of our own/i)).toBeTruthy();
   });
 });

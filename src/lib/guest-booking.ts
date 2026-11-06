@@ -1,7 +1,7 @@
 import { t, getLocale } from "@/i18n";
 import { ApiError, apiFetch, type ApiFetchOptions } from "./api";
 import { addDaysIso, utcToLocal } from "./local-date";
-import { MOMENTIZING_WHATSAPP_NUMBER } from "./whatsapp";
+import { MOMENTIZING_WHATSAPP_NUMBER } from "./whatsapp-constants";
 
 /** What an anonymous visitor may see about a specialist — the API deliberately omits licence numbers and street addresses. */
 export interface PublicSpecialistCard {

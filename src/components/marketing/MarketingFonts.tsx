@@ -2,7 +2,10 @@
 
 import { useEffect } from "react";
 
-const FONT_AWESOME = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css";
+import { withBase } from "@/lib/base-path";
+
+/** Self-hosted (public/vendor/fontawesome, v6.0.0 free) so no visitor IP address is sent to a third-party CDN. */
+const FONT_AWESOME = withBase("/vendor/fontawesome/css/all.min.css");
 
 /**
  * Icon font, added AFTER the page is interactive. A `<link rel="stylesheet" precedence>` makes React 19 hold the whole

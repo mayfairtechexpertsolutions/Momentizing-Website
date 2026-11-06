@@ -30,10 +30,14 @@ let inflight: Promise<string | null> | null = null;
 let lastFailureAt = Number.NEGATIVE_INFINITY;
 const listeners = new Set<() => void>();
 
+function notify() {
+  listeners.forEach((listener) => listener());
+}
+
 function setStatus(next: BackendStatus) {
   if (next === status) return;
   status = next;
-  listeners.forEach((listener) => listener());
+  notify();
 }
 
 /**
@@ -43,8 +47,11 @@ function setStatus(next: BackendStatus) {
 export function probeBackend(): Promise<string | null> {
   inflight ??= apiFetch<{ whatsappNumber: string }>(CONTACT_INFO_PATH, { anonymous: true, signal: AbortSignal.timeout(PROBE_TIMEOUT_MS) })
     .then((info) => {
+      const previousNumber = whatsappNumber;
       whatsappNumber = info.whatsappNumber.replace(/\D/g, "") || null;
       if (Date.now() - lastFailureAt >= FAILURE_HOLD_MS) setStatus("online");
+      // Links already on screen (built with the built-in number) must pick up the live one without a reload.
+      if (whatsappNumber !== previousNumber) notify();
       return whatsappNumber;
     })
     .catch((err) => {
@@ -58,6 +65,15 @@ export function probeBackend(): Promise<string | null> {
   return inflight;
 }
 
+/**
+ * Whether a component that merely wants the business number should ask the backend. Not when the number is already
+ * known, and not while the site is offline (the status hook re-checks on its own schedule), so mounting many
+ * WhatsApp links does not hammer a down server.
+ */
+export function shouldProbeForNumber(): boolean {
+  return whatsappNumber === null && status !== "offline";
+}
+
 /** The business number the backend last reported, or null before the first answer. */
 export function knownWhatsAppNumber(): string | null {
   return whatsappNumber;
@@ -69,7 +85,7 @@ export function reportBackendUnavailable() {
   setStatus("offline");
 }
 
-const subscribe = (listener: () => void) => {
+export const subscribeBackendStatus = (listener: () => void) => {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
@@ -78,7 +94,7 @@ const subscribe = (listener: () => void) => {
 
 /** Live backend status; the first user on a page triggers the probe and an offline site keeps re-checking. */
 export function useBackendStatus(): BackendStatus {
-  const current = useSyncExternalStore(subscribe, () => status, () => "checking" as BackendStatus);
+  const current = useSyncExternalStore(subscribeBackendStatus, () => status, () => "checking" as BackendStatus);
 
   useEffect(() => {
     if (status === "checking") void probeBackend();

@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/marketing/JsonLd";
 import { faqPageSchema } from "@/lib/structured-data";
 import { BrandIllustration } from "@/components/marketing/BrandIllustration";
 import { BookingModal } from "@/components/marketing/BookingModal";
-import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp";
+import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp-constants";
 import { SpecialistCard } from "@/components/marketing/SpecialistCard";
 import { UpcomingEventsBand } from "@/components/marketing/UpcomingEventsBand";
 import { useMarketingDirectory } from "@/lib/marketing-directory";

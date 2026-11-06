@@ -2,7 +2,7 @@ import fallbackData from "@/data/fallback-specialists.json";
 import type { PublicSlots, PublicSpecialistCard } from "./guest-booking";
 import { withBase } from "./base-path";
 import { addDaysIso, parseIsoLocal } from "./local-date";
-import { intlLocale } from "@/i18n";
+import { getLocale, intlLocale, type Locale } from "@/i18n";
 import type { MarketingSpecialist, MarketingSpecialistLocation } from "./marketing-directory";
 import type { PageResponse } from "./types";
 
@@ -70,7 +70,12 @@ interface FallbackProfileRecord {
   sessionFeeCurrency: string;
   /** Weekday name -> session start times (24h "HH:mm", in `timeZone`). */
   weeklySlots: Record<string, string[]>;
+  /** Optional Indonesian text; a missing field shows the English one. The lists must match the English lists entry by entry. */
+  translations?: { id?: { bio?: string; areasOfExpertise?: string[]; credentials?: string[] } };
 }
+
+/** Language names as they are written in the Indonesian site; anything not listed is shown as typed in the JSON. */
+const LANGUAGE_NAMES_ID: Record<string, string> = { English: "Inggris", French: "Prancis", Mandarin: "Mandarin", Japanese: "Jepang", German: "Jerman", Dutch: "Belanda", Korean: "Korea", Arabic: "Arab" };
 
 const DEFAULT_DURATION_MINUTES: number = fallbackData.defaultDurationMinutes;
 
@@ -111,7 +116,24 @@ function photoUrl(photo: string): string | null {
   return withBase(`/team/${encodeURIComponent(name)}`);
 }
 
-function toSpecialist(record: FallbackProfileRecord): FallbackSpecialist {
+/** The record's text in `locale`, checked so a translated list can never drift out of step with the English one. */
+function textFor(record: FallbackProfileRecord, locale: Locale) {
+  const tr = locale === "id" ? record.translations?.id : undefined;
+  for (const field of ["areasOfExpertise", "credentials"] as const) {
+    if (tr?.[field] && tr[field]!.length !== record[field].length) {
+      throw new Error(`fallback-specialists.json: "${record.name}" translations.id.${field} has ${tr[field]!.length} entries but the English list has ${record[field].length} (they must match, in the same order)`);
+    }
+  }
+  return {
+    bio: tr?.bio ?? record.bio,
+    areasOfExpertise: tr?.areasOfExpertise ?? record.areasOfExpertise,
+    credentials: tr?.credentials ?? record.credentials,
+    languages: locale === "id" ? record.languages.map((l) => LANGUAGE_NAMES_ID[l] ?? l) : record.languages,
+  };
+}
+
+function toSpecialist(record: FallbackProfileRecord, locale: Locale = "en"): FallbackSpecialist {
+  const text = textFor(record, locale);
   const practiceMode = assertOneOf(record.practiceMode, PRACTICE_MODES, "practiceMode", record.name);
   const gender = assertOneOf(record.gender, GENDERS, "gender", record.name);
   const locations = toLocations(record);
@@ -123,9 +145,9 @@ function toSpecialist(record: FallbackProfileRecord): FallbackSpecialist {
     id: record.id,
     name: record.name,
     professionType: record.professionType,
-    bio: record.bio,
-    specialisation: record.areasOfExpertise.join(", "),
-    credentialsSummary: record.credentials.join("\n"),
+    bio: text.bio,
+    specialisation: text.areasOfExpertise.join(", "),
+    credentialsSummary: text.credentials.join("\n"),
     weeklySlots: Object.entries(record.weeklySlots)
       .map(([name, times]) => ({ day: dayIndex(name), times: [...times].sort() }))
       .sort((a, b) => a.day - b.day),
@@ -133,7 +155,7 @@ function toSpecialist(record: FallbackProfileRecord): FallbackSpecialist {
     timeZone: assertValidTimeZone(record.timeZone, record.name),
     avatarUrl: photoUrl(record.photo) ?? defaultPhotoUrl,
     defaultPhotoUrl,
-    languages: record.languages.length > 0 ? record.languages.join(", ") : null,
+    languages: text.languages.length > 0 ? text.languages.join(", ") : null,
     acceptingNewClients: true,
     licenceNumber: record.licenceNumber,
     yearsExperience: record.yearsExperience,
@@ -153,7 +175,19 @@ function toSpecialist(record: FallbackProfileRecord): FallbackSpecialist {
   };
 }
 
-export const FALLBACK_SPECIALISTS: FallbackSpecialist[] = (fallbackData.specialists as unknown as FallbackProfileRecord[]).map(toSpecialist);
+const RECORDS = fallbackData.specialists as unknown as FallbackProfileRecord[];
+const BY_LOCALE: Record<Locale, FallbackSpecialist[]> = {
+  en: RECORDS.map((r) => toSpecialist(r, "en")),
+  id: RECORDS.map((r) => toSpecialist(r, "id")),
+};
+
+/** The built-in profiles in English (stable for tests and tools). Screens use `fallbackSpecialists()` instead. */
+export const FALLBACK_SPECIALISTS: FallbackSpecialist[] = BY_LOCALE.en;
+
+/** The built-in profiles in the language the visitor reads the site in (Indonesian text where the JSON provides it). */
+export function fallbackSpecialists(): FallbackSpecialist[] {
+  return BY_LOCALE[getLocale()] ?? BY_LOCALE.en;
+}
 
 /** The default portrait to fall back to if a built-in profile's photo file is missing; undefined for live profiles. */
 export function fallbackPhotoFor(id: number): string | undefined {
@@ -161,15 +195,16 @@ export function fallbackPhotoFor(id: number): string | undefined {
 }
 
 export function getFallbackSpecialist(id: number): FallbackSpecialist | null {
-  return FALLBACK_SPECIALISTS.find((s) => s.id === id) ?? null;
+  return fallbackSpecialists().find((s) => s.id === id) ?? null;
 }
 
 /** The fallback list shaped like the real directory response, so callers need no special case. */
 export function fallbackDirectoryPage(size: number): PageResponse<MarketingSpecialist> {
-  const content = FALLBACK_SPECIALISTS.slice(0, Math.max(0, size));
+  const all = fallbackSpecialists();
+  const content = all.slice(0, Math.max(0, size));
   return {
     content,
-    totalElements: FALLBACK_SPECIALISTS.length,
+    totalElements: all.length,
     totalPages: 1,
     number: 0,
     size: content.length,

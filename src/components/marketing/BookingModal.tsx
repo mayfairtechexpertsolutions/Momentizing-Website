@@ -2,7 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { apiFetch, errorMessage } from "@/lib/api";
+import { apiFetch, errorMessage, isBackendUnavailable } from "@/lib/api";
+import { reportBackendUnavailable, useBackendStatus } from "@/lib/backend-status";
 import { usePackages } from "@/lib/session-packages";
 import { useWhatsAppLink } from "@/lib/whatsapp";
 import { BookButton, Field, InlineNotice, inputClass } from "./booking/ui";
@@ -16,7 +17,7 @@ interface BookingModalProps {
 }
 
 function buildWhatsAppMessage(fullName: string, packageName: string | undefined, message: string): string {
-  const lines = [packageName ? t("site.whatsapp.questionAbout", { name: packageName }) : t("site.whatsapp.question")];
+  const lines = [packageName ? t("site.whatsapp.questionAbout", { name: packageName }) : t("site.whatsapp.corporate")];
   if (fullName) lines.push(t("site.whatsapp.myName", { name: fullName }));
   if (message) lines.push(message);
   return lines.join(" ");
@@ -29,6 +30,7 @@ function buildWhatsAppMessage(fullName: string, packageName: string | undefined,
  */
 export function BookingModal({ open, initialPackageId, onClose }: BookingModalProps) {
   const whatsAppLink = useWhatsAppLink();
+  const backendOffline = useBackendStatus() === "offline";
   const { data: packages } = usePackages();
 
   const [fullName, setFullName] = useState("");
@@ -36,13 +38,15 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
   const [phone, setPhone] = useState("");
   // undefined = no explicit choice yet, so it falls back to initialPackageId/the first package below;
   // once the visitor picks one, that choice sticks even if `packages` re-fetches.
-  const [pickedPackageId, setPickedPackageId] = useState<number | undefined>(undefined);
+  // null = the visitor explicitly chose "Corporate / team wellbeing" (no package).
+  const [pickedPackageId, setPickedPackageId] = useState<number | null | undefined>(undefined);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const packageId = pickedPackageId ?? initialPackageId ?? packages?.[0]?.id;
+  // Opened from a package card: that package. Opened from "Inquire for corporate": no package, never the first one.
+  const packageId = pickedPackageId === undefined ? initialPackageId : (pickedPackageId ?? undefined);
   const selectedPackage = packages?.find((p) => p.id === packageId);
 
   // Closing keeps what the visitor typed (an accidental tap outside shouldn't erase a message); it is only cleared
@@ -84,7 +88,9 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
       await submitInquiry("WEBSITE_FORM");
       setSubmitted(true);
     } catch (err) {
-      setError(errorMessage(err));
+      // A down backend swaps the form for the WhatsApp alternative (below) instead of leaving a dead end.
+      if (isBackendUnavailable(err)) reportBackendUnavailable();
+      else setError(errorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -93,9 +99,12 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
   function handleWhatsApp() {
     // Fire-and-forget: the lead still lands in the same admin queue as form submissions, but
     // the WhatsApp handoff shouldn't wait on the network round trip.
-    submitInquiry("WHATSAPP").catch(() => {
-      /* best-effort — the visitor's WhatsApp conversation is the real record either way */
-    });
+    // Skipped while the backend is known to be down: it would only fail.
+    if (!backendOffline) {
+      submitInquiry("WHATSAPP").catch(() => {
+        /* best-effort — the visitor's WhatsApp conversation is the real record either way */
+      });
+    }
     window.open(whatsAppLink(buildWhatsAppMessage(fullName, selectedPackage?.name, message)), "_blank", "noopener,noreferrer");
     handleClose();
   }
@@ -116,10 +125,11 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
         </div>
       ) : (
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-          <p className="text-momentizing-muted">{t("site.enquiry.intro")}</p>
+          <p className="text-momentizing-muted">{backendOffline ? t("site.offline.enquiryBody") : t("site.enquiry.intro")}</p>
           <Field id="enq-name" label={t("site.form.yourName")}>
             <input name="fullName" id="enq-name" required autoComplete="name" autoCapitalize="words" autoCorrect="off" spellCheck={false} value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
           </Field>
+          {!backendOffline && (<>
           <Field id="enq-email" label={t("app.common.email")}>
             <input name="email" id="enq-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
           </Field>
@@ -128,7 +138,8 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
           </Field>
           {(packages ?? []).length > 0 && (
             <Field id="enq-package" label={t("site.enquiry.interested")}>
-              <select name="packageId" id="enq-package" value={packageId ?? ""} onChange={(e) => setPickedPackageId(Number(e.target.value))} className={inputClass}>
+              <select name="packageId" id="enq-package" value={packageId ?? ""} onChange={(e) => setPickedPackageId(e.target.value === "" ? null : Number(e.target.value))} className={inputClass}>
+                <option value="">{t("site.enquiry.corporateOption")}</option>
                 {(packages ?? []).map((pkg) => (
                   <option key={pkg.id} value={pkg.id}>
                     {pkg.name}
@@ -137,6 +148,7 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
               </select>
             </Field>
           )}
+          </>)}
           <Field id="enq-message" label={t("site.enquiry.message")}>
             <textarea name="message" id="enq-message" rows={3} maxLength={2000} value={message} onChange={(e) => setMessage(e.target.value)} className={`${inputClass} resize-y`} />
           </Field>
@@ -145,11 +157,13 @@ export function BookingModal({ open, initialPackageId, onClose }: BookingModalPr
               {error}
             </InlineNotice>
           )}
-          <BookButton type="submit" loading={submitting}>
-            {submitting ? t("site.common.sending") : t("site.enquiry.send")}
-          </BookButton>
-          <BookButton variant="secondary" onClick={handleWhatsApp} disabled={!fullName.trim()}>
-            {t("site.enquiry.whatsapp")}
+          {!backendOffline && (
+            <BookButton type="submit" loading={submitting}>
+              {submitting ? t("site.common.sending") : t("site.enquiry.send")}
+            </BookButton>
+          )}
+          <BookButton variant={backendOffline ? "primary" : "secondary"} onClick={handleWhatsApp} disabled={!fullName.trim()}>
+            {backendOffline ? t("site.enquiry.whatsappOnly") : t("site.enquiry.whatsapp")}
           </BookButton>
         </form>
       )}

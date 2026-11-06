@@ -35,6 +35,8 @@ export interface Draft {
   concerns: string[];
   note: string;
   consent: boolean;
+  /** Separate, explicit consent to process health-related answers (sensitive data). */
+  healthConsent: boolean;
   specialist: PublicSpecialistCard | null;
   mode: "SUGGESTED" | "SPECIFIC";
   time: string | null;
@@ -49,6 +51,7 @@ export const EMPTY_DRAFT: Draft = {
   concerns: [],
   note: "",
   consent: false,
+  healthConsent: false,
   specialist: null,
   mode: "SUGGESTED",
   time: null,

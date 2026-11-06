@@ -1,5 +1,5 @@
 import { withBase } from "@/lib/base-path";
-import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp";
+import { MOMENTIZING_WHATSAPP_DISPLAY } from "@/lib/whatsapp-constants";
 import { LEGAL_EMAIL, List, Section, linkClass } from "./LegalDocuments";
 
 /**
@@ -103,7 +103,7 @@ export function TermsDocumentId() {
               {MOMENTIZING_WHATSAPP_DISPLAY}). Jika kode tidak kami terima tepat waktu, penahanan berakhir dan waktunya dibuka kembali. Tim kami juga dapat mengonfirmasi pemesanan secara manual.
             </>,
             "Waktu ditampilkan sesuai jam Anda, beserta nama zona waktunya. Mohon periksa zona waktu sebelum mengonfirmasi.",
-            "Detail pemesanan, pengingat, dan perubahan dikirim kepada Anda lewat WhatsApp, serta lewat email atau notifikasi aplikasi jika Anda memiliki akun. Dengan memesan, Anda setuju dihubungi dengan cara ini terkait pemesanan tersebut.",
+            "Detail pemesanan, pengingat, dan perubahan dikirim kepada Anda lewat WhatsApp, serta lewat email atau notifikasi aplikasi jika Anda memiliki akun. Dengan memesan, Anda setuju dihubungi dengan cara ini terkait pemesanan tersebut. Pesan promosi, seperti kabar acara, hanya kami kirim jika Anda menyetujuinya secara terpisah, dan Anda dapat berhenti kapan saja dengan membalas STOP atau menghubungi kami.",
             "Jika kami tidak dapat menemukan waktu yang cocok, Anda dapat meminta bantuan. Tim kami akan menghubungi Anda lewat WhatsApp, biasanya dalam satu hari kerja.",
             "Sesi berulang diatur bersama tim kami setelah sesi pertama Anda. Kami akan mengonfirmasi setiap tanggalnya dengan Anda.",
           ]}
@@ -328,7 +328,10 @@ export function PrivacyDocumentId() {
       </Section>
 
       <Section title="4. Apa yang tersimpan di browser Anda">
-        <p>Kami tidak menggunakan cookie di situs web ini. Kami menggunakan penyimpanan bawaan browser Anda dengan dua cara:</p>
+        <p>
+          Kami tidak memasang cookie sendiri, dan tidak menggunakan cookie iklan atau analitik. Kami menggunakan
+          penyimpanan bawaan browser Anda dengan dua cara:
+        </p>
         <List
           items={[
             <>
@@ -344,6 +347,17 @@ export function PrivacyDocumentId() {
           ]}
         />
         <p>Situs ini tetap berfungsi jika Anda memblokir penyimpanan ini.</p>
+        <p>
+          Beberapa fitur memuat konten dari perusahaan lain, yang kemudian menerima alamat jaringan (IP) dan detail
+          browser Anda serta dapat menggunakan penyimpanan sendiri sesuai kebijakan mereka:
+        </p>
+        <List
+          items={[
+            "Cloudflare Turnstile, pada formulir pemesanan, untuk membedakan manusia dari bot.",
+            "YouTube (mode privasi yang ditingkatkan) atau Vimeo, hanya pada halaman acara yang memiliki video promosi, dan hanya saat video ditampilkan.",
+            "Google Maps, hanya jika Anda mengetuk tautan peta atau petunjuk arah.",
+          ]}
+        />
       </Section>
 
       <Section title="5. Siapa yang dapat melihat informasi Anda">
@@ -380,7 +394,7 @@ export function PrivacyDocumentId() {
 
       <Section title="6. Di mana data Anda diproses">
         <p>
-          Penyedia kami dapat memproses data di Indonesia dan di negara lain. Saat data Anda keluar dari negara Anda, kami
+          Penyedia kami (termasuk Twilio, Amazon Web Services, Google Firebase, Cloudflare, dan Xendit) dapat memproses data di Indonesia dan di negara lain, termasuk Singapura, Amerika Serikat, dan Uni Eropa. Saat data Anda keluar dari negara Anda, kami
           mengambil langkah untuk memastikan data tetap terlindungi dengan standar yang setidaknya setara dengan kebijakan
           ini (misalnya, melalui perlindungan kontraktual).
         </p>
@@ -404,7 +418,7 @@ export function PrivacyDocumentId() {
           disimpan dalam bentuk hash. Akses dibatasi berdasarkan peran, dan akses spesialis ke informasi klien dicatat.
           Pemesanan dilindungi dari bot dan peniruan identitas, termasuk dengan memverifikasi nomor WhatsApp Anda. Tidak ada
           sistem yang sepenuhnya aman. Jika terjadi kebocoran yang kemungkinan merugikan Anda, kami akan memberi tahu Anda,
-          dan pihak berwenang bila diwajibkan, tanpa penundaan yang tidak semestinya.
+          dan pihak berwenang bila diwajibkan, secara tertulis dan paling lambat 3 x 24 jam sejak kami mengetahuinya, sebagaimana diwajibkan hukum Indonesia.
         </p>
       </Section>
 

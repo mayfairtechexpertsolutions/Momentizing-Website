@@ -1,6 +1,6 @@
 import type { PublicEvent } from "./events";
 import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME } from "./site-url";
-import { MOMENTIZING_WHATSAPP_NUMBER } from "./whatsapp";
+import { MOMENTIZING_WHATSAPP_NUMBER } from "./whatsapp-constants";
 
 /** Organization + WebSite graph, rendered on every page from the root layout. */
 export const siteGraph = {

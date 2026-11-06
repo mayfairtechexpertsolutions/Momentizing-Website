@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SlotPicker } from "./SlotPicker";
@@ -30,6 +30,13 @@ const slots = (days: { date: string; times: string[] }[], next: string | null = 
 
 describe("SlotPicker", () => {
   beforeEach(() => fetchSlots.mockReset());
+  afterEach(() => vi.useRealTimers());
+
+  /** The picker hides times that already passed; the fixtures are in the past, so pretend it is early October. */
+  const pretendItIsEarlyOctober = () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 9, 1, 8, 0));
+  };
 
   it("shows the open times grouped by part of day and reports the pick", async () => {
     fetchSlots.mockResolvedValue(slots([{ date: "2026-10-02", times: ["09:00", "14:00", "18:00"] }]));
@@ -50,6 +57,7 @@ describe("SlotPicker", () => {
   });
 
   it("offers preferred times, not an error, when the backend is unreachable", async () => {
+    pretendItIsEarlyOctober();
     fetchSlots.mockRejectedValueOnce(new TypeError("Failed to fetch"));
     render(<SlotPicker specialistId={1} date="2026-10-02" onDateChange={() => {}} value={null} onChange={() => {}} />);
     expect(await screen.findByRole("button", { name: /9:00/ })).toBeInTheDocument();
@@ -99,10 +107,21 @@ describe("SlotPicker", () => {
 
   it("serves a built-in profile from its weekly pattern without calling the backend", async () => {
     // Adeline (id -1) works Tuesdays 15:30 and 16:30 WIB = 08:30 and 09:30 UTC; the picker shows them on the visitor's own clock.
+    pretendItIsEarlyOctober();
     const visitorDate = utcToLocal("2026-11-03", "08:30").date;
     render(<SlotPicker specialistId={-1} date={visitorDate} onDateChange={() => {}} value={null} onChange={() => {}} />);
     expect(await screen.findAllByRole("button", { name: /\d:30/ })).toHaveLength(2);
     expect(fetchSlots).not.toHaveBeenCalled();
+  });
+
+  it("does not offer a built-in time that has already passed today", async () => {
+    // Tuesday 3 Nov 2026, 16:00 in Jakarta: Adeline's 15:30 is gone, and 16:30 is inside the two-hour lead time.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-03T09:00:00Z"));
+    const visitorDate = utcToLocal("2026-11-03", "08:30").date;
+    render(<SlotPicker specialistId={-1} date={visitorDate} onDateChange={() => {}} value={null} onChange={() => {}} />);
+    expect(await screen.findByText(/no open times/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /\d:30/ })).not.toBeInTheDocument();
   });
 
   it("offers the next day with openings when a built-in profile has none that day", async () => {

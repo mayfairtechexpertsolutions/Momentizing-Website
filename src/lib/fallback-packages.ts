@@ -1,4 +1,5 @@
 import fallbackData from "@/data/fallback-packages.json";
+import { getLocale } from "@/i18n";
 import type { SessionPackage } from "./session-packages";
 
 /**
@@ -24,6 +25,8 @@ export interface FallbackPackageRecord {
   discountPercent?: number | null;
   description?: string;
   badge?: string;
+  /** Optional Indonesian text; a missing field shows the English one. */
+  translations?: { id?: { description?: string; badge?: string } };
 }
 
 function fail(who: string, problem: string): never {
@@ -52,6 +55,7 @@ const RECORDS = fallbackData.packages as unknown as FallbackPackageRecord[];
 
 /** The entry shaped like the live `/packages` response, so callers need no special case. */
 export function toSessionPackage(record: FallbackPackageRecord, index: number): SessionPackage {
+  const tr = getLocale() === "id" ? record.translations?.id : undefined;
   return {
     id: record.id,
     name: record.name,
@@ -59,8 +63,8 @@ export function toSessionPackage(record: FallbackPackageRecord, index: number): 
     priceCents: Math.round(record.price * 100),
     currency: record.currency,
     discountPercent: record.discountPercent ?? null,
-    description: record.description || null,
-    badgeLabel: record.badge || null,
+    description: (tr?.description ?? record.description) || null,
+    badgeLabel: (tr?.badge ?? record.badge) || null,
     active: true,
     sortOrder: index + 1,
   };

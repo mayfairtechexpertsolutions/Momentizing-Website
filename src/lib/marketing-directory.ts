@@ -56,7 +56,7 @@ export function practiceModeLabel(mode: string): string | undefined {
   return PRACTICE_MODES.includes(mode) ? t(`site.mode.${mode}`) : undefined;
 }
 
-const PROFESSIONS = ["PSYCHOLOGIST", "THERAPIST", "PSYCHIATRIST", "COACH"];
+const PROFESSIONS = ["PSYCHOLOGIST", "CLINICAL_PSYCHOLOGIST", "THERAPIST", "PSYCHIATRIST", "COUNSELOR", "COACH", "WELLNESS_PRACTITIONER"];
 
 /** "PSYCHOLOGIST" -> "Psychologist", "SOCIAL_WORKER" -> "Social worker"; null when there is nothing to show. */
 export function professionLabel(professionType: string | null | undefined): string | null {
@@ -98,7 +98,10 @@ const FALLBACK_NOT_FOUND = "Associate not found";
  */
 export function useMarketingSpecialist(id: number) {
   const fallbackId = isFallbackSpecialistId(id);
-  const query = useApiQuery<MarketingSpecialist>(fallbackId ? null : `/specialist/directory/${id}`, { anonymous: true });
+  // A missing or non-numeric `?id=` is "no such profile", not a reason to ask the backend about `/directory/NaN`.
+  const validId = Number.isInteger(id) && id !== 0;
+  const query = useApiQuery<MarketingSpecialist>(fallbackId || !validId ? null : `/specialist/directory/${id}`, { anonymous: true });
+  if (!validId) return { ...query, data: null, error: FALLBACK_NOT_FOUND, isLoading: false };
   if (!fallbackId) return query;
   const fallback = getFallbackSpecialist(id);
   return { ...query, data: fallback, error: fallback ? null : FALLBACK_NOT_FOUND, isLoading: false };

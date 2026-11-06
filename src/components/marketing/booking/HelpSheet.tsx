@@ -10,6 +10,7 @@ import { TurnstileWidget, TURNSTILE_ENABLED } from "./TurnstileWidget";
 import { withBase } from "@/lib/base-path";
 import { useBackendStatus } from "@/lib/backend-status";
 import { useWhatsAppLink } from "@/lib/whatsapp";
+import { formatDateLong } from "@/lib/local-date";
 
 export interface HelpPrefill {
   fullName: string;
@@ -96,7 +97,7 @@ export function HelpSheet({
         <div className="flex flex-col gap-4">
           <p className="text-momentizing-muted">{t("site.offline.helpBody")}</p>
           <a
-            href={whatsAppLink(t("site.offline.helpMessage", { name: fullName.trim() || "-", date: prefill.preferredDate ?? "-" }))}
+            href={whatsAppLink(t("site.offline.helpMessage", { name: fullName.trim() || "-", date: prefill.preferredDate ? formatDateLong(prefill.preferredDate) : "-" }))}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-momentizing-teal px-6 py-3 text-sm font-semibold text-white transition hover:bg-momentizing-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-momentizing-teal"

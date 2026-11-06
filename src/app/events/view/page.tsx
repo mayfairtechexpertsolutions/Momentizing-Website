@@ -19,6 +19,7 @@ import {
   type PublicEvent,
   type PublicEventSession,
 } from "@/lib/events";
+import { useWhatsAppLink } from "@/lib/whatsapp";
 import { t } from "@/i18n";
 
 /** The event id comes from `?id=` (not a `[id]` segment) so the site can be statically exported; the Suspense
@@ -46,23 +47,26 @@ function EventDetail() {
   return (
     <div className="min-h-dvh bg-momentizing-cream font-marketing-sans text-momentizing-slate">
       {isLoading && (
-        <p role="status" className="px-6 pt-48 pb-24 text-center font-marketing-serif text-lg text-momentizing-muted">
-          {t("site.events.loadingOne")}
-        </p>
+        <main id="main">
+          <p role="status" className="px-6 pt-48 pb-24 text-center font-marketing-serif text-lg text-momentizing-muted">
+            {t("site.events.loadingOne")}
+          </p>
+        </main>
       )}
 
       {!isLoading && !e && notFound && (
-        <div className="px-6 pt-48 pb-24 text-center">
-          <p className="mb-4 font-marketing-serif text-2xl text-momentizing-muted">{t("site.events.notFound")}</p>
+        <main id="main" className="px-6 pt-48 pb-24 text-center">
+          <h1 className="mb-4 font-marketing-serif text-2xl text-momentizing-muted">{t("site.events.notFound")}</h1>
           <Link href="/events" className="inline-flex min-h-11 items-center font-bold text-momentizing-teal underline">
             {t("site.events.seeAllLower")}
           </Link>
-        </div>
+        </main>
       )}
 
       {!isLoading && !e && !notFound && error && (
-        <div role="alert" className="px-6 pt-48 pb-24 text-center">
-          <p className="mb-2 font-marketing-serif text-2xl">{t("site.events.loadErrorOne")}</p>
+        <main id="main" className="px-6 pt-48 pb-24 text-center">
+          <div role="alert">
+          <h1 className="mb-2 font-marketing-serif text-2xl">{t("site.events.loadErrorOne")}</h1>
           {!unavailable && <p className="mb-6 text-sm text-momentizing-muted">{error}</p>}
           <button
             type="button"
@@ -71,7 +75,8 @@ function EventDetail() {
           >
             {t("site.common.tryAgain")}
           </button>
-        </div>
+          </div>
+        </main>
       )}
 
       {e && <EventBody event={e} />}
@@ -83,7 +88,16 @@ function EventBody({ event: e }: { event: PublicEvent }) {
   const pageUrl = absoluteUrl(`/events/view/?id=${e.id}`);
   const embed = videoEmbedUrl(e.videoUrl);
   const now = new Date();
-  const canRegister = !!e.registrationUrl && !e.cancelled && !e.past;
+  const whatsAppLink = useWhatsAppLink();
+  const open = !e.cancelled && !e.past;
+  // No registration page set (always the case for the built-in events): registering is a WhatsApp message, so the
+  // page's "the joining link is sent when you register" always has a way to do it.
+  const registerUrl = open
+    ? e.registrationUrl ||
+      whatsAppLink(t("site.events.registerMessage", { title: e.title, date: formatEventDate(e.sessions[0]?.date ?? "", { day: "numeric", month: "long", year: "numeric" }) }))
+    : null;
+  const registerLabel = e.registrationUrl ? t("site.events.register") : t("site.events.registerWhatsapp");
+  const canRegister = !!registerUrl;
 
   return (
     <>
@@ -195,7 +209,7 @@ function EventBody({ event: e }: { event: PublicEvent }) {
             )}
 
             <div className="hidden flex-wrap gap-3 md:flex">
-              {canRegister && <RegisterButton url={e.registrationUrl!} />}
+              {canRegister && <RegisterButton url={registerUrl!} label={registerLabel} />}
               <ShareButton title={e.title} url={pageUrl} />
             </div>
           </div>
@@ -204,7 +218,7 @@ function EventBody({ event: e }: { event: PublicEvent }) {
 
       {/* Phones: keep the main action in reach while reading. pr-24 leaves room for the floating WhatsApp button. */}
       <div className="fixed inset-x-0 bottom-0 z-[80] flex gap-3 border-t border-momentizing-mint-deep bg-white/95 py-3 pr-24 pl-4 backdrop-blur-md md:hidden">
-        {canRegister ? <RegisterButton url={e.registrationUrl!} full /> : <ShareButton title={e.title} url={pageUrl} full />}
+        {canRegister ? <RegisterButton url={registerUrl!} label={registerLabel} full /> : <ShareButton title={e.title} url={pageUrl} full />}
         {canRegister && <ShareButton title={e.title} url={pageUrl} iconOnly />}
       </div>
     </>
@@ -242,7 +256,7 @@ function SessionRow({ event, session: s, pageUrl, ended }: { event: PublicEvent;
   );
 }
 
-function RegisterButton({ url, full = false }: { url: string; full?: boolean }) {
+function RegisterButton({ url, label, full = false }: { url: string; label: string; full?: boolean }) {
   return (
     <a
       href={url}
@@ -250,7 +264,7 @@ function RegisterButton({ url, full = false }: { url: string; full?: boolean }) 
       rel="noopener noreferrer"
       className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-momentizing-teal px-8 py-3 text-sm font-bold tracking-widest text-white uppercase transition hover:bg-momentizing-slate ${full ? "flex-1" : ""}`}
     >
-      {t("site.events.register")} <i aria-hidden="true" className="fas fa-arrow-up-right-from-square text-xs" />
+      {label} <i aria-hidden="true" className="fas fa-arrow-up-right-from-square text-xs" />
     </a>
   );
 }
